@@ -21,34 +21,59 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
         $this->call([
-            // AdminSeeder::class,
-            UserSeeder::class,
 
-            // Locations (countries, states, cities, zones)
-            StatesSeeder::class,
-            CitiesTableSeeder::class,
-            ZonesTableSeeder::class,
-
-            // Catalog structure
-            MainCategorySeeder::class,
-            CategorySeeder::class,
-            BrandSeeder::class,
-
-            // Colors & sizes
-            ProductColorSeeder::class,
-            ProductSizeSeeder::class,
-            SizeSeeder::class,
-
-            // Shipment-related lookup tables
+            // 1. Core lookups (no dependencies)
+            AdminSeeder::class,
+            SettingSeeder::class,
+            ConfigSeeder::class,
+            PackageTypeSeeder::class,
             ConsignmentTypeSeeder::class,
             DeliveryTypeSeeder::class,
-
-            // Content & UI
-            PageSeeder::class,
+            SizeSeeder::class,
+            ProductSizeSeeder::class,
+            ProductColorSeeder::class,
+            CancelReasonSeeder::class,
+            ContactAdminSeeder::class,
+            WhatsappTemplateSeeder::class,
             BannarSeeder::class,
+            PageSeeder::class,
+            BrandSeeder::class,
 
-            // Products
-            // ProductSeeder::class,
+            // 2. Location hierarchy
+            StatesSeeder::class,        // creates Country + State
+            CitiesTableSeeder::class,
+            ZonesTableSeeder::class,
+            LocationSeeder::class,      // locations table
+
+            // 3. Auth
+            UserSeeder::class,
+            RolePermissionSeeder::class,
+
+            // 4. Catalog
+            MainCategorySeeder::class,
+            CategorySeeder::class,
+            ProductSeeder::class,
+
+            // 5. Commerce / Users
+            UserAddressSeeder::class,
+            WalletSeeder::class,
+            PromoCodeSeeder::class,
+
+            // 6. Vendors
+            VendorSeeder::class,
+            VendorBranchSeeder::class,
+            VendorCommissionSeeder::class,
+
+            // 7. Shipment companies
+            ShipmentCompanySeeder::class,
+            ShipmentCommissionSeeder::class,
+            ShipmentLocationSeeder::class,
+            CompanyCoverageSeeder::class,
+            ShipmentCompanyCategoryPriceSeeder::class,
+
+            // 8. Reviews (requires orders to exist - seed separately)
+            // ReviewSeeder::class,
+            // ProductReviewSeeder::class,
         ]);
     }
 }
