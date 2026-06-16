@@ -51,9 +51,8 @@ class ProductSeeder extends Seeder
         for ($i = 1; $i <= 15; $i++) {
             $mainCategory = $mainCategories->random();
 
-            $category = $categories
-                ->where('main_category_id', $mainCategory->id)
-                ->random() ?? $categories->random();
+            $filtered = $categories->where('main_category_id', $mainCategory->id);
+            $category = $filtered->isNotEmpty() ? $filtered->random() : $categories->random();
 
             $brand = $brands->isNotEmpty() ? $brands->random() : null;
 
