@@ -155,6 +155,11 @@ class User extends Authenticatable
         return $this->morphMany(MediaFile::class, 'mediable');
     }
 
+    public function representative()
+    {
+        return $this->hasOne(Representative::class);
+    }
+
     protected static function booted()
     {
         static::assignPrefixedNumberOnCreate('user_number', 'USR');

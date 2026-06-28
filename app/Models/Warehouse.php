@@ -74,6 +74,11 @@ class Warehouse extends Model
         return $this->morphMany(MediaFile::class, 'mediable');
     }
 
+    public function representatives()
+    {
+        return $this->hasMany(Representative::class);
+    }
+
     /**
      * Accessors / Mutators (اختياري)
      * لو عايز تنسّق الاسم أو العنوان قبل العرض

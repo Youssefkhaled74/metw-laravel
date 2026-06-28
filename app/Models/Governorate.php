@@ -34,6 +34,19 @@ class Governorate extends Model
         return $this->belongsTo(City::class, 'capital_city_id');
     }
 
+    public function representativeServiceGovernorates()
+    {
+        return $this->hasMany(RepresentativeServiceGovernorate::class);
+    }
+
+    public function representatives()
+    {
+        return $this->belongsToMany(
+            Representative::class,
+            'representative_service_governorates'
+        )->withTimestamps();
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

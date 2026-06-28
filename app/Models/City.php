@@ -50,6 +50,19 @@ class City extends Model
         return $this->belongsTo(Governorate::class);
     }
 
+    public function representativeServiceCities()
+    {
+        return $this->hasMany(RepresentativeServiceCity::class);
+    }
+
+    public function representatives()
+    {
+        return $this->belongsToMany(
+            Representative::class,
+            'representative_service_cities'
+        )->withTimestamps();
+    }
+
     public function getNameAttribute()
     {
         return $this->{'name_' . app()->getLocale()};
