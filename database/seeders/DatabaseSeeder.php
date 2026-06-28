@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             PackageTypeSeeder::class,
             ConsignmentTypeSeeder::class,
             DeliveryTypeSeeder::class,
+            TransportTypeSeeder::class,
             SizeSeeder::class,
             ProductSizeSeeder::class,
             ProductColorSeeder::class,
