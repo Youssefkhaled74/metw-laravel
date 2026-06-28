@@ -127,6 +127,21 @@ class ShipmentCompany extends Authenticatable
         return $this->hasMany(ShipmentLocation::class, 'shipment_company_id');
     }
 
+    public function accountProfile()
+    {
+        return $this->morphOne(AccountProfile::class, 'profileable');
+    }
+
+    public function foundationAddresses()
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
+
+    public function mediaFiles()
+    {
+        return $this->morphMany(MediaFile::class, 'mediable');
+    }
+
     protected static function booted()
     {
         static::assignPrefixedNumberOnCreate('company_number', 'SHC');

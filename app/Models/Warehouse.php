@@ -64,6 +64,16 @@ class Warehouse extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function foundationAddresses()
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
+
+    public function mediaFiles()
+    {
+        return $this->morphMany(MediaFile::class, 'mediable');
+    }
+
     /**
      * Accessors / Mutators (اختياري)
      * لو عايز تنسّق الاسم أو العنوان قبل العرض

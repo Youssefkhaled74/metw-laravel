@@ -140,6 +140,21 @@ class User extends Authenticatable
         return $this->hasOne(Wallet::class);
     }
 
+    public function accountProfile()
+    {
+        return $this->morphOne(AccountProfile::class, 'profileable');
+    }
+
+    public function foundationAddresses()
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
+
+    public function mediaFiles()
+    {
+        return $this->morphMany(MediaFile::class, 'mediable');
+    }
+
     protected static function booted()
     {
         static::assignPrefixedNumberOnCreate('user_number', 'USR');

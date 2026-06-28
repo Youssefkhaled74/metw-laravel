@@ -40,4 +40,19 @@ class Employee extends Authenticatable
         static::assignPrefixedNumberOnCreate('employee_number', 'EMP');
     }
 
+    public function accountProfile()
+    {
+        return $this->morphOne(AccountProfile::class, 'profileable');
+    }
+
+    public function foundationAddresses()
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
+
+    public function mediaFiles()
+    {
+        return $this->morphMany(MediaFile::class, 'mediable');
+    }
+
 }

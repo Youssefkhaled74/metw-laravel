@@ -192,6 +192,12 @@ class Product extends Model
     {
         return $this->hasMany(ProductMedia::class)->where('type', \App\Enum\ProductMediaType::IMAGE->value);
     }
+
+    public function mediaFiles()
+    {
+        return $this->morphMany(MediaFile::class, 'mediable');
+    }
+
     public function videos()
     {
         return $this->hasMany(ProductMedia::class)->where('type', \App\Enum\ProductMediaType::VIDEO->value);

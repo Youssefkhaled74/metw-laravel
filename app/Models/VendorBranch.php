@@ -80,4 +80,14 @@ class VendorBranch extends Model
         return implode(', ', array_filter($parts));
     }
 
+    public function foundationAddresses()
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
+
+    public function mediaFiles()
+    {
+        return $this->morphMany(MediaFile::class, 'mediable');
+    }
+
 }
