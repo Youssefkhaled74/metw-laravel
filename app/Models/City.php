@@ -15,7 +15,16 @@ class City extends Model
         'name_ar',
         'is_active',
         'state_id',
+        'governorate_id',
+        'excel_sort',
+        'is_capital',
     ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'is_capital' => 'boolean',
+    ];
+
     protected $appends = ['name'];
 
     public function addresses()
@@ -34,6 +43,11 @@ class City extends Model
     public function state()
     {
         return $this->belongsTo(State::class);
+    }
+
+    public function governorate()
+    {
+        return $this->belongsTo(Governorate::class);
     }
 
     public function getNameAttribute()

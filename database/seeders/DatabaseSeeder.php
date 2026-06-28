@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
             // 2. Location hierarchy
             StatesSeeder::class,        // creates Country + State
             CitiesTableSeeder::class,
+            GovernoratesAndCitiesExcelSeeder::class,
             ZonesTableSeeder::class,
             LocationSeeder::class,      // locations table
 
