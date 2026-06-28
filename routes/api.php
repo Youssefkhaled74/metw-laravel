@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\V1\Ecommerce\Product\ColorController;
 use App\Http\Controllers\Api\V1\Ecommerce\Product\ProductController;
 use App\Http\Controllers\Api\V1\Ecommerce\Product\ProductSizeController;
 use App\Http\Controllers\Api\V1\Shipment\FavouriteController;
+use App\Http\Controllers\Api\V1\Shipment\ShipmentContactController;
+use App\Http\Controllers\Api\V1\Shipment\ShipmentRequestController;
 use App\Http\Controllers\Api\V1\Shipment\ConsignmentTypeController;
 use App\Http\Controllers\Api\V1\Shipment\DeliveryTypeController;
 use App\Http\Controllers\Api\V1\Shipment\Order\CartController;
@@ -32,6 +34,8 @@ use App\Http\Controllers\Api\V1\Ecommerce\HomeController;
 use App\Http\Controllers\Api\V1\Shipment\Order\PackageAddressController;
 use App\Http\Controllers\Api\V1\Shipment\Order\SavedAddressController;
 use App\Http\Controllers\Api\V1\Shipment\Order\ShipmentCoverageController;
+use App\Http\Controllers\Api\V1\Representative\RepresentativeController;
+use App\Http\Controllers\Api\V1\Representative\RepresentativeDocumentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -72,6 +76,13 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::get('notifications', [UserController::class, 'getNotifications']);
         Route::post('notifications/mark-as-read', [UserController::class, 'markAsRead']);
         Route::post('set-default-lang', [UserController::class, 'setDefaultLang']);
+    });
+    Route::prefix('representatives')->group(function () {
+        Route::post('register', [RepresentativeController::class, 'register']);
+        Route::get('me', [RepresentativeController::class, 'me']);
+        Route::put('me', [RepresentativeController::class, 'update']);
+        Route::post('documents', [RepresentativeDocumentController::class, 'store']);
+        Route::get('transport-types', [RepresentativeController::class, 'transportTypes']);
     });
     Route::prefix('shipment-companies')->group(function () {
         Route::get('/', [ShipmentCompanyController::class, 'index'])->withoutMiddleware('auth:sanctum');
@@ -121,6 +132,21 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 
     // الحصول على نقطة الـ Handoff فقط
     Route::post('shipment/handoff-point', [ShipmentCoverageController::class, 'getHandoffPoint']);
+    Route::prefix('shipment/contacts')->group(function () {
+        Route::post('/', [ShipmentContactController::class, 'store']);
+        Route::get('/', [ShipmentContactController::class, 'index']);
+        Route::get('{id}', [ShipmentContactController::class, 'show']);
+        Route::put('{id}', [ShipmentContactController::class, 'update']);
+        Route::delete('{id}', [ShipmentContactController::class, 'destroy']);
+    });
+    Route::prefix('shipment/requests')->group(function () {
+        Route::post('/', [ShipmentRequestController::class, 'store']);
+        Route::post('{id}/packages', [ShipmentRequestController::class, 'storePackage']);
+        Route::delete('{id}/packages/{packageId}', [ShipmentRequestController::class, 'destroyPackage']);
+        Route::post('{id}/submit', [ShipmentRequestController::class, 'submit']);
+        Route::get('/', [ShipmentRequestController::class, 'index']);
+        Route::get('{id}', [ShipmentRequestController::class, 'show']);
+    });
 
     // Cart
     Route::prefix('cart')->group(function () {

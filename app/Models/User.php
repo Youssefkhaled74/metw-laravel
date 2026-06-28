@@ -160,6 +160,16 @@ class User extends Authenticatable
         return $this->hasOne(Representative::class);
     }
 
+    public function shipmentContacts()
+    {
+        return $this->hasMany(ShipmentContact::class);
+    }
+
+    public function shipmentRequests()
+    {
+        return $this->hasMany(ShipmentRequest::class);
+    }
+
     protected static function booted()
     {
         static::assignPrefixedNumberOnCreate('user_number', 'USR');
