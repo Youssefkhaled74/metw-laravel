@@ -78,6 +78,11 @@ class Vendor extends Authenticatable
         return $this->morphMany(MediaFile::class, 'mediable');
     }
 
+    public function businessProfile()
+    {
+        return $this->hasOne(VendorBusinessProfile::class);
+    }
+
     public function ecommerceOrderItems()
     {
         return $this->hasManyThrough(

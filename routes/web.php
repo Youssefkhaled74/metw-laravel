@@ -115,6 +115,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             [CommissionController::class, 'CustomVendorStore']
         )->name('vendors.commission.store');
 
+        Route::patch('/vendors/{vendorId}/business-profile/approve', [\App\Http\Controllers\Dashboard\Admin\VendorBusinessProfileApprovalController::class, 'approve'])
+            ->name('vendors.business-profile.approve');
+        Route::patch('/vendors/{vendorId}/business-profile/reject', [\App\Http\Controllers\Dashboard\Admin\VendorBusinessProfileApprovalController::class, 'reject'])
+            ->name('vendors.business-profile.reject');
+
         Route::patch(
             '/vendors/{vendor}/commission',
             [CommissionController::class, 'CustomVendorUpdate']
@@ -372,6 +377,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'store'])->name('store');
                 Route::get('/{warehouse}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'edit'])->name('edit');
                 Route::patch('/{warehouse}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'update'])->name('update');
+                Route::patch('/{warehouse}/business-profile', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseBusinessProfileController::class, 'upsert'])->name('business-profile.upsert');
+                Route::patch('/{warehouse}/business-profile/approve', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseBusinessProfileController::class, 'approve'])->name('business-profile.approve');
+                Route::patch('/{warehouse}/business-profile/reject', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseBusinessProfileController::class, 'reject'])->name('business-profile.reject');
                 Route::delete('/{warehouse}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'destroy'])->name('destroy');
                 Route::patch('/{warehouse}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'toggleStatus'])->name('toggle-status');
             });
@@ -587,5 +595,7 @@ Route::prefix('vendor')->name('vendor.')->group(function () {
             Route::patch('/profile', 'update')->name('profile.update');
             Route::patch('/change-password', 'changePassword')->name('change-password');
         });
+        Route::patch('/business-profile', [\App\Http\Controllers\Dashboard\Vendor\VendorBusinessProfileController::class, 'upsert'])
+            ->name('business-profile.upsert');
     });
 });

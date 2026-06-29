@@ -162,6 +162,22 @@ class Product extends Model
     {
         return $this->belongsToMany(Product::class, 'related_products', 'product_id', 'related_product_id');
     }
+
+    public function shippingProfile()
+    {
+        return $this->hasOne(ProductShippingProfile::class);
+    }
+
+    public function returnPolicy()
+    {
+        return $this->hasOne(ProductReturnPolicy::class);
+    }
+
+    public function shippingFeePolicy()
+    {
+        return $this->hasOne(ProductShippingFee::class);
+    }
+
     public function cartitmes()
     {
         return $this->hasMany(CartItem::class);

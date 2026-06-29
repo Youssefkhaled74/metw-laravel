@@ -79,6 +79,11 @@ class Warehouse extends Model
         return $this->hasMany(Representative::class);
     }
 
+    public function businessProfile()
+    {
+        return $this->hasOne(WarehouseBusinessProfile::class);
+    }
+
     /**
      * Accessors / Mutators (اختياري)
      * لو عايز تنسّق الاسم أو العنوان قبل العرض
