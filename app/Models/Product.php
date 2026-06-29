@@ -100,6 +100,15 @@ class Product extends Model
         'has_deposit' => 'boolean',
         'deposit_percentage' => 'float',
         'requires_delivery_otp' => 'boolean',
+        'is_returnable' => 'boolean',
+        'return_fee' => 'float',
+        'return_validity' => 'integer',
+        'free_shipping_min_order' => 'float',
+        'free_shipping_price' => 'float',
+        'package_length' => 'float',
+        'package_width' => 'float',
+        'package_height' => 'float',
+        'package_weight' => 'float',
     ];
     public function brand()
     {

@@ -18,13 +18,18 @@ class WarehouseFactory extends Factory
 
     public function definition(): array
     {
+        $country = Country::factory();
+        $state = State::factory()->state(fn () => ['country_id' => $country]);
+        $city = City::factory()->state(fn () => ['state_id' => $state]);
+        $zone = Zone::factory()->state(fn () => ['city_id' => $city]);
+
         return [
             'name' => fake()->company() . ' Warehouse',
             'phone' => fake()->phoneNumber(),
-            'country_id' => Country::query()->value('id'),
-            'state_id' => State::query()->value('id'),
-            'city_id' => City::withoutGlobalScopes()->value('id'),
-            'zone_id' => Zone::query()->value('id'),
+            'country_id' => $country,
+            'state_id' => $state,
+            'city_id' => $city,
+            'zone_id' => $zone,
             'street_name' => fake()->streetName(),
             'building' => fake()->buildingNumber(),
             'floor' => (string) fake()->numberBetween(1, 10),

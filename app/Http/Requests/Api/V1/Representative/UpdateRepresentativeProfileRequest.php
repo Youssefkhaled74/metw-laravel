@@ -5,6 +5,7 @@ namespace App\Http\Requests\Api\V1\Representative;
 use App\Enum\RepresentativeAccountType;
 use App\Enum\RepresentativeWorkType;
 use App\Models\City;
+use App\Models\TransportType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -63,8 +64,62 @@ class UpdateRepresentativeProfileRequest extends FormRequest
         $validator->after(function ($validator) {
             $cityIds = array_values(array_filter((array) $this->input('city_ids', [])));
             $governorateIds = array_values(array_filter((array) $this->input('governorate_ids', [])));
+            $representative = $this->user()?->representative;
+            $existingWorkTypes = $representative
+                ? $representative->workTypes->map(fn ($workType) => $workType->work_type?->value ?? $workType->work_type)
+                : collect();
+            $workTypes = collect((array) ($this->input('work_types', $existingWorkTypes->all())))
+                ->filter()
+                ->values();
+            $transportTypeId = data_get(
+                $this->all(),
+                'vehicle.transport_type_id',
+                $representative?->vehicle?->transport_type_id
+            );
+
+            if (
+                $workTypes->contains(RepresentativeWorkType::LOCAL_DELIVERY->value)
+                && $workTypes->count() > 1
+            ) {
+                $validator->errors()->add(
+                    'work_types',
+                    'Local delivery cannot be combined with other representative work types.'
+                );
+            }
+
+            if (
+                $workTypes->contains(RepresentativeWorkType::LOCAL_DELIVERY->value)
+                && count($governorateIds) > 1
+            ) {
+                $validator->errors()->add(
+                    'governorate_ids',
+                    'Local delivery representatives can only select one governorate.'
+                );
+            }
+
+            if (
+                $workTypes->contains(RepresentativeWorkType::LOCAL_DELIVERY->value)
+                && empty($cityIds)
+                && $this->has('work_types')
+            ) {
+                $validator->errors()->add(
+                    'city_ids',
+                    'At least one city is required when local delivery is selected.'
+                );
+            }
 
             if (empty($cityIds) || empty($governorateIds)) {
+                if ($transportTypeId) {
+                    $transportType = TransportType::query()->find($transportTypeId);
+
+                    if (! $transportType || ! $transportType->is_active) {
+                        $validator->errors()->add(
+                            'vehicle.transport_type_id',
+                            'The selected transport type must exist and be active.'
+                        );
+                    }
+                }
+
                 return;
             }
 
@@ -76,6 +131,17 @@ class UpdateRepresentativeProfileRequest extends FormRequest
 
             if (! empty($invalidCityIds)) {
                 $validator->errors()->add('city_ids', 'Selected cities must belong to the selected governorates.');
+            }
+
+            if ($transportTypeId) {
+                $transportType = TransportType::query()->find($transportTypeId);
+
+                if (! $transportType || ! $transportType->is_active) {
+                    $validator->errors()->add(
+                        'vehicle.transport_type_id',
+                        'The selected transport type must exist and be active.'
+                    );
+                }
             }
         });
     }

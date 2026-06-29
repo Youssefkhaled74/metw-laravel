@@ -2,8 +2,14 @@
 
 namespace Database\Factories;
 
+use App\Enum\AddressType;
 use App\Models\Address;
+use App\Models\City;
+use App\Models\Country;
+use App\Models\Governorate;
+use App\Models\State;
 use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -15,21 +21,27 @@ class AddressFactory extends Factory
 
     public function definition(): array
     {
-        $user = User::query()->first() ?? User::query()->create([
-            'username' => fake()->unique()->userName(),
-            'email' => fake()->unique()->safeEmail(),
-            'phone' => fake()->unique()->numerify('201#########'),
-            'country_code' => '+20',
-            'password' => 'password',
+        $country = Country::factory();
+        $state = State::factory()->state(fn () => ['country_id' => $country]);
+        $governorate = Governorate::factory();
+        $city = City::factory()->state(fn () => [
+            'state_id' => $state,
+            'governorate_id' => $governorate,
         ]);
+        $zone = Zone::factory()->state(fn () => ['city_id' => $city]);
 
         return [
             'addressable_type' => User::class,
-            'addressable_id' => $user->id,
+            'addressable_id' => User::factory(),
             'label' => fake()->randomElement(['home', 'office']),
-            'type' => fake()->randomElement(['billing', 'shipping']),
+            'type' => fake()->randomElement(AddressType::values()),
             'contact_name' => fake()->name(),
             'contact_phone' => fake()->phoneNumber(),
+            'country_id' => $country,
+            'state_id' => $state,
+            'governorate_id' => $governorate,
+            'city_id' => $city,
+            'zone_id' => $zone,
             'postal_code' => fake()->postcode(),
             'address_line_1' => fake()->streetAddress(),
             'address_line_2' => fake()->optional()->secondaryAddress(),
