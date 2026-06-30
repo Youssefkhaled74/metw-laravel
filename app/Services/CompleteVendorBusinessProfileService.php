@@ -16,7 +16,9 @@ class CompleteVendorBusinessProfileService
     public function complete(Vendor $vendor, array $data, Request $request): VendorBusinessProfile
     {
         return DB::transaction(function () use ($vendor, $data, $request) {
-            $profile = $vendor->businessProfile()->firstOrNew();
+            $profile = VendorBusinessProfile::query()->firstOrNew([
+                'vendor_id' => $vendor->id,
+            ]);
 
             $profile->fill([
                 'legal_name' => $data['legal_name'],
@@ -33,7 +35,6 @@ class CompleteVendorBusinessProfileService
                 'rejection_reason' => null,
             ]);
 
-            $profile->vendor()->associate($vendor);
             $profile->save();
 
             $this->syncDocuments($profile, $request, 'vendor-business-profiles');

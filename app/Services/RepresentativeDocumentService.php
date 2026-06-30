@@ -48,6 +48,9 @@ class RepresentativeDocumentService
             foreach ($files as $index => $file) {
                 $extension = strtolower($file->getClientOriginalExtension());
                 $filename = now()->format('YmdHis') . '_' . Str::uuid() . '.' . $extension;
+                $originalName = $file->getClientOriginalName();
+                $mimeType = $file->getClientMimeType();
+                $size = $file->getSize();
 
                 $file->move(public_path($directory), $filename);
 
@@ -58,12 +61,12 @@ class RepresentativeDocumentService
                     'disk' => 'public',
                     'directory' => $directory,
                     'filename' => $filename,
-                    'original_name' => $file->getClientOriginalName(),
+                    'original_name' => $originalName,
                     'extension' => $extension,
-                    'mime_type' => $file->getClientMimeType(),
-                    'size' => $file->getSize(),
+                    'mime_type' => $mimeType,
+                    'size' => $size,
                     'url' => asset($relativePath),
-                    'title' => $titles[$index] ?? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                    'title' => $titles[$index] ?? pathinfo($originalName, PATHINFO_FILENAME),
                     'sort_order' => $index,
                     'is_primary' => $isPrimary && $index === 0,
                     'metadata' => $metadata,

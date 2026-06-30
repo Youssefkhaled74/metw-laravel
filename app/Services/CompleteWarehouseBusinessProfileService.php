@@ -16,7 +16,9 @@ class CompleteWarehouseBusinessProfileService
     public function complete(Warehouse $warehouse, array $data, Request $request): WarehouseBusinessProfile
     {
         return DB::transaction(function () use ($warehouse, $data, $request) {
-            $profile = $warehouse->businessProfile()->firstOrNew();
+            $profile = WarehouseBusinessProfile::query()->firstOrNew([
+                'warehouse_id' => $warehouse->id,
+            ]);
 
             $profile->fill([
                 'legal_name' => $data['legal_name'],
@@ -33,7 +35,6 @@ class CompleteWarehouseBusinessProfileService
                 'rejection_reason' => null,
             ]);
 
-            $profile->warehouse()->associate($warehouse);
             $profile->save();
 
             $this->syncDocuments($profile, $request, 'warehouse-business-profiles');

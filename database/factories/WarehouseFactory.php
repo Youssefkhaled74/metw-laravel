@@ -6,7 +6,6 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\State;
 use App\Models\Warehouse;
-use App\Models\Zone;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,15 +20,13 @@ class WarehouseFactory extends Factory
         $country = Country::factory();
         $state = State::factory()->state(fn () => ['country_id' => $country]);
         $city = City::factory()->state(fn () => ['state_id' => $state]);
-        $zone = Zone::factory()->state(fn () => ['city_id' => $city]);
-
         return [
             'name' => fake()->company() . ' Warehouse',
             'phone' => fake()->phoneNumber(),
             'country_id' => $country,
             'state_id' => $state,
             'city_id' => $city,
-            'zone_id' => $zone,
+            'zone_id' => null,
             'street_name' => fake()->streetName(),
             'building' => fake()->buildingNumber(),
             'floor' => (string) fake()->numberBetween(1, 10),

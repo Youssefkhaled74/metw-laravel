@@ -9,7 +9,6 @@ use App\Models\Country;
 use App\Models\Governorate;
 use App\Models\State;
 use App\Models\User;
-use App\Models\Zone;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -28,8 +27,6 @@ class AddressFactory extends Factory
             'state_id' => $state,
             'governorate_id' => $governorate,
         ]);
-        $zone = Zone::factory()->state(fn () => ['city_id' => $city]);
-
         return [
             'addressable_type' => User::class,
             'addressable_id' => User::factory(),
@@ -41,7 +38,7 @@ class AddressFactory extends Factory
             'state_id' => $state,
             'governorate_id' => $governorate,
             'city_id' => $city,
-            'zone_id' => $zone,
+            'zone_id' => null,
             'postal_code' => fake()->postcode(),
             'address_line_1' => fake()->streetAddress(),
             'address_line_2' => fake()->optional()->secondaryAddress(),
