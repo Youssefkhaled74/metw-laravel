@@ -2,20 +2,27 @@
 
 namespace App\Http\Controllers\Dashboard\Admin;
 
+use App\Enum\BusinessProfileStatus;
 use App\Enum\PaymentStatus;
 use App\Enum\ReturnStatus;
+use App\Enum\ShipmentRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Models\EcommerceOrder;
 use App\Models\Order;
 use App\Models\ReturnRequest;
 use App\Models\Product;
+use App\Models\Representative;
 use App\Models\ShipmentCompany;
 use App\Models\Employee;
+use App\Models\ShipmentRequest;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Models\VendorBusinessProfile;
+use App\Models\WarehouseBusinessProfile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Schema;
 
 
 class AdminDashboardController extends Controller
@@ -32,6 +39,23 @@ class AdminDashboardController extends Controller
             return view('dashboard.admin.no-permission');
         }
         // dd(Auth::guard('employee')->user()->can('admin.dashboard'));
+
+        $safeCount = function ($model, $column = null, $value = null) {
+            try {
+                $table = (new $model)->getTable();
+                if (!Schema::hasTable($table)) {
+                    return 0;
+                }
+                $query = $model::query();
+                if ($column && $value !== null) {
+                    $query = $query->where($column, $value);
+                }
+                return $query->count();
+            } catch (\Exception $e) {
+                return 0;
+            }
+        };
+
         $stats = [
             'total_users' => User::count(),
             'total_vendors' => Vendor::count(),
@@ -41,6 +65,29 @@ class AdminDashboardController extends Controller
             'total_ecommerce_orders' => EcommerceOrder::count(),
             'pending_shipment_orders' => Order::where('status', 'pending')->count(),
             'pending_ecommerce_orders' => EcommerceOrder::where('status', 'pending')->count(),
+
+            // Phase 2 - Shipment Requests
+            'total_shipment_requests' => $safeCount(ShipmentRequest::class),
+            'pending_shipment_requests' => $safeCount(ShipmentRequest::class, 'status', ShipmentRequestStatus::SUBMITTED),
+            // Assigned, completed, and cancelled statuses do not exist on ShipmentRequest yet.
+            // ShipmentRequestStatus enum only has DRAFT and SUBMITTED.
+            // 'assigned_shipment_requests' => ShipmentRequest::where(...)->count(),
+            // 'completed_shipment_requests' => ShipmentRequest::where(...)->count(),
+            // 'cancelled_shipment_requests' => ShipmentRequest::where(...)->count(),
+
+            // Phase 2 - Vendor Business Profiles
+            'pending_vendor_approvals' => $safeCount(VendorBusinessProfile::class, 'status', BusinessProfileStatus::PENDING_REVIEW),
+            'approved_vendors' => $safeCount(VendorBusinessProfile::class, 'status', BusinessProfileStatus::APPROVED),
+
+            // Phase 2 - Warehouse Business Profiles
+            'pending_warehouse_approvals' => $safeCount(WarehouseBusinessProfile::class, 'status', BusinessProfileStatus::PENDING_REVIEW),
+            'approved_warehouses' => $safeCount(WarehouseBusinessProfile::class, 'status', BusinessProfileStatus::APPROVED),
+
+            // Phase 2 - Active Shipment Companies (without global scope to query raw)
+            'active_shipment_companies' => ShipmentCompany::withoutGlobalScope('active')->where('is_active', true)->count(),
+
+            // Phase 2 - Active Representatives
+            'active_representatives' => $safeCount(Representative::class, 'is_active', true),
         ];
 
         $latestUnverifiedUser = User::whereNull('email_verified_at')->latest()->first();

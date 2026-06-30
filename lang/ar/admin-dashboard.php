@@ -1478,6 +1478,17 @@ return [
     'shipment' => 'تطبيق الشحن والتوصيل السريع',
     'ecommerce' => 'تطبيق الماركت',
 
-
+    // Phase 2 Dashboard
+    'phase_2_overview' => 'نظرة عامة على المرحلة الثانية',
+    'phase_2_subtitle' => 'طلبات الشحن، البائعين، المستودعات، والمندوبين',
+    'shipment_requests' => 'طلبات الشحن',
+    'pending_shipments' => 'طلبات الشحن المعلقة',
+    'assigned_shipments' => 'طلبات الشحن المعينة',
+    'completed_shipments' => 'طلبات الشحن المكتملة',
+    'pending_vendors' => 'موافقات البائعين المعلقة',
+    'pending_warehouses' => 'موافقات المستودعات المعلقة',
+    'shipment_companies_active' => 'شركات الشحن النشطة',
+    'representatives_active' => 'المندوبين النشطين',
+    'not_implemented' => 'لم يتم التنفيذ بعد',
 
 ];

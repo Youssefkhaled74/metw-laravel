@@ -4,515 +4,954 @@
 @section('page-title', __('admin-dashboard.dashboard_overview'))
 
 @section('content')
-    <div class="row g-3 mb-4">
-        <!-- Statistics Cards -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card stat-card-primary h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="stat-label">{{ __('admin-dashboard.total_users') }}</div>
-                            <div class="stat-value">{{ number_format($stats['total_users']) }}</div>
-                        </div>
-                        <div class="stat-icon-wrapper">
-                            <i class="fas fa-users stat-icon"></i>
-                        </div>
-                    </div>
+    @php
+        $stats = $stats ?? [];
+        $dashboardCycles = $dashboardCycles ?? [];
+        $cycleUiLabels = $cycleUiLabels ?? [];
+
+        $safeNumber = fn ($value) => number_format((int) ($value ?? 0));
+        $label = fn ($key, $fallback) => __($key) === $key ? $fallback : __($key);
+        $routeOrNull = fn ($name, $params = []) => Route::has($name) ? route($name, $params) : null;
+
+        $actionCards = [
+            [
+                'label' => 'Pending Shipments',
+                'value' => $stats['pending_shipment_requests'] ?? $stats['pending_shipment_orders'] ?? 0,
+                'helper' => 'Waiting for review, pricing, or assignment.',
+                'icon' => 'fas fa-clock',
+                'tone' => 'warning',
+                'badge' => 'Needs action',
+                'url' => $routeOrNull('admin.shipment-orders'),
+            ],
+            [
+                'label' => 'Pending Vendors',
+                'value' => $stats['pending_vendor_approvals'] ?? 0,
+                'helper' => 'Business profiles waiting for approval.',
+                'icon' => 'fas fa-store-alt',
+                'tone' => 'danger',
+                'badge' => 'Review',
+                'url' => $routeOrNull('admin.vendors'),
+            ],
+            [
+                'label' => 'Pending Warehouses',
+                'value' => $stats['pending_warehouse_approvals'] ?? 0,
+                'helper' => 'Warehouses waiting for admin approval.',
+                'icon' => 'fas fa-warehouse',
+                'tone' => 'primary',
+                'badge' => 'Review',
+                'url' => $routeOrNull('admin.settings.warehouses.index'),
+            ],
+            [
+                'label' => 'Pending Orders',
+                'value' => $stats['pending_ecommerce_orders'] ?? 0,
+                'helper' => 'Ecommerce orders that still need follow-up.',
+                'icon' => 'fas fa-shopping-bag',
+                'tone' => 'info',
+                'badge' => 'Follow up',
+                'url' => $routeOrNull('admin.orders'),
+            ],
+        ];
+
+        $businessHealthCards = [
+            [
+                'label' => $label('admin-dashboard.total_users', 'Total Users'),
+                'value' => $stats['total_users'] ?? 0,
+                'helper' => 'All registered customer accounts.',
+                'icon' => 'fas fa-users',
+                'tone' => 'primary',
+                'url' => $routeOrNull('admin.users'),
+            ],
+            [
+                'label' => $label('admin-dashboard.total_vendors', 'Total Vendors'),
+                'value' => $stats['total_vendors'] ?? 0,
+                'helper' => 'Vendor accounts inside the platform.',
+                'icon' => 'fas fa-store',
+                'tone' => 'success',
+                'url' => $routeOrNull('admin.vendors'),
+            ],
+            [
+                'label' => $label('admin-dashboard.shipment_companies', 'Shipment Companies'),
+                'value' => $stats['total_shipment_companies'] ?? $stats['active_shipment_companies'] ?? 0,
+                'helper' => 'Companies connected to shipping operations.',
+                'icon' => 'fas fa-truck-moving',
+                'tone' => 'info',
+                'url' => $routeOrNull('admin.shipment-companies'),
+            ],
+            [
+                'label' => $label('admin-dashboard.total_products', 'Total Products'),
+                'value' => $stats['total_products'] ?? 0,
+                'helper' => 'Products currently available in the system.',
+                'icon' => 'fas fa-box',
+                'tone' => 'warning',
+                'url' => $routeOrNull('admin.products'),
+            ],
+        ];
+
+        $phase2Cards = [
+            [
+                'label' => 'Shipment Requests',
+                'value' => $stats['total_shipment_requests'] ?? $stats['total_shipment_orders'] ?? 0,
+                'helper' => 'New shipping request flow from Phase 2.',
+                'icon' => 'fas fa-file-invoice',
+                'tone' => 'primary',
+                'url' => $routeOrNull('admin.shipment-orders'),
+            ],
+            [
+                'label' => 'Assigned Shipments',
+                'value' => $stats['assigned_shipment_requests'] ?? 0,
+                'helper' => 'Requests already assigned to a company or courier.',
+                'icon' => 'fas fa-clipboard-check',
+                'tone' => 'info',
+                'url' => $routeOrNull('admin.shipment-orders'),
+            ],
+            [
+                'label' => 'Completed Shipments',
+                'value' => $stats['completed_shipment_requests'] ?? $stats['completed_shipment_orders'] ?? 0,
+                'helper' => 'Delivered or completed shipment requests.',
+                'icon' => 'fas fa-check-circle',
+                'tone' => 'success',
+                'url' => $routeOrNull('admin.shipment-orders'),
+            ],
+            [
+                'label' => 'Cancelled Shipments',
+                'value' => $stats['cancelled_shipment_requests'] ?? $stats['cancelled_shipment_orders'] ?? 0,
+                'helper' => 'Cancelled or rejected shipment requests.',
+                'icon' => 'fas fa-ban',
+                'tone' => 'danger',
+                'url' => $routeOrNull('admin.shipment-orders'),
+            ],
+            [
+                'label' => 'Approved Vendors',
+                'value' => $stats['approved_vendors'] ?? 0,
+                'helper' => 'Vendors approved to operate normally.',
+                'icon' => 'fas fa-user-check',
+                'tone' => 'success',
+                'url' => $routeOrNull('admin.vendors'),
+            ],
+            [
+                'label' => 'Approved Warehouses',
+                'value' => $stats['approved_warehouses'] ?? 0,
+                'helper' => 'Warehouses approved for business use.',
+                'icon' => 'fas fa-warehouse',
+                'tone' => 'primary',
+                'url' => $routeOrNull('admin.settings.warehouses.index'),
+            ],
+            [
+                'label' => 'Active Representatives',
+                'value' => $stats['active_representatives'] ?? 0,
+                'helper' => 'Representatives available for operations.',
+                'icon' => 'fas fa-user-tie',
+                'tone' => 'info',
+                'url' => $routeOrNull('admin.representatives.index'),
+            ],
+            [
+                'label' => 'Ecommerce Orders',
+                'value' => $stats['total_ecommerce_orders'] ?? 0,
+                'helper' => 'Marketplace order flow overview.',
+                'icon' => 'fas fa-shopping-cart',
+                'tone' => 'warning',
+                'url' => $routeOrNull('admin.orders'),
+            ],
+        ];
+
+        $quickLinks = [
+            [
+                'label' => 'Shipment Requests',
+                'helper' => 'Review sender, receiver, package, status, and assignment.',
+                'icon' => 'fas fa-shipping-fast',
+                'url' => $routeOrNull('admin.shipment-orders'),
+            ],
+            [
+                'label' => 'Vendors',
+                'helper' => 'Review vendor profile, branches, products, and approvals.',
+                'icon' => 'fas fa-store',
+                'url' => $routeOrNull('admin.vendors'),
+            ],
+            [
+                'label' => 'Warehouses',
+                'helper' => 'Manage warehouse approval and business data.',
+                'icon' => 'fas fa-warehouse',
+                'url' => $routeOrNull('admin.settings.warehouses.index'),
+            ],
+            [
+                'label' => 'Shipment Companies',
+                'helper' => 'Manage shipping partners and company coverage.',
+                'icon' => 'fas fa-truck',
+                'url' => $routeOrNull('admin.shipment-companies'),
+            ],
+        ];
+    @endphp
+
+    <div class="admin-dashboard-page">
+        <div class="dashboard-hero mb-4">
+            <div class="dashboard-hero-content">
+                <div>
+                    <span class="dashboard-eyebrow">Metw Admin Control Center</span>
+                    <h1 class="dashboard-title">{{ $label('admin-dashboard.dashboard_overview', 'Dashboard Overview') }}</h1>
+                    <p class="dashboard-subtitle mb-0">
+                        Understand what needs action, what is moving, and what belongs to the new Phase 2 business flow.
+                    </p>
+                </div>
+                <div class="dashboard-hero-summary">
+                    <span class="summary-label">Action items</span>
+                    <strong>{{ $safeNumber(collect($actionCards)->sum('value')) }}</strong>
+                    <small>items need attention</small>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card stat-card-success h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="stat-label">{{ __('admin-dashboard.total_vendors') }}</div>
-                            <div class="stat-value">{{ number_format($stats['total_vendors']) }}</div>
-                        </div>
-                        <div class="stat-icon-wrapper">
-                            <i class="fas fa-store stat-icon"></i>
-                        </div>
-                    </div>
+        <section class="dashboard-section mb-4">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">Start here</span>
+                    <h2>Action Required</h2>
+                    <p>Critical items that need admin review or operational follow-up.</p>
                 </div>
             </div>
-        </div>
 
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card stat-card-info h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="stat-label">{{ __('admin-dashboard.shipment_companies') }}</div>
-                            <div class="stat-value">{{ number_format($stats['total_shipment_companies']) }}</div>
-                        </div>
-                        <div class="stat-icon-wrapper">
-                            <i class="fas fa-truck stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card stat-card-warning h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="stat-label">{{ __('admin-dashboard.total_products') }}</div>
-                            <div class="stat-value">{{ number_format($stats['total_products']) }}</div>
-                        </div>
-                        <div class="stat-icon-wrapper">
-                            <i class="fas fa-box stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card stat-card-danger h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="stat-label">{{ __('admin-dashboard.shipment_orders') }}</div>
-                            <div class="stat-value">{{ number_format($stats['total_shipment_orders']) }}</div>
-                            <div class="stat-subtext">
-                                <i class="fas fa-clock me-1"></i>
-                                {{ __('admin-dashboard.pending') }}: <strong>{{ $stats['pending_shipment_orders'] }}</strong>
-                            </div>
-                        </div>
-                        <div class="stat-icon-wrapper">
-                            <i class="fas fa-shipping-fast stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card stat-card-secondary h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="stat-label">{{ __('admin-dashboard.ecommerce_orders') }}</div>
-                            <div class="stat-value">{{ number_format($stats['total_ecommerce_orders']) }}</div>
-                            <div class="stat-subtext">
-                                <i class="fas fa-clock me-1"></i>
-                                {{ __('admin-dashboard.pending') }}: <strong>{{ $stats['pending_ecommerce_orders'] }}</strong>
-                            </div>
-                        </div>
-                        <div class="stat-icon-wrapper">
-                            <i class="fas fa-shopping-cart stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="dashboard-cycle-section mb-4" id="approvalCycles">
-        <div class="cycle-section-header mb-3">
-            <h5 class="mb-1 fw-bold">{{ $dashboardCycles['approvals']['title'] }}</h5>
-            <p class="mb-0 text-muted small">{{ $dashboardCycles['approvals']['subtitle'] }}</p>
-        </div>
-        <div class="row g-3">
-            @foreach ($dashboardCycles['approvals']['cards'] as $card)
-                <div class="col-xl-4 col-md-6">
-                    <div class="cycle-card h-100">
-                        <div class="cycle-card-header">
-                            <div class="cycle-card-heading">
-                                <div class="cycle-card-title">{{ $card['title'] }}</div>
-                                <div class="cycle-card-count">{{ number_format($card['count']) }}</div>
-                            </div>
-                            <span class="cycle-badge cycle-badge-warning">{{ $cycleUiLabels['needs_approval'] }}</span>
-                        </div>
-                        <div class="cycle-latest">
-                            <div class="cycle-latest-label">{{ $cycleUiLabels['latest_item'] }}</div>
-                            <div class="cycle-latest-title">
-                                @if (!empty($card['latest_url']))
-                                    <a href="{{ $card['latest_url'] }}">{{ $card['latest_title'] }}</a>
-                                @else
-                                    {{ $card['latest_title'] }}
-                                @endif
-                            </div>
-                            @if (!empty($card['latest_meta']))
-                                <div class="cycle-latest-meta">{{ $card['latest_meta'] }}</div>
-                            @endif
-                        </div>
-                        <div class="cycle-card-footer mt-3">
-                            <span class="text-muted small cycle-status-text">{{ $card['latest_status'] }}</span>
-                            <a href="{{ $card['view_all_url'] }}" class="btn btn-outline-primary btn-sm">{{ $cycleUiLabels['view_all'] }}</a>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
-    <div class="dashboard-cycle-section mb-4" id="trustCycles">
-        <div class="cycle-section-header mb-3">
-            <h5 class="mb-1 fw-bold">{{ $dashboardCycles['trust']['title'] }}</h5>
-            <p class="mb-0 text-muted small">{{ $dashboardCycles['trust']['subtitle'] }}</p>
-        </div>
-        <div class="row g-3">
-            @foreach ($dashboardCycles['trust']['cards'] as $card)
-                <div class="col-xl-4 col-md-6">
-                    <div class="cycle-card h-100">
-                        <div class="cycle-card-header">
-                            <div class="cycle-card-heading">
-                                <div class="cycle-card-title">{{ $card['title'] }}</div>
-                                <div class="d-flex flex-wrap gap-2 mt-2">
-                                    <span class="cycle-mini-stat"><strong>{{ number_format($card['trusted_count']) }}</strong> {{ $cycleUiLabels['trusted'] }}</span>
-                                    <span class="cycle-mini-stat"><strong>{{ number_format($card['rejected_count']) }}</strong> {{ $cycleUiLabels['rejected'] }}</span>
+            <div class="row g-3">
+                @foreach ($actionCards as $card)
+                    <div class="col-xl-3 col-md-6">
+                        @if (!empty($card['url']))
+                            <a href="{{ $card['url'] }}" class="dashboard-card-link">
+                        @endif
+                            <div class="metric-card metric-card-{{ $card['tone'] }} h-100">
+                                <div class="metric-card-top">
+                                    <div class="metric-icon"><i class="{{ $card['icon'] }}"></i></div>
+                                    <span class="metric-badge">{{ $card['badge'] }}</span>
+                                </div>
+                                <div class="metric-label">{{ $card['label'] }}</div>
+                                <div class="metric-value">{{ $safeNumber($card['value']) }}</div>
+                                <p class="metric-helper">{{ $card['helper'] }}</p>
+                                <div class="metric-action">
+                                    <span>{{ !empty($card['url']) ? 'Open details' : 'Route not available' }}</span>
+                                    <i class="fas fa-arrow-right"></i>
                                 </div>
                             </div>
-                            <span class="cycle-badge cycle-badge-success">{{ $cycleUiLabels['trust_level'] }}</span>
-                        </div>
-                        <div class="cycle-latest mb-2">
-                            <div class="cycle-latest-label">{{ $cycleUiLabels['latest_trusted'] }}</div>
-                            <div class="cycle-latest-title">
-                                @if (!empty($card['trusted_url']))
-                                    <a href="{{ $card['trusted_url'] }}">{{ $card['trusted_title'] }}</a>
-                                @else
-                                    {{ $card['trusted_title'] }}
-                                @endif
-                            </div>
-                            @if (!empty($card['trusted_meta']))
-                                <div class="cycle-latest-meta">{{ $card['trusted_meta'] }}</div>
-                            @endif
-                        </div>
-                        <div class="cycle-latest">
-                            <div class="cycle-latest-label">{{ $cycleUiLabels['latest_rejected'] }}</div>
-                            <div class="cycle-latest-title">
-                                @if (!empty($card['rejected_url']))
-                                    <a href="{{ $card['rejected_url'] }}">{{ $card['rejected_title'] }}</a>
-                                @else
-                                    {{ $card['rejected_title'] }}
-                                @endif
-                            </div>
-                            @if (!empty($card['rejected_meta']))
-                                <div class="cycle-latest-meta">{{ $card['rejected_meta'] }}</div>
-                            @endif
-                        </div>
-                        <div class="cycle-card-footer cycle-card-footer-end mt-3">
-                            <a href="{{ $card['view_all_url'] }}" class="btn btn-outline-primary btn-sm">{{ $cycleUiLabels['view_all'] }}</a>
-                        </div>
+                        @if (!empty($card['url']))
+                            </a>
+                        @endif
                     </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
-    <div class="dashboard-cycle-section mb-4" id="adminApprovalCycles">
-        <div class="cycle-section-header mb-3">
-            <h5 class="mb-1 fw-bold">{{ $dashboardCycles['adminApprovals']['title'] }}</h5>
-            <p class="mb-0 text-muted small">{{ $dashboardCycles['adminApprovals']['subtitle'] }}</p>
-        </div>
-        <div class="row g-3">
-            @foreach ($dashboardCycles['adminApprovals']['cards'] as $card)
-                <div class="col-xl-3 col-md-6">
-                    <div class="cycle-card h-100">
-                        <div class="cycle-card-header">
-                            <div class="cycle-card-heading">
-                                <div class="cycle-card-title">{{ $card['title'] }}</div>
-                                <div class="cycle-card-count">{{ number_format($card['count']) }}</div>
-                            </div>
-                            <span class="cycle-badge cycle-badge-primary">{{ $card['latest_status'] }}</span>
-                        </div>
-                        <div class="cycle-latest">
-                            <div class="cycle-latest-label">{{ $cycleUiLabels['latest_item'] }}</div>
-                            <div class="cycle-latest-title">
-                                @if (!empty($card['latest_url']))
-                                    <a href="{{ $card['latest_url'] }}">{{ $card['latest_title'] }}</a>
-                                @else
-                                    {{ $card['latest_title'] }}
-                                @endif
-                            </div>
-                            @if (!empty($card['latest_meta']))
-                                <div class="cycle-latest-meta">{{ $card['latest_meta'] }}</div>
-                            @endif
-                        </div>
-                        <div class="cycle-card-footer cycle-card-footer-end mt-3">
-                            <a href="{{ $card['view_all_url'] }}" class="btn btn-outline-primary btn-sm">{{ $cycleUiLabels['view_all'] }}</a>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
-    <div class="dashboard-cycle-section mb-4" id="pendingCycles">
-        <div class="cycle-section-header mb-3">
-            <h5 class="mb-1 fw-bold">{{ $dashboardCycles['pending']['title'] }}</h5>
-            <p class="mb-0 text-muted small">{{ $dashboardCycles['pending']['subtitle'] }}</p>
-        </div>
-        <div class="row g-3">
-            @foreach ($dashboardCycles['pending']['cards'] as $card)
-                <div class="col-xl-3 col-md-6">
-                    <div class="cycle-card h-100">
-                        <div class="cycle-card-header">
-                            <div class="cycle-card-heading">
-                                <div class="cycle-card-title">{{ $card['title'] }}</div>
-                                <div class="cycle-card-count">{{ number_format($card['count']) }}</div>
-                            </div>
-                            <span class="cycle-badge cycle-badge-warning">{{ $card['latest_status'] }}</span>
-                        </div>
-                        <div class="cycle-latest">
-                            <div class="cycle-latest-label">{{ $cycleUiLabels['latest_item'] }}</div>
-                            <div class="cycle-latest-title">
-                                @if (!empty($card['latest_url']))
-                                    <a href="{{ $card['latest_url'] }}">{{ $card['latest_title'] }}</a>
-                                @else
-                                    {{ $card['latest_title'] }}
-                                @endif
-                            </div>
-                            @if (!empty($card['latest_meta']))
-                                <div class="cycle-latest-meta">{{ $card['latest_meta'] }}</div>
-                            @endif
-                        </div>
-                        <div class="cycle-card-footer cycle-card-footer-end mt-3">
-                            <a href="{{ $card['view_all_url'] }}" class="btn btn-outline-primary btn-sm">{{ $cycleUiLabels['view_all'] }}</a>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
-    <div class="dashboard-cycle-section mb-4" id="complaintsCycles">
-        <div class="cycle-section-header mb-3">
-            <h5 class="mb-1 fw-bold">{{ $dashboardCycles['complaints']['title'] }}</h5>
-            <p class="mb-0 text-muted small">{{ $dashboardCycles['complaints']['subtitle'] }}</p>
-        </div>
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4 text-center text-muted">
-                <i class="fas fa-comment-dots fa-2x mb-3"></i>
-                <p class="mb-0">{{ $cycleUiLabels['no_complaints_source'] }}</p>
+                @endforeach
             </div>
-        </div>
+        </section>
+
+        <section class="dashboard-section mb-4">
+            <div class="section-heading section-heading-inline">
+                <div>
+                    <span class="section-kicker">Business health</span>
+                    <h2>Main Platform Numbers</h2>
+                    <p>High-level numbers for users, vendors, products, and shipment partners.</p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                @foreach ($businessHealthCards as $card)
+                    <div class="col-xl-3 col-md-6">
+                        @if (!empty($card['url']))
+                            <a href="{{ $card['url'] }}" class="dashboard-card-link">
+                        @endif
+                            <div class="compact-stat-card compact-stat-card-{{ $card['tone'] }} h-100">
+                                <div class="compact-stat-icon"><i class="{{ $card['icon'] }}"></i></div>
+                                <div class="compact-stat-content">
+                                    <span>{{ $card['label'] }}</span>
+                                    <strong>{{ $safeNumber($card['value']) }}</strong>
+                                    <small>{{ $card['helper'] }}</small>
+                                </div>
+                            </div>
+                        @if (!empty($card['url']))
+                            </a>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
+        <section class="dashboard-section mb-4">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">Phase 2 operations</span>
+                    <h2>New Flow Visibility</h2>
+                    <p>Shipment requests, approvals, warehouses, representatives, and order flow.</p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                @foreach ($phase2Cards as $card)
+                    <div class="col-xl-3 col-md-6">
+                        @if (!empty($card['url']))
+                            <a href="{{ $card['url'] }}" class="dashboard-card-link">
+                        @endif
+                            <div class="operation-card h-100">
+                                <div class="operation-icon operation-icon-{{ $card['tone'] }}"><i class="{{ $card['icon'] }}"></i></div>
+                                <div class="operation-body">
+                                    <span class="operation-label">{{ $card['label'] }}</span>
+                                    <strong>{{ $safeNumber($card['value']) }}</strong>
+                                    <p>{{ $card['helper'] }}</p>
+                                </div>
+                            </div>
+                        @if (!empty($card['url']))
+                            </a>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
+        <section class="dashboard-section mb-4">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">Navigation</span>
+                    <h2>Quick Access</h2>
+                    <p>Go directly to the operational pages related to Phase 2.</p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                @foreach ($quickLinks as $link)
+                    <div class="col-xl-3 col-md-6">
+                        @if (!empty($link['url']))
+                            <a href="{{ $link['url'] }}" class="quick-link-card">
+                        @else
+                            <div class="quick-link-card quick-link-disabled">
+                        @endif
+                                <div class="quick-link-icon"><i class="{{ $link['icon'] }}"></i></div>
+                                <div>
+                                    <strong>{{ $link['label'] }}</strong>
+                                    <p>{{ $link['helper'] }}</p>
+                                </div>
+                                <span class="quick-link-arrow"><i class="fas fa-arrow-right"></i></span>
+                        @if (!empty($link['url']))
+                            </a>
+                        @else
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
+        @if (!empty($dashboardCycles['approvals']['cards']))
+            <section class="dashboard-cycle-section mb-4" id="approvalCycles">
+                <div class="cycle-section-header mb-3">
+                    <div>
+                        <span class="section-kicker">Approval cycle</span>
+                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['approvals']['title'] ?? 'Approvals' }}</h5>
+                        <p class="mb-0 text-muted small">{{ $dashboardCycles['approvals']['subtitle'] ?? 'Items waiting for approval.' }}</p>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    @foreach ($dashboardCycles['approvals']['cards'] as $card)
+                        <div class="col-xl-4 col-md-6">
+                            <div class="cycle-card h-100">
+                                <div class="cycle-card-header">
+                                    <div class="cycle-card-heading">
+                                        <div class="cycle-card-title">{{ $card['title'] ?? '-' }}</div>
+                                        <div class="cycle-card-count">{{ $safeNumber($card['count'] ?? 0) }}</div>
+                                    </div>
+                                    <span class="cycle-badge cycle-badge-warning">{{ $cycleUiLabels['needs_approval'] ?? 'Needs approval' }}</span>
+                                </div>
+                                <div class="cycle-latest">
+                                    <div class="cycle-latest-label">{{ $cycleUiLabels['latest_item'] ?? 'Latest item' }}</div>
+                                    <div class="cycle-latest-title">
+                                        @if (!empty($card['latest_url']))
+                                            <a href="{{ $card['latest_url'] }}">{{ $card['latest_title'] ?? '-' }}</a>
+                                        @else
+                                            {{ $card['latest_title'] ?? '-' }}
+                                        @endif
+                                    </div>
+                                    @if (!empty($card['latest_meta']))
+                                        <div class="cycle-latest-meta">{{ $card['latest_meta'] }}</div>
+                                    @endif
+                                </div>
+                                <div class="cycle-card-footer mt-3">
+                                    <span class="text-muted small cycle-status-text">{{ $card['latest_status'] ?? '-' }}</span>
+                                    @if (!empty($card['view_all_url']))
+                                        <a href="{{ $card['view_all_url'] }}" class="btn btn-outline-primary btn-sm">{{ $cycleUiLabels['view_all'] ?? 'View all' }}</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        @if (!empty($dashboardCycles['trust']['cards']))
+            <section class="dashboard-cycle-section mb-4" id="trustCycles">
+                <div class="cycle-section-header mb-3">
+                    <div>
+                        <span class="section-kicker">Trust cycle</span>
+                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['trust']['title'] ?? 'Trust' }}</h5>
+                        <p class="mb-0 text-muted small">{{ $dashboardCycles['trust']['subtitle'] ?? 'Trusted and rejected records.' }}</p>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    @foreach ($dashboardCycles['trust']['cards'] as $card)
+                        <div class="col-xl-4 col-md-6">
+                            <div class="cycle-card h-100">
+                                <div class="cycle-card-header">
+                                    <div class="cycle-card-heading">
+                                        <div class="cycle-card-title">{{ $card['title'] ?? '-' }}</div>
+                                        <div class="d-flex flex-wrap gap-2 mt-2">
+                                            <span class="cycle-mini-stat"><strong>{{ $safeNumber($card['trusted_count'] ?? 0) }}</strong> {{ $cycleUiLabels['trusted'] ?? 'Trusted' }}</span>
+                                            <span class="cycle-mini-stat"><strong>{{ $safeNumber($card['rejected_count'] ?? 0) }}</strong> {{ $cycleUiLabels['rejected'] ?? 'Rejected' }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="cycle-badge cycle-badge-success">{{ $cycleUiLabels['trust_level'] ?? 'Trust level' }}</span>
+                                </div>
+                                <div class="cycle-latest mb-2">
+                                    <div class="cycle-latest-label">{{ $cycleUiLabels['latest_trusted'] ?? 'Latest trusted' }}</div>
+                                    <div class="cycle-latest-title">
+                                        @if (!empty($card['trusted_url']))
+                                            <a href="{{ $card['trusted_url'] }}">{{ $card['trusted_title'] ?? '-' }}</a>
+                                        @else
+                                            {{ $card['trusted_title'] ?? '-' }}
+                                        @endif
+                                    </div>
+                                    @if (!empty($card['trusted_meta']))
+                                        <div class="cycle-latest-meta">{{ $card['trusted_meta'] }}</div>
+                                    @endif
+                                </div>
+                                <div class="cycle-latest">
+                                    <div class="cycle-latest-label">{{ $cycleUiLabels['latest_rejected'] ?? 'Latest rejected' }}</div>
+                                    <div class="cycle-latest-title">
+                                        @if (!empty($card['rejected_url']))
+                                            <a href="{{ $card['rejected_url'] }}">{{ $card['rejected_title'] ?? '-' }}</a>
+                                        @else
+                                            {{ $card['rejected_title'] ?? '-' }}
+                                        @endif
+                                    </div>
+                                    @if (!empty($card['rejected_meta']))
+                                        <div class="cycle-latest-meta">{{ $card['rejected_meta'] }}</div>
+                                    @endif
+                                </div>
+                                <div class="cycle-card-footer cycle-card-footer-end mt-3">
+                                    @if (!empty($card['view_all_url']))
+                                        <a href="{{ $card['view_all_url'] }}" class="btn btn-outline-primary btn-sm">{{ $cycleUiLabels['view_all'] ?? 'View all' }}</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        @if (!empty($dashboardCycles['adminApprovals']['cards']))
+            <section class="dashboard-cycle-section mb-4" id="adminApprovalCycles">
+                <div class="cycle-section-header mb-3">
+                    <div>
+                        <span class="section-kicker">Admin approvals</span>
+                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['adminApprovals']['title'] ?? 'Admin Approvals' }}</h5>
+                        <p class="mb-0 text-muted small">{{ $dashboardCycles['adminApprovals']['subtitle'] ?? 'Admin-controlled approval items.' }}</p>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    @foreach ($dashboardCycles['adminApprovals']['cards'] as $card)
+                        <div class="col-xl-3 col-md-6">
+                            <div class="cycle-card h-100">
+                                <div class="cycle-card-header">
+                                    <div class="cycle-card-heading">
+                                        <div class="cycle-card-title">{{ $card['title'] ?? '-' }}</div>
+                                        <div class="cycle-card-count">{{ $safeNumber($card['count'] ?? 0) }}</div>
+                                    </div>
+                                    <span class="cycle-badge cycle-badge-primary">{{ $card['latest_status'] ?? '-' }}</span>
+                                </div>
+                                <div class="cycle-latest">
+                                    <div class="cycle-latest-label">{{ $cycleUiLabels['latest_item'] ?? 'Latest item' }}</div>
+                                    <div class="cycle-latest-title">
+                                        @if (!empty($card['latest_url']))
+                                            <a href="{{ $card['latest_url'] }}">{{ $card['latest_title'] ?? '-' }}</a>
+                                        @else
+                                            {{ $card['latest_title'] ?? '-' }}
+                                        @endif
+                                    </div>
+                                    @if (!empty($card['latest_meta']))
+                                        <div class="cycle-latest-meta">{{ $card['latest_meta'] }}</div>
+                                    @endif
+                                </div>
+                                <div class="cycle-card-footer cycle-card-footer-end mt-3">
+                                    @if (!empty($card['view_all_url']))
+                                        <a href="{{ $card['view_all_url'] }}" class="btn btn-outline-primary btn-sm">{{ $cycleUiLabels['view_all'] ?? 'View all' }}</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        @if (!empty($dashboardCycles['pending']['cards']))
+            <section class="dashboard-cycle-section mb-4" id="pendingCycles">
+                <div class="cycle-section-header mb-3">
+                    <div>
+                        <span class="section-kicker">Pending cycles</span>
+                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['pending']['title'] ?? 'Pending' }}</h5>
+                        <p class="mb-0 text-muted small">{{ $dashboardCycles['pending']['subtitle'] ?? 'Pending operational cycles.' }}</p>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    @foreach ($dashboardCycles['pending']['cards'] as $card)
+                        <div class="col-xl-3 col-md-6">
+                            <div class="cycle-card h-100">
+                                <div class="cycle-card-header">
+                                    <div class="cycle-card-heading">
+                                        <div class="cycle-card-title">{{ $card['title'] ?? '-' }}</div>
+                                        <div class="cycle-card-count">{{ $safeNumber($card['count'] ?? 0) }}</div>
+                                    </div>
+                                    <span class="cycle-badge cycle-badge-warning">{{ $card['latest_status'] ?? '-' }}</span>
+                                </div>
+                                <div class="cycle-latest">
+                                    <div class="cycle-latest-label">{{ $cycleUiLabels['latest_item'] ?? 'Latest item' }}</div>
+                                    <div class="cycle-latest-title">
+                                        @if (!empty($card['latest_url']))
+                                            <a href="{{ $card['latest_url'] }}">{{ $card['latest_title'] ?? '-' }}</a>
+                                        @else
+                                            {{ $card['latest_title'] ?? '-' }}
+                                        @endif
+                                    </div>
+                                    @if (!empty($card['latest_meta']))
+                                        <div class="cycle-latest-meta">{{ $card['latest_meta'] }}</div>
+                                    @endif
+                                </div>
+                                <div class="cycle-card-footer cycle-card-footer-end mt-3">
+                                    @if (!empty($card['view_all_url']))
+                                        <a href="{{ $card['view_all_url'] }}" class="btn btn-outline-primary btn-sm">{{ $cycleUiLabels['view_all'] ?? 'View all' }}</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        <section class="dashboard-cycle-section mb-4" id="complaintsCycles">
+            <div class="cycle-section-header mb-3">
+                <div>
+                    <span class="section-kicker">Support</span>
+                    <h5 class="mb-1 fw-bold">{{ $dashboardCycles['complaints']['title'] ?? 'Complaints' }}</h5>
+                    <p class="mb-0 text-muted small">{{ $dashboardCycles['complaints']['subtitle'] ?? 'Complaints and customer support signals.' }}</p>
+                </div>
+            </div>
+            <div class="empty-state-card">
+                <i class="fas fa-comment-dots"></i>
+                <strong>{{ $cycleUiLabels['no_complaints_source'] ?? 'No complaints source is connected yet.' }}</strong>
+                <span>When complaint data is available, this area can show open complaints and urgent support issues.</span>
+            </div>
+        </section>
     </div>
 @endsection
 
 @section('scripts')
-    <style data-page-style="admin-dashboard">
-        /* Statistics Cards */
-        .stat-card {
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 20px;
-            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    <style data-page-style="admin-dashboard-enhanced">
+        :root {
+            --metw-bg: #f6f8fb;
+            --metw-surface: #ffffff;
+            --metw-border: #e5e7eb;
+            --metw-text: #0f172a;
+            --metw-muted: #64748b;
+            --metw-primary: #2563eb;
+            --metw-success: #16a34a;
+            --metw-warning: #f59e0b;
+            --metw-danger: #dc2626;
+            --metw-info: #0891b2;
+            --metw-shadow: 0 14px 32px rgba(15, 23, 42, 0.07);
+            --metw-shadow-hover: 0 22px 44px rgba(15, 23, 42, 0.12);
+        }
+
+        .admin-dashboard-page {
+            color: var(--metw-text);
+        }
+
+        .dashboard-hero {
+            background:
+                radial-gradient(circle at top right, rgba(37, 99, 235, 0.18), transparent 32%),
+                linear-gradient(135deg, #0f172a 0%, #1e3a8a 52%, #0f766e 100%);
+            border-radius: 28px;
+            padding: 1.5rem;
+            color: #ffffff;
+            box-shadow: var(--metw-shadow);
             overflow: hidden;
             position: relative;
-            isolation: isolate;
-            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
         }
 
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.14) !important;
-            border-color: rgba(255, 255, 255, 0.28);
-        }
-
-        .stat-card::after {
+        .dashboard-hero::after {
             content: '';
             position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
-            pointer-events: none;
+            width: 240px;
+            height: 240px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.09);
+            right: -80px;
+            bottom: -110px;
         }
 
-        .stat-card-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
+        .dashboard-hero-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
-        .stat-card-success {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: #fff;
-        }
-
-        .stat-card-info {
-            background: linear-gradient(135deg, #3494E6 0%, #EC6EAD 100%);
-            color: #fff;
-        }
-
-        .stat-card-warning {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: #fff;
-        }
-
-        .stat-card-danger {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: #fff;
-        }
-
-        .stat-card-secondary {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: #fff;
-        }
-
-        .stat-label {
-            font-size: 0.76rem;
-            font-weight: 700;
+        .dashboard-eyebrow,
+        .section-kicker {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            font-size: 0.72rem;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
-            opacity: 0.88;
+            letter-spacing: 0.1em;
+        }
+
+        .dashboard-eyebrow {
+            color: rgba(255, 255, 255, 0.72);
+            margin-bottom: 0.55rem;
+        }
+
+        .dashboard-title {
+            font-size: clamp(1.65rem, 3vw, 2.35rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 0.55rem;
+        }
+
+        .dashboard-subtitle {
+            max-width: 680px;
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.98rem;
+            line-height: 1.7;
+        }
+
+        .dashboard-hero-summary {
+            min-width: 190px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 22px;
+            padding: 1rem 1.15rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .summary-label {
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .dashboard-hero-summary strong {
+            font-size: 2.15rem;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+
+        .dashboard-hero-summary small {
+            color: rgba(255, 255, 255, 0.76);
+        }
+
+        .dashboard-section,
+        .dashboard-cycle-section {
+            background: var(--metw-surface);
+            border: 1px solid var(--metw-border);
+            border-radius: 26px;
+            padding: 1.25rem;
+            box-shadow: var(--metw-shadow);
+        }
+
+        .section-heading,
+        .cycle-section-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding-bottom: 0.95rem;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .section-kicker {
+            color: var(--metw-primary);
             margin-bottom: 0.4rem;
         }
 
-        .stat-value {
-            font-size: 2.15rem;
-            font-weight: 800;
-            line-height: 1.2;
+        .section-heading h2,
+        .cycle-section-header h5 {
+            font-size: 1.18rem;
+            font-weight: 900 !important;
+            line-height: 1.35;
+            margin: 0 0 0.2rem;
+            color: var(--metw-text);
         }
 
-        .stat-subtext {
-            font-size: 0.78rem;
-            opacity: 0.9;
-            margin-top: 0.5rem;
+        .section-heading p,
+        .cycle-section-header p {
+            margin: 0;
+            color: var(--metw-muted) !important;
+            font-size: 0.9rem !important;
+            line-height: 1.6;
         }
 
-        .stat-icon-wrapper {
-            width: 64px;
-            height: 64px;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.16);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.22);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        .dashboard-card-link,
+        .dashboard-card-link:hover {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+            height: 100%;
         }
 
-        .stat-icon {
-            font-size: 1.65rem;
-            opacity: 0.95;
-        }
-
-        /* Cards */
-        .card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        }
-
-        .card-header {
-            border-radius: 12px 12px 0 0 !important;
-            padding: 1rem 1.25rem;
-            font-weight: 600;
-        }
-
-        /* Tables */
-        .table {
-            margin-bottom: 0;
-        }
-
-        .table thead th {
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.8125rem;
-            letter-spacing: 0.5px;
-            padding: 0.875rem 0.75rem;
-            vertical-align: middle;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .table tbody td {
-            padding: 0.875rem 0.75rem;
-            vertical-align: middle;
-        }
-
-        .table-hover tbody tr {
-            transition: background-color 0.15s ease;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        .table-search-input {
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
-            transition: all 0.2s ease;
-        }
-
-        .table-search-input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-
-        .dashboard-cycle-section {
-            scroll-margin-top: 110px;
+        .metric-card,
+        .compact-stat-card,
+        .operation-card,
+        .quick-link-card,
+        .cycle-card,
+        .empty-state-card {
             background: #ffffff;
             border: 1px solid #e5e7eb;
-            border-radius: 24px;
-            padding: 1.25rem;
-            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
+            border-radius: 22px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.055);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .metric-card:hover,
+        .compact-stat-card:hover,
+        .operation-card:hover,
+        .quick-link-card:hover,
+        .cycle-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--metw-shadow-hover);
+            border-color: #c7d2fe;
+        }
+
+        .metric-card {
+            padding: 1.2rem;
+            min-height: 214px;
+            display: flex;
+            flex-direction: column;
             position: relative;
             overflow: hidden;
         }
 
-        .dashboard-cycle-section::after {
+        .metric-card::before {
             content: '';
             position: absolute;
             inset: 0 0 auto 0;
-            height: 3px;
-            background: linear-gradient(90deg, #1d4ed8 0%, #0ea5e9 45%, #22c55e 100%);
-            opacity: 0.95;
+            height: 4px;
+            background: var(--card-tone, var(--metw-primary));
         }
 
-        .cycle-section-header {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-            padding: 0.1rem 0.25rem 0.85rem;
-            border-bottom: 1px solid #eef2f7;
-            margin-bottom: 1rem !important;
-        }
+        .metric-card-primary { --card-tone: var(--metw-primary); }
+        .metric-card-success { --card-tone: var(--metw-success); }
+        .metric-card-warning { --card-tone: var(--metw-warning); }
+        .metric-card-danger { --card-tone: var(--metw-danger); }
+        .metric-card-info { --card-tone: var(--metw-info); }
 
-        .cycle-section-header h5 {
-            font-size: 1.16rem;
-            line-height: 1.35;
-            color: #0f172a;
-            font-weight: 800 !important;
-            margin-bottom: 0 !important;
+        .metric-card-top {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
-        .cycle-section-header h5::before {
-            content: '';
-            width: 10px;
-            height: 10px;
+        .metric-icon,
+        .compact-stat-icon,
+        .operation-icon,
+        .quick-link-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+        }
+
+        .metric-icon {
+            color: var(--card-tone, var(--metw-primary));
+            background: color-mix(in srgb, var(--card-tone, var(--metw-primary)) 11%, white);
+        }
+
+        .metric-badge,
+        .cycle-badge {
             border-radius: 999px;
-            background: linear-gradient(135deg, #2563eb, #22c55e);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-            flex: 0 0 10px;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.68rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            white-space: nowrap;
         }
 
-        .cycle-section-header p {
-            color: #64748b !important;
-            font-size: 0.92rem !important;
+        .metric-badge {
+            color: var(--card-tone, var(--metw-primary));
+            background: color-mix(in srgb, var(--card-tone, var(--metw-primary)) 10%, white);
+        }
+
+        .metric-label,
+        .operation-label {
+            color: var(--metw-muted);
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 0.35rem;
+        }
+
+        .metric-value {
+            color: var(--metw-text);
+            font-size: 2.25rem;
+            font-weight: 950;
+            line-height: 1;
+        }
+
+        .metric-helper {
+            color: var(--metw-muted);
+            line-height: 1.55;
+            font-size: 0.88rem;
+            margin: 0.85rem 0 1rem;
+        }
+
+        .metric-action {
+            margin-top: auto;
+            color: var(--card-tone, var(--metw-primary));
+            font-size: 0.82rem;
+            font-weight: 900;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .compact-stat-card {
+            padding: 1.05rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9rem;
+        }
+
+        .compact-stat-card-primary .compact-stat-icon,
+        .operation-icon-primary { background: #eff6ff; color: var(--metw-primary); }
+        .compact-stat-card-success .compact-stat-icon,
+        .operation-icon-success { background: #ecfdf5; color: var(--metw-success); }
+        .compact-stat-card-warning .compact-stat-icon,
+        .operation-icon-warning { background: #fffbeb; color: var(--metw-warning); }
+        .compact-stat-card-danger .compact-stat-icon,
+        .operation-icon-danger { background: #fef2f2; color: var(--metw-danger); }
+        .compact-stat-card-info .compact-stat-icon,
+        .operation-icon-info { background: #ecfeff; color: var(--metw-info); }
+
+        .compact-stat-content {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .compact-stat-content span {
+            color: var(--metw-muted);
+            font-size: 0.78rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .compact-stat-content strong {
+            color: var(--metw-text);
+            font-size: 1.65rem;
+            font-weight: 950;
+            line-height: 1.15;
+            margin: 0.2rem 0;
+        }
+
+        .compact-stat-content small {
+            color: var(--metw-muted);
+            line-height: 1.45;
+        }
+
+        .operation-card {
+            padding: 1.05rem;
+            display: flex;
+            gap: 0.95rem;
+            align-items: flex-start;
+        }
+
+        .operation-body strong {
+            display: block;
+            font-size: 1.7rem;
+            font-weight: 950;
+            line-height: 1.1;
+            margin: 0.15rem 0 0.45rem;
+        }
+
+        .operation-body p {
+            color: var(--metw-muted);
+            font-size: 0.86rem;
             line-height: 1.5;
             margin: 0;
         }
 
-        .cycle-card {
-            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-            border: 1px solid #e5e7eb;
-            border-radius: 22px;
-            padding: 1.35rem;
-            box-shadow: 0 14px 26px rgba(15, 23, 42, 0.06);
-            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        .quick-link-card {
+            min-height: 128px;
+            padding: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
             position: relative;
-            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .quick-link-card:hover {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .quick-link-disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .quick-link-icon {
+            background: #f1f5f9;
+            color: var(--metw-primary);
+        }
+
+        .quick-link-card strong {
+            display: block;
+            color: var(--metw-text);
+            font-weight: 900;
+            margin-bottom: 0.25rem;
+        }
+
+        .quick-link-card p {
+            margin: 0;
+            color: var(--metw-muted);
+            font-size: 0.86rem;
+            line-height: 1.5;
+            padding-inline-end: 1rem;
+        }
+
+        .quick-link-arrow {
+            position: absolute;
+            right: 1rem;
+            bottom: 1rem;
+            color: var(--metw-primary);
+        }
+
+        .dashboard-cycle-section {
+            scroll-margin-top: 110px;
+        }
+
+        .cycle-card {
+            padding: 1.15rem;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -532,6 +971,63 @@
             min-width: 0;
         }
 
+        .cycle-card-title {
+            color: var(--metw-muted);
+            font-size: 0.76rem;
+            font-weight: 900;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            line-height: 1.45;
+            margin-bottom: 0.45rem;
+        }
+
+        .cycle-card-count {
+            color: var(--metw-text);
+            font-size: 2rem;
+            font-weight: 950;
+            line-height: 1;
+        }
+
+        .cycle-badge-warning { background: #fff7ed; color: #c2410c; }
+        .cycle-badge-success { background: #ecfdf5; color: #047857; }
+        .cycle-badge-primary { background: #eff6ff; color: #1d4ed8; }
+
+        .cycle-latest {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 17px;
+            padding: 0.9rem;
+            margin-top: 0.75rem;
+        }
+
+        .cycle-latest-label {
+            color: #94a3b8;
+            font-size: 0.68rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 0.28rem;
+        }
+
+        .cycle-latest-title,
+        .cycle-latest-title a {
+            color: var(--metw-text);
+            font-weight: 900;
+            line-height: 1.4;
+            text-decoration: none;
+            word-break: break-word;
+        }
+
+        .cycle-latest-title a:hover {
+            color: var(--metw-primary);
+        }
+
+        .cycle-latest-meta {
+            color: var(--metw-muted);
+            font-size: 0.82rem;
+            margin-top: 0.25rem;
+        }
+
         .cycle-card-footer {
             display: flex;
             align-items: center;
@@ -539,116 +1035,11 @@
             gap: 0.75rem;
             flex-wrap: wrap;
             margin-top: auto !important;
-            padding-top: 0.15rem;
+            padding-top: 1rem;
         }
 
         .cycle-card-footer-end {
             justify-content: flex-end;
-        }
-
-        .cycle-status-text {
-            overflow-wrap: anywhere;
-            word-break: break-word;
-        }
-
-        .cycle-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 34px rgba(15, 23, 42, 0.12);
-            border-color: #c7d2fe;
-        }
-
-        .cycle-card::before {
-            content: '';
-            position: absolute;
-            inset: 0 auto auto 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #2563eb 0%, #38bdf8 50%, #22c55e 100%);
-        }
-
-        .cycle-card-title {
-            font-size: 0.74rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: #64748b;
-            font-weight: 700;
-            margin-bottom: 0.4rem;
-            word-break: break-word;
-            line-height: 1.5;
-            text-align: start;
-        }
-
-        .cycle-card-count {
-            font-size: 2rem;
-            line-height: 1;
-            font-weight: 900;
-            color: #0f172a;
-        }
-
-        .cycle-badge {
-            font-size: 0.7rem;
-            font-weight: 700;
-            border-radius: 999px;
-            padding: 0.38rem 0.75rem;
-            white-space: nowrap;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            flex: 0 0 auto;
-        }
-
-        .cycle-badge-warning {
-            background: #fff7ed;
-            color: #c2410c;
-        }
-
-        .cycle-badge-success {
-            background: #ecfdf5;
-            color: #047857;
-        }
-
-        .cycle-badge-primary {
-            background: #eff6ff;
-            color: #1d4ed8;
-        }
-
-        .cycle-latest {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 0.95rem 1rem;
-            margin-top: 1rem;
-        }
-
-        .cycle-latest-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #94a3b8;
-            margin-bottom: 0.25rem;
-            font-weight: 700;
-            text-align: start;
-        }
-
-        .cycle-latest-title a,
-        .cycle-latest-title {
-            color: #0f172a;
-            font-weight: 800;
-            text-decoration: none;
-            word-break: break-word;
-            line-height: 1.4;
-            display: block;
-            text-align: start;
-        }
-
-        .cycle-latest-title a:hover {
-            color: #2563eb;
-        }
-
-        .cycle-latest-meta {
-            color: #64748b;
-            font-size: 0.82rem;
-            margin-top: 0.25rem;
-            text-align: start;
         }
 
         .cycle-mini-stat {
@@ -661,147 +1052,132 @@
             padding: 0.34rem 0.7rem;
             color: #475569;
             font-size: 0.76rem;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .cycle-mini-stat strong {
-            color: #0f172a;
+            color: var(--metw-text);
         }
 
+        .btn-sm {
+            border-radius: 999px;
+            font-weight: 800;
+            padding-inline: 0.9rem;
+        }
+
+        .empty-state-card {
+            padding: 2rem 1rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            color: var(--metw-muted);
+            background: #f8fafc;
+        }
+
+        .empty-state-card i {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            background: #ffffff;
+            color: var(--metw-primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 0.4rem;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        .empty-state-card strong {
+            color: var(--metw-text);
+            font-weight: 900;
+        }
+
+        .empty-state-card span {
+            max-width: 560px;
+            line-height: 1.6;
+        }
+
+        :dir(rtl) .dashboard-hero-content,
+        :dir(rtl) .section-heading,
         :dir(rtl) .cycle-section-header,
+        :dir(rtl) .metric-card,
+        :dir(rtl) .compact-stat-card,
+        :dir(rtl) .operation-card,
+        :dir(rtl) .quick-link-card,
         :dir(rtl) .cycle-card,
         :dir(rtl) .cycle-latest {
             direction: rtl;
+            text-align: right;
         }
 
-        :dir(ltr) .cycle-section-header,
-        :dir(ltr) .cycle-card,
-        :dir(ltr) .cycle-latest {
-            direction: ltr;
+        :dir(rtl) .metric-action i,
+        :dir(rtl) .quick-link-arrow i {
+            transform: rotate(180deg);
+        }
+
+        :dir(rtl) .quick-link-arrow {
+            right: auto;
+            left: 1rem;
         }
 
         :dir(rtl) .cycle-card-footer-end {
             justify-content: flex-start;
         }
 
-        :dir(ltr) .cycle-card-footer-end {
-            justify-content: flex-end;
-        }
-
-        .cycle-card .d-flex.flex-wrap.gap-2.mt-2 {
-            row-gap: 0.5rem;
-        }
-
+        :dir(rtl) .metric-label,
+        :dir(rtl) .operation-label,
+        :dir(rtl) .compact-stat-content span,
         :dir(rtl) .cycle-card-title,
-        :dir(rtl) .cycle-latest-label {
+        :dir(rtl) .cycle-latest-label,
+        :dir(rtl) .dashboard-eyebrow,
+        :dir(rtl) .section-kicker {
             text-transform: none;
             letter-spacing: 0;
         }
 
-        :dir(ltr) .cycle-card-title,
-        :dir(ltr) .cycle-latest-label {
-            text-transform: uppercase;
-        }
-
-        /* Buttons */
-        .btn-lg {
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-lg:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-sm {
-            border-radius: 999px;
-            font-weight: 700;
-            transition: all 0.2s ease;
-            padding-inline: 0.9rem;
-        }
-
-        .btn-sm:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Badges */
-        .badge {
-            font-weight: 500;
-            font-size: 0.8125rem;
-        }
-
-        /* Empty States */
-        .text-center.py-5 {
-            padding: 3rem 1rem !important;
-        }
-
-        .dashboard-cycle-section + .dashboard-cycle-section {
-            margin-top: 1.25rem;
-        }
-
-        .dashboard-cycle-section .row.g-3 {
-            margin-top: 0.25rem;
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
-            .stat-value {
-                font-size: 1.5rem;
+            .dashboard-hero,
+            .dashboard-section,
+            .dashboard-cycle-section {
+                border-radius: 20px;
+                padding: 1rem;
             }
 
+            .dashboard-hero-content,
+            .section-heading,
+            .cycle-section-header {
+                flex-direction: column;
+            }
+
+            .dashboard-hero-summary {
+                width: 100%;
+            }
+
+            .metric-card {
+                min-height: auto;
+            }
+
+            .metric-value {
+                font-size: 1.85rem;
+            }
+
+            .compact-stat-content strong,
+            .operation-body strong,
             .cycle-card-count {
                 font-size: 1.45rem;
             }
 
-            .dashboard-cycle-section {
-                padding: 1rem;
-                border-radius: 18px;
-            }
-
-            .cycle-section-header h5 {
-                font-size: 1.02rem;
-                gap: 0.4rem;
-            }
-
-            .cycle-section-header p {
-                font-size: 0.86rem !important;
-            }
-
-            .cycle-card-header {
-                flex-direction: column;
-            }
-
-            .cycle-badge {
-                align-self: flex-start;
-            }
-
-            .cycle-card-footer,
-            .cycle-card-footer-end {
-                justify-content: flex-start;
-            }
-
-            .stat-icon-wrapper {
-                width: 50px;
-                height: 50px;
-            }
-
-            .stat-icon {
-                font-size: 1.5rem;
-            }
-
-            .table thead th,
-            .table tbody td {
-                padding: 0.75rem 0.5rem;
-                font-size: 0.875rem;
-            }
-
-            .table-search-input {
-                max-width: 100% !important;
-                margin-top: 0.5rem;
+            .metric-icon,
+            .compact-stat-icon,
+            .operation-icon,
+            .quick-link-icon {
+                width: 42px;
+                height: 42px;
+                border-radius: 14px;
             }
         }
     </style>

@@ -1452,4 +1452,17 @@ return [
     'ecommerce' => 'Marketplace App',
     'shipment' => 'Fast Shipping and Delivery App',
 
+    // Phase 2 Dashboard
+    'phase_2_overview' => 'Phase 2 Overview',
+    'phase_2_subtitle' => 'Shipment Requests, Vendors, Warehouses, and Representatives',
+    'shipment_requests' => 'Shipment Requests',
+    'pending_shipments' => 'Pending Shipments',
+    'assigned_shipments' => 'Assigned Shipments',
+    'completed_shipments' => 'Completed Shipments',
+    'pending_vendors' => 'Pending Vendor Approvals',
+    'pending_warehouses' => 'Pending Warehouse Approvals',
+    'shipment_companies_active' => 'Active Shipment Companies',
+    'representatives_active' => 'Active Representatives',
+    'not_implemented' => 'Not Yet Implemented',
+
 ];
