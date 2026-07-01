@@ -5,6 +5,7 @@ use App\Http\Controllers\Dashboard\Admin\NotificationController;
 use App\Http\Controllers\Dashboard\Admin\AdminDashboardController;
 use App\Http\Controllers\Dashboard\Admin\ShipmentRequestController;
 use App\Http\Controllers\Dashboard\Admin\Settings\ConfigController;
+use App\Http\Controllers\Dashboard\Admin\Settings\GovernorateController;
 use App\Http\Controllers\Dashboard\Admin\ShipmentController;
 use App\Http\Controllers\Dashboard\Admin\RoleController;
 use App\Http\Controllers\Dashboard\Admin\PermissionController;
@@ -245,6 +246,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('/promo_codes/{promo_code}', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'update'])->name('promo_codes.update');
             Route::delete('/promo_codes/{promo_code}', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'destroy'])->name('promo_codes.destroy');
             Route::patch('/promo_codes/{promo_code}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'toggleStatus'])->name('promo_codes.toggle-status');
+
+            Route::prefix('governorates')->name('governorates.')->group(function () {
+                Route::get('/', [GovernorateController::class, 'index'])->name('index');
+                Route::get('/create', [GovernorateController::class, 'create'])->name('create');
+                Route::post('/', [GovernorateController::class, 'store'])->name('store');
+                Route::get('/{governorate}/edit', [GovernorateController::class, 'edit'])->name('edit');
+                Route::patch('/{governorate}', [GovernorateController::class, 'update'])->name('update');
+                Route::delete('/{governorate}', [GovernorateController::class, 'destroy'])->name('destroy');
+                Route::patch('/{governorate}/toggle', [GovernorateController::class, 'toggle'])->name('toggle-status');
+            });
 
             Route::prefix('cities')->name('cities.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'index'])->name('index');

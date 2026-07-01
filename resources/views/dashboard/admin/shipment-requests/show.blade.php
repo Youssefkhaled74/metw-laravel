@@ -1,435 +1,1101 @@
+@extends('layouts.admin')
+
+@section('title', app()->getLocale() === 'ar' ? 'تفاصيل طلب الشحن' : 'Shipment Request Details')
+@section('page-title', (app()->getLocale() === 'ar' ? 'تفاصيل طلب الشحن' : 'Shipment Request Details') . ' - ' . ($shipmentRequest->request_number ?? ('#' . $shipmentRequest->id)))
+
 @php
-    use App\Enum\ShipmentRequestStatus;
+    use Illuminate\Support\Facades\Route;
+
+    $locale = app()->getLocale();
+    $isArabic = $locale === 'ar';
+
+    $text = static fn (string $en, string $ar) => $isArabic ? $ar : $en;
+
+    $safeRoute = static function (string $name, mixed $parameters = []) {
+        return Route::has($name) ? route($name, $parameters) : null;
+    };
+
     $statusValue = $shipmentRequest->status?->value ?? 'unknown';
-    $statusColor = match ($statusValue) {
+
+    $statusLabel = match ($statusValue) {
+        'draft' => $text('Draft', 'مسودة'),
+        'submitted' => $text('Submitted', 'مُرسل'),
+        default => $text(
+            ucfirst(str_replace('_', ' ', $statusValue)),
+            ucfirst(str_replace('_', ' ', $statusValue))
+        ),
+    };
+
+    $statusTone = match ($statusValue) {
         'submitted' => 'warning',
         'draft' => 'secondary',
-        'assigned' => 'info',
-        'accepted' => 'primary',
-        'picked_up' => 'dark',
-        'in_transit' => 'primary',
-        'delivered' => 'success',
-        'cancelled' => 'danger',
-        'rejected' => 'danger',
         default => 'secondary',
     };
+
     $sender = $shipmentRequest->senderContact;
     $receiver = $shipmentRequest->receiverContact;
     $senderAddress = $sender?->primaryAddress;
     $receiverAddress = $receiver?->primaryAddress;
+
+    $locationLabel = static function ($address) use ($text) {
+        if (! $address) {
+            return $text('Not provided', 'غير متوفر');
+        }
+
+        $parts = array_filter([
+            data_get($address, 'city.name'),
+            data_get($address, 'governorate.name'),
+            data_get($address, 'state.name'),
+            data_get($address, 'zone.name'),
+            data_get($address, 'address_line_1'),
+            data_get($address, 'address_line_2'),
+            data_get($address, 'landmark'),
+        ]);
+
+        return ! empty($parts) ? implode(' · ', $parts) : $text('Not provided', 'غير متوفر');
+    };
+
+    $mediaUrl = static function ($media) {
+        $path = data_get($media, 'url') ?: data_get($media, 'path') ?: data_get($media, 'file_path');
+
+        if (! $path) {
+            $directory = trim((string) data_get($media, 'directory'), '/');
+            $filename = trim((string) data_get($media, 'filename'));
+            $path = $directory && $filename ? $directory . '/' . $filename : null;
+        }
+
+        if (! $path) {
+            return null;
+        }
+
+        return preg_match('/^https?:\\/\\//i', $path) ? $path : asset($path);
+    };
+
+    $requestNumber = $shipmentRequest->request_number ?? ('#' . $shipmentRequest->id);
+    $createdAt = $shipmentRequest->created_at?->format('Y-m-d H:i') ?? '--';
+    $submittedAt = $shipmentRequest->submitted_at?->format('Y-m-d H:i');
+
+    $packagesCount = $shipmentRequest->packages->count();
+    $customerName = $shipmentRequest->user?->username ?? $text('Guest', 'ضيف');
+    $customerPhone = $shipmentRequest->user?->phone ?? '--';
+    $customerEmail = $shipmentRequest->user?->email ?? '--';
+    $customerInitial = mb_substr($customerName, 0, 1);
+
+    $routeIcon = $isArabic ? 'fa-arrow-left' : 'fa-arrow-right';
+
+    $statusSteps = [
+        'draft' => ['label' => $text('Draft', 'مسودة'), 'icon' => 'fa-pen'],
+        'submitted' => ['label' => $text('Submitted', 'مُرسل'), 'icon' => 'fa-paper-plane'],
+    ];
+
+    $currentStepIndex = array_search($statusValue, array_keys($statusSteps), true);
 @endphp
 
-@extends('layouts.admin')
-
-@section('title', __('admin-dashboard.shipment_request_details'))
-@section('page-title', __('admin-dashboard.shipment_request_details') . ' - ' . ($shipmentRequest->request_number ?? '#'.$shipmentRequest->id))
-
 @section('page-actions')
-    <a href="{{ route('admin.shipment-requests.index') }}" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left me-1"></i>
-        {{ __('admin-dashboard.back_to_requests') }}
-    </a>
+    @if ($safeRoute('admin.shipment-requests.index'))
+        <a href="{{ $safeRoute('admin.shipment-requests.index') }}" class="btn srd-back-btn">
+            <i class="fas {{ $isArabic ? 'fa-arrow-right ms-1' : 'fa-arrow-left me-1' }}"></i>
+            {{ $text('Back to list', 'العودة إلى القائمة') }}
+        </a>
+    @endif
 @endsection
 
 @section('content')
-<div class="row">
+    <div class="srd-page" dir="{{ $isArabic ? 'rtl' : 'ltr' }}">
+        <section class="srd-hero">
+            <div class="srd-hero-main">
+                <div class="srd-icon">
+                    <i class="fas fa-shipping-fast"></i>
+                </div>
 
-    {{-- ================= PAGE HEADER ================= --}}
-    <div class="col-12 mb-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <div>
-                    <h4 class="mb-1 fw-bold">{{ $shipmentRequest->request_number ?? '#' . $shipmentRequest->id }}</h4>
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        <span class="status-pill btn-{{ $statusColor }} mb-0">
-                            <span class="status-dot"></span>
-                            {{ __('admin-dashboard.' . $statusValue) !== 'admin-dashboard.' . $statusValue ? __('admin-dashboard.' . $statusValue) : ucfirst(str_replace('_', ' ', $statusValue)) }}
+                <div class="srd-hero-text">
+                    <span class="srd-chip">{{ $text('Shipment request', 'طلب شحن') }}</span>
+
+                    <h3>{{ $requestNumber }}</h3>
+
+                    <div class="srd-meta-row">
+                        <span class="srd-status srd-status-{{ $statusTone }}">
+                            <i></i>
+                            {{ $statusLabel }}
                         </span>
-                        <small class="text-muted">
-                            <i class="far fa-calendar-alt me-1"></i>
-                            {{ $shipmentRequest->created_at?->format('M d, Y H:i') ?? '--' }}
-                        </small>
-                        @if($shipmentRequest->updated_at && $shipmentRequest->updated_at->ne($shipmentRequest->created_at))
-                            <small class="text-muted">
-                                <i class="fas fa-edit me-1"></i>
-                                {{ $shipmentRequest->updated_at->format('M d, Y H:i') }}
-                            </small>
+
+                        <span class="srd-meta-pill">
+                            <i class="far fa-calendar-alt"></i>
+                            {{ $createdAt }}
+                        </span>
+
+                        @if ($submittedAt)
+                            <span class="srd-meta-pill">
+                                <i class="fas fa-paper-plane"></i>
+                                {{ $submittedAt }}
+                            </span>
                         @endif
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    {{-- ================= REQUEST SUMMARY ================= --}}
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle text-primary me-2"></i>{{ __('admin-dashboard.request_summary') }}</h5>
-            </div>
-            <div class="card-body pt-3">
-                <table class="table table-borderless mb-0 summary-table">
-                    <tbody>
-                        <tr>
-                            <td class="text-muted w-35">{{ __('admin-dashboard.customer') }}</td>
-                            <td class="fw-semibold">{{ $shipmentRequest->user->username ?? __('admin-dashboard.guest') }}</td>
-                        </tr>
-                        @if($shipmentRequest->user)
-                        <tr>
-                            <td class="text-muted">{{ __('admin-dashboard.phone') }}</td>
-                            <td>{{ $shipmentRequest->user->phone ?? '--' }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">{{ __('admin-dashboard.email') }}</td>
-                            <td>{{ $shipmentRequest->user->email ?? '--' }}</td>
-                        </tr>
-                        @endif
-                        <tr>
-                            <td class="text-muted">{{ __('admin-dashboard.status') }}</td>
-                            <td><span class="status-pill btn-{{ $statusColor }}" style="min-height:28px;font-size:0.8rem;"><span class="status-dot"></span>{{ __('admin-dashboard.' . $statusValue) !== 'admin-dashboard.' . $statusValue ? __('admin-dashboard.' . $statusValue) : ucfirst(str_replace('_', ' ', $statusValue)) }}</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">{{ __('admin-dashboard.packages') }}</td>
-                            <td>{{ $shipmentRequest->packages->count() }} {{ __('admin-dashboard.package_unit') }}</td>
-                        </tr>
-                        @if($shipmentRequest->submitted_at)
-                        <tr>
-                            <td class="text-muted">{{ __('admin-dashboard.submitted_at') }}</td>
-                            <td>{{ $shipmentRequest->submitted_at->format('M d, Y H:i') }}</td>
-                        </tr>
-                        @endif
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+            <div class="srd-hero-stats">
+                <div class="srd-stat">
+                    <span>{{ $text('Packages', 'الطرود') }}</span>
+                    <strong>{{ $packagesCount }}</strong>
+                </div>
 
-    {{-- ================= ASSIGNMENT SUMMARY ================= --}}
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-truck text-success me-2"></i>{{ __('admin-dashboard.shipping_assignment') }}</h5>
-            </div>
-            <div class="card-body pt-3">
-                <table class="table table-borderless mb-0 summary-table">
-                    <tbody>
-                        <tr>
-                            <td class="text-muted w-35">{{ __('admin-dashboard.suggested_company') }}</td>
-                            <td class="fw-semibold">{{ __('admin-dashboard.not_available_yet') }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">{{ __('admin-dashboard.assigned_company') }}</td>
-                            <td class="fw-semibold">{{ __('admin-dashboard.not_available_yet') }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">{{ __('admin-dashboard.representative') }}</td>
-                            <td>{{ __('admin-dashboard.not_available_yet') }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">{{ __('admin-dashboard.payment_status') }}</td>
-                            <td><span class="badge bg-secondary">{{ __('admin-dashboard.not_available_yet') }}</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">{{ __('admin-dashboard.estimated_price') }}</td>
-                            <td>--</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">{{ __('admin-dashboard.final_price') }}</td>
-                            <td>--</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="alert alert-info mt-2 mb-0 py-2 small">
-                    <i class="fas fa-info-circle me-1"></i>
-                    {{ app()->getLocale() === 'ar' ? 'بيانات التعيين ستكون متاحة في التحديثات القادمة للمرحلة الثانية.' : 'Assignment data will be available in upcoming Phase 2 updates.' }}
+                <div class="srd-stat">
+                    <span>{{ $text('Status', 'الحالة') }}</span>
+                    <strong class="srd-stat-text">{{ $statusLabel }}</strong>
                 </div>
             </div>
+        </section>
+
+        <section class="srd-route-card">
+            <div class="srd-section-head">
+                <div>
+                    <h5>{{ $text('Shipment route', 'مسار الشحنة') }}</h5>
+                    <p>{{ $text('Sender and receiver route overview.', 'نظرة سريعة على المرسل والمستلم.') }}</p>
+                </div>
+            </div>
+
+            <div class="srd-route">
+                <div class="srd-route-point">
+                    <span class="srd-route-label">{{ $text('From', 'من') }}</span>
+                    <strong>{{ $sender?->full_name ?? '--' }}</strong>
+                    <small>{{ $sender?->primary_mobile ?? '--' }}</small>
+                    <p>{{ $locationLabel($senderAddress) }}</p>
+                </div>
+
+                <div class="srd-route-arrow">
+                    <i class="fas {{ $routeIcon }}"></i>
+                </div>
+
+                <div class="srd-route-point">
+                    <span class="srd-route-label">{{ $text('To', 'إلى') }}</span>
+                    <strong>{{ $receiver?->full_name ?? '--' }}</strong>
+                    <small>{{ $receiver?->primary_mobile ?? '--' }}</small>
+                    <p>{{ $locationLabel($receiverAddress) }}</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="row g-4">
+            <div class="col-12 col-xl-4">
+                <section class="srd-card h-100">
+                    <div class="srd-section-head">
+                        <div>
+                            <h5>{{ $text('Customer', 'العميل') }}</h5>
+                            <p>{{ $text('Main customer information.', 'بيانات العميل الأساسية.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="srd-person">
+                        <span class="srd-avatar">{{ $customerInitial }}</span>
+
+                        <div>
+                            <strong>{{ $customerName }}</strong>
+                            <small>{{ $customerPhone }}</small>
+                        </div>
+                    </div>
+
+                    <div class="srd-info-list">
+                        <div>
+                            <span>{{ $text('Phone', 'الهاتف') }}</span>
+                            <strong>{{ $customerPhone }}</strong>
+                        </div>
+
+                        <div>
+                            <span>{{ $text('Email', 'البريد الإلكتروني') }}</span>
+                            <strong>{{ $customerEmail }}</strong>
+                        </div>
+
+                        <div>
+                            <span>{{ $text('Request date', 'تاريخ الطلب') }}</span>
+                            <strong>{{ $createdAt }}</strong>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-12 col-xl-4">
+                <section class="srd-card h-100">
+                    <div class="srd-section-head">
+                        <div>
+                            <h5>{{ $text('Sender', 'المرسل') }}</h5>
+                            <p>{{ $text('Pickup contact details.', 'بيانات جهة الاستلام.') }}</p>
+                        </div>
+                    </div>
+
+                    @if ($sender)
+                        <div class="srd-info-list">
+                            <div>
+                                <span>{{ $text('Full name', 'الاسم الكامل') }}</span>
+                                <strong>{{ $sender->full_name ?? '--' }}</strong>
+                            </div>
+
+                            <div>
+                                <span>{{ $text('Primary mobile', 'الهاتف الرئيسي') }}</span>
+                                <strong>{{ $sender->primary_mobile ?? '--' }}</strong>
+                            </div>
+
+                            <div>
+                                <span>{{ $text('Secondary mobile', 'هاتف إضافي') }}</span>
+                                <strong>{{ $sender->secondary_mobile ?? '--' }}</strong>
+                            </div>
+
+                            <div>
+                                <span>{{ $text('Address', 'العنوان') }}</span>
+                                <strong>{{ $locationLabel($senderAddress) }}</strong>
+                            </div>
+                        </div>
+                    @else
+                        <div class="srd-empty-note">
+                            {{ $text('Sender details are not available.', 'بيانات المرسل غير متوفرة.') }}
+                        </div>
+                    @endif
+                </section>
+            </div>
+
+            <div class="col-12 col-xl-4">
+                <section class="srd-card h-100">
+                    <div class="srd-section-head">
+                        <div>
+                            <h5>{{ $text('Receiver', 'المستلم') }}</h5>
+                            <p>{{ $text('Delivery contact details.', 'بيانات جهة التسليم.') }}</p>
+                        </div>
+                    </div>
+
+                    @if ($receiver)
+                        <div class="srd-info-list">
+                            <div>
+                                <span>{{ $text('Full name', 'الاسم الكامل') }}</span>
+                                <strong>{{ $receiver->full_name ?? '--' }}</strong>
+                            </div>
+
+                            <div>
+                                <span>{{ $text('Primary mobile', 'الهاتف الرئيسي') }}</span>
+                                <strong>{{ $receiver->primary_mobile ?? '--' }}</strong>
+                            </div>
+
+                            <div>
+                                <span>{{ $text('Secondary mobile', 'هاتف إضافي') }}</span>
+                                <strong>{{ $receiver->secondary_mobile ?? '--' }}</strong>
+                            </div>
+
+                            <div>
+                                <span>{{ $text('Address', 'العنوان') }}</span>
+                                <strong>{{ $locationLabel($receiverAddress) }}</strong>
+                            </div>
+                        </div>
+                    @else
+                        <div class="srd-empty-note">
+                            {{ $text('Receiver details are not available.', 'بيانات المستلم غير متوفرة.') }}
+                        </div>
+                    @endif
+                </section>
+            </div>
         </div>
-    </div>
 
-    {{-- ================= SENDER INFORMATION ================= --}}
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-user-circle text-warning me-2"></i>{{ __('admin-dashboard.sender_information') }}</h5>
-            </div>
-            <div class="card-body pt-3">
-                @if ($sender)
-                    <table class="table table-borderless mb-0 summary-table">
-                        <tbody>
-                            <tr><td class="text-muted w-35">{{ __('admin-dashboard.name') }}</td><td class="fw-semibold">{{ $sender->full_name ?? '--' }}</td></tr>
-                            <tr><td class="text-muted">{{ __('admin-dashboard.phone') }}</td><td>{{ $sender->primary_mobile ?? '--' }}</td></tr>
-                            <tr><td class="text-muted">{{ __('admin-dashboard.secondary_phone') }}</td><td>{{ $sender->secondary_mobile ?? '--' }}</td></tr>
-                            @if ($senderAddress)
-                                <tr><td class="text-muted">{{ __('admin-dashboard.address') }}</td><td>{{ $senderAddress->address_line_1 ?? '--' }} {{ $senderAddress->address_line_2 ?? '' }}</td></tr>
-                                <tr><td class="text-muted">{{ __('admin-dashboard.governorate') }}</td><td>{{ $senderAddress->governorate?->name ?? '--' }}</td></tr>
-                                <tr><td class="text-muted">{{ __('admin-dashboard.city') }}</td><td>{{ $senderAddress->city?->name ?? '--' }}</td></tr>
-                                <tr><td class="text-muted">{{ __('admin-dashboard.area_zone') }}</td><td>{{ $senderAddress->zone?->name ?? '--' }}</td></tr>
-                                <tr><td class="text-muted">{{ __('admin-dashboard.landmark') }}</td><td>{{ $senderAddress->landmark ?? '--' }}</td></tr>
-                                @if($senderAddress->latitude && $senderAddress->longitude)
-                                <tr><td class="text-muted">{{ __('admin-dashboard.location') }}</td>
-                                    <td>
-                                        <a href="https://www.google.com/maps?q={{ $senderAddress->latitude }},{{ $senderAddress->longitude }}" target="_blank" class="text-primary">
-                                            <i class="fas fa-map-marker-alt me-1"></i>{{ $senderAddress->latitude }}, {{ $senderAddress->longitude }}
-                                        </a>
-                                    </td>
-                                </tr>
-                                @endif
-                            @else
-                                <tr><td colspan="2" class="text-muted small">{{ __('admin-dashboard.no_address_provided') }}</td></tr>
-                            @endif
-                        </tbody>
-                    </table>
-                @else
-                    <p class="text-muted small mb-0">{{ __('admin-dashboard.sender_not_provided') }}</p>
-                @endif
-            </div>
-        </div>
-    </div>
+        <div class="row g-4">
+            <div class="col-12 col-xl-8">
+                <section class="srd-card">
+                    <div class="srd-section-head">
+                        <div>
+                            <h5>{{ $text('Packages', 'الطرود') }}</h5>
+                            <p>{{ $text('Package details, dimensions, value, notes, and images.', 'تفاصيل الطرود والأبعاد والقيمة والملاحظات والصور.') }}</p>
+                        </div>
 
-    {{-- ================= RECEIVER INFORMATION ================= --}}
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-user-circle text-info me-2"></i>{{ __('admin-dashboard.receiver_information') }}</h5>
-            </div>
-            <div class="card-body pt-3">
-                @if ($receiver)
-                    <table class="table table-borderless mb-0 summary-table">
-                        <tbody>
-                            <tr><td class="text-muted w-35">{{ __('admin-dashboard.name') }}</td><td class="fw-semibold">{{ $receiver->full_name ?? '--' }}</td></tr>
-                            <tr><td class="text-muted">{{ __('admin-dashboard.phone') }}</td><td>{{ $receiver->primary_mobile ?? '--' }}</td></tr>
-                            <tr><td class="text-muted">{{ __('admin-dashboard.secondary_phone') }}</td><td>{{ $receiver->secondary_mobile ?? '--' }}</td></tr>
-                            @if ($receiverAddress)
-                                <tr><td class="text-muted">{{ __('admin-dashboard.address') }}</td><td>{{ $receiverAddress->address_line_1 ?? '--' }} {{ $receiverAddress->address_line_2 ?? '' }}</td></tr>
-                                <tr><td class="text-muted">{{ __('admin-dashboard.governorate') }}</td><td>{{ $receiverAddress->governorate?->name ?? '--' }}</td></tr>
-                                <tr><td class="text-muted">{{ __('admin-dashboard.city') }}</td><td>{{ $receiverAddress->city?->name ?? '--' }}</td></tr>
-                                <tr><td class="text-muted">{{ __('admin-dashboard.area_zone') }}</td><td>{{ $receiverAddress->zone?->name ?? '--' }}</td></tr>
-                                <tr><td class="text-muted">{{ __('admin-dashboard.landmark') }}</td><td>{{ $receiverAddress->landmark ?? '--' }}</td></tr>
-                                @if($receiverAddress->latitude && $receiverAddress->longitude)
-                                <tr><td class="text-muted">{{ __('admin-dashboard.location') }}</td>
-                                    <td>
-                                        <a href="https://www.google.com/maps?q={{ $receiverAddress->latitude }},{{ $receiverAddress->longitude }}" target="_blank" class="text-primary">
-                                            <i class="fas fa-map-marker-alt me-1"></i>{{ $receiverAddress->latitude }}, {{ $receiverAddress->longitude }}
-                                        </a>
-                                    </td>
-                                </tr>
-                                @endif
-                            @else
-                                <tr><td colspan="2" class="text-muted small">{{ __('admin-dashboard.no_address_provided') }}</td></tr>
-                            @endif
-                        </tbody>
-                    </table>
-                @else
-                    <p class="text-muted small mb-0">{{ __('admin-dashboard.receiver_not_provided') }}</p>
-                @endif
-            </div>
-        </div>
-    </div>
+                        <span class="srd-count-pill">
+                            {{ $packagesCount }}
+                            {{ $text('package(s)', 'طرد') }}
+                        </span>
+                    </div>
 
-    {{-- ================= PACKAGE INFORMATION ================= --}}
-    <div class="col-12 mb-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-box text-secondary me-2"></i>{{ __('admin-dashboard.package_information') }}</h5>
-            </div>
-            <div class="card-body pt-3">
-                @if ($shipmentRequest->packages->count() > 0)
-                    <div class="row g-3">
-                        @foreach ($shipmentRequest->packages as $pkg)
-                            <div class="col-lg-6 col-xl-4">
-                                <div class="border rounded-3 p-3 h-100 package-card">
-                                    <h6 class="fw-bold mb-2">{{ $pkg->package_name ?? __('admin-dashboard.package') . ' #' . $loop->iteration }}</h6>
-                                    <table class="table table-borderless mb-0 small summary-table">
-                                        <tbody>
-                                            @if($pkg->package_type)
-                                            <tr><td class="text-muted w-40">{{ __('admin-dashboard.package_type') }}</td><td>{{ $pkg->package_type }}</td></tr>
-                                            @endif
-                                            @if($pkg->weight)
-                                            <tr><td class="text-muted">{{ __('admin-dashboard.weight') }}</td><td>{{ $pkg->weight }} {{ app()->getLocale() === 'ar' ? 'كجم' : 'kg' }}</td></tr>
-                                            @endif
-                                            @if($pkg->length || $pkg->width || $pkg->height)
-                                            <tr><td class="text-muted">{{ __('admin-dashboard.dimensions') }}</td><td>{{ $pkg->length ?? '--' }} x {{ $pkg->width ?? '--' }} x {{ $pkg->height ?? '--' }} {{ app()->getLocale() === 'ar' ? 'سم' : 'cm' }}</td></tr>
-                                            @endif
-                                            @if($pkg->quantity)
-                                            <tr><td class="text-muted">{{ __('admin-dashboard.quantity') }}</td><td>{{ $pkg->quantity }}</td></tr>
-                                            @endif
-                                            @if($pkg->declared_value)
-                                            <tr><td class="text-muted">{{ __('admin-dashboard.declared_value') }}</td><td>{{ __('admin-dashboard.EGP') }} {{ number_format($pkg->declared_value, 2) }}</td></tr>
-                                            @endif
-                                            @if($pkg->notes)
-                                            <tr><td class="text-muted">{{ __('admin-dashboard.notes') }}</td><td class="text-wrap">{{ $pkg->notes }}</td></tr>
-                                            @endif
-                                        </tbody>
-                                    </table>
+                    @if ($shipmentRequest->packages->count())
+                        <div class="srd-package-list">
+                            @foreach ($shipmentRequest->packages as $package)
+                                @php
+                                    $packageMeta = $package->metadata ?? [];
+                                    $packageImages = $package->relationLoaded('mediaFiles') ? $package->mediaFiles : collect();
 
-                                    {{-- Special handling badges --}}
-                                    @php
-                                        $meta = $pkg->metadata ?? [];
-                                        $badges = [];
-                                        if (!empty($meta['is_fragile'])) $badges[] = ['label' => app()->getLocale() === 'ar' ? 'قابل للكسر' : 'Fragile', 'class' => 'bg-danger'];
-                                        if (!empty($meta['needs_cooling'])) $badges[] = ['label' => app()->getLocale() === 'ar' ? 'تبريد' : 'Cooling', 'class' => 'bg-info'];
-                                        if (!empty($meta['is_valuable'])) $badges[] = ['label' => app()->getLocale() === 'ar' ? 'ثمين' : 'Valuable', 'class' => 'bg-warning text-dark'];
-                                        if (!empty($meta['is_documents'])) $badges[] = ['label' => app()->getLocale() === 'ar' ? 'مستندات' : 'Documents', 'class' => 'bg-secondary'];
-                                        if (!empty($meta['is_heavy'])) $badges[] = ['label' => app()->getLocale() === 'ar' ? 'ثقيل' : 'Heavy', 'class' => 'bg-dark'];
-                                    @endphp
-                                    @if(count($badges) > 0)
-                                        <div class="d-flex flex-wrap gap-1 mt-2">
-                                            @foreach($badges as $badge)
-                                                <span class="badge {{ $badge['class'] }}">{{ $badge['label'] }}</span>
+                                    $badges = [];
+
+                                    if (! empty(data_get($packageMeta, 'is_fragile'))) {
+                                        $badges[] = $text('Fragile', 'قابل للكسر');
+                                    }
+
+                                    if (! empty(data_get($packageMeta, 'needs_cooling'))) {
+                                        $badges[] = $text('Cooling', 'تبريد');
+                                    }
+
+                                    if (! empty(data_get($packageMeta, 'is_valuable'))) {
+                                        $badges[] = $text('Valuable', 'ثمين');
+                                    }
+
+                                    if (! empty(data_get($packageMeta, 'is_documents'))) {
+                                        $badges[] = $text('Documents', 'مستندات');
+                                    }
+                                @endphp
+
+                                <article class="srd-package">
+                                    <div class="srd-package-top">
+                                        <div>
+                                            <h6>{{ $package->package_name ?? $text('Package', 'طرد') . ' #' . $loop->iteration }}</h6>
+                                            <p>{{ $package->package_type ?? $text('No type provided', 'لا يوجد نوع') }}</p>
+                                        </div>
+
+                                        <span class="srd-count-pill">
+                                            {{ $package->quantity ?? 1 }}
+                                            {{ $text('item(s)', 'عنصر') }}
+                                        </span>
+                                    </div>
+
+                                    <div class="srd-package-grid">
+                                        <div>
+                                            <span>{{ $text('Weight', 'الوزن') }}</span>
+                                            <strong>{{ $package->weight ?? '--' }}</strong>
+                                        </div>
+
+                                        <div>
+                                            <span>{{ $text('Dimensions', 'الأبعاد') }}</span>
+                                            <strong>{{ $package->length ?? '--' }} × {{ $package->width ?? '--' }} × {{ $package->height ?? '--' }}</strong>
+                                        </div>
+
+                                        <div>
+                                            <span>{{ $text('Declared value', 'القيمة المعلنة') }}</span>
+                                            <strong>{{ $package->declared_value ?? '--' }}</strong>
+                                        </div>
+                                    </div>
+
+                                    @if ($badges)
+                                        <div class="srd-badges">
+                                            @foreach ($badges as $badge)
+                                                <span>{{ $badge }}</span>
                                             @endforeach
                                         </div>
                                     @endif
 
-                                    {{-- Package images --}}
-                                    @php
-                                        $images = $pkg->mediaFiles ?? collect();
-                                    @endphp
-                                    @if($images->count() > 0)
-                                        <div class="d-flex flex-wrap gap-2 mt-2">
-                                            @foreach($images as $img)
-                                                <a href="{{ $img->url ?? '#' }}" target="_blank">
-                                                    <img src="{{ $img->url ?? '#' }}" alt="{{ __('admin-dashboard.package_image') }}" class="rounded" style="width:60px;height:60px;object-fit:cover;border:1px solid #e2e8f0;">
-                                                </a>
-                                            @endforeach
+                                    <div class="srd-package-note">
+                                        <span>{{ $text('Notes', 'ملاحظات') }}</span>
+                                        <p>{{ $package->notes ?: $text('No package notes.', 'لا توجد ملاحظات على الطرد.') }}</p>
+                                    </div>
+
+                                    @if ($packageImages->count())
+                                        <div class="srd-images">
+                                            <span>{{ $text('Attached images', 'الصور المرفقة') }}</span>
+
+                                            <div>
+                                                @foreach ($packageImages as $media)
+                                                    @php $url = $mediaUrl($media); @endphp
+
+                                                    @if ($url)
+                                                        <a href="{{ $url }}" target="_blank" rel="noopener" class="srd-image-link">
+                                                            <img src="{{ $url }}" alt="{{ $package->package_name ?? $text('Package image', 'صورة الطرد') }}">
+                                                        </a>
+                                                    @endif
+                                                @endforeach
+                                            </div>
                                         </div>
                                     @endif
+                                </article>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="srd-empty-note">
+                            {{ $text('No package records were saved for this request.', 'لم يتم حفظ أي طرود لهذا الطلب.') }}
+                        </div>
+                    @endif
+                </section>
+            </div>
+
+            <div class="col-12 col-xl-4">
+                <section class="srd-card mb-4">
+                    <div class="srd-section-head">
+                        <div>
+                            <h5>{{ $text('Status timeline', 'الجدول الزمني') }}</h5>
+                            <p>{{ $text('Current request progress.', 'تقدم الطلب الحالي.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="srd-timeline">
+                        @foreach ($statusSteps as $key => $step)
+                            @php
+                                $stepIndex = array_search($key, array_keys($statusSteps), true);
+                                $isActive = $currentStepIndex !== false && $stepIndex <= $currentStepIndex;
+                                $isCurrent = $currentStepIndex !== false && $stepIndex === $currentStepIndex;
+                            @endphp
+
+                            <div class="srd-timeline-row {{ $isActive ? 'is-active' : '' }} {{ $isCurrent ? 'is-current' : '' }}">
+                                <div class="srd-timeline-icon">
+                                    <i class="fas {{ $step['icon'] }}"></i>
+                                </div>
+
+                                <div>
+                                    <strong>{{ $step['label'] }}</strong>
+                                    <small>
+                                        {{ $isCurrent ? $text('Current step', 'المرحلة الحالية') : ($isActive ? $text('Completed', 'مكتمل') : $text('Pending', 'قيد الانتظار')) }}
+                                    </small>
                                 </div>
                             </div>
                         @endforeach
                     </div>
-                @else
-                    <p class="text-muted small mb-0">{{ __('admin-dashboard.no_packages_provided') }}</p>
-                @endif
+
+                    <div class="srd-helper-note">
+                        {{ $text(
+                            'Only the current status is stored, so this timeline shows the available draft/submitted flow.',
+                            'الحالة الحالية فقط هي المخزنة، لذلك يعرض المخطط التدفق المتاح: مسودة / مُرسل.'
+                        ) }}
+                    </div>
+                </section>
+
+                <section class="srd-card">
+                    <div class="srd-section-head">
+                        <div>
+                            <h5>{{ $text('Company assignment', 'تعيين شركة الشحن') }}</h5>
+                            <p>{{ $text('Assignment status.', 'حالة التعيين.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="srd-empty-note">
+                        {{ $text(
+                            'No shipment company relation is stored yet, so this request is currently shown as unassigned.',
+                            'لا توجد علاقة مخزنة لشركة الشحن بعد، لذلك يظهر هذا الطلب كغير مُعيّن حالياً.'
+                        ) }}
+                    </div>
+                </section>
             </div>
         </div>
-    </div>
 
-    {{-- ================= STATUS TIMELINE ================= --}}
-    <div class="col-12 mb-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-clock text-primary me-2"></i>{{ __('admin-dashboard.status_timeline') }}</h5>
+        <section class="srd-card">
+            <div class="srd-section-head">
+                <div>
+                    <h5>{{ $text('Notes', 'الملاحظات') }}</h5>
+                    <p>{{ $text('Request notes and package reasons.', 'ملاحظات الطلب وأسباب الطرود.') }}</p>
+                </div>
             </div>
-            <div class="card-body pt-3">
-                @php
-                    $allStatuses = [
-                        'draft' => ['label' => __('admin-dashboard.draft'), 'icon' => 'fa-pen'],
-                        'submitted' => ['label' => __('admin-dashboard.submitted'), 'icon' => 'fa-paper-plane'],
-                        'assigned' => ['label' => __('admin-dashboard.assigned'), 'icon' => 'fa-user-check'],
-                        'accepted' => ['label' => __('admin-dashboard.accepted'), 'icon' => 'fa-check-circle'],
-                        'picked_up' => ['label' => __('admin-dashboard.picked_up'), 'icon' => 'fa-box-open'],
-                        'in_transit' => ['label' => __('admin-dashboard.in_transit'), 'icon' => 'fa-truck'],
-                        'delivered' => ['label' => __('admin-dashboard.delivered'), 'icon' => 'fa-house-chimney'],
-                    ];
-                    $currentIndex = array_search($statusValue, array_keys($allStatuses));
-                    $isTerminal = in_array($statusValue, ['cancelled', 'rejected']);
-                @endphp
 
-                <div class="timeline-wrapper">
-                    @if($isTerminal)
-                        <div class="text-center py-4">
-                            <span class="badge bg-danger fs-6 px-4 py-2">
-                                <i class="fas {{ $statusValue === 'cancelled' ? 'fa-ban' : 'fa-times-circle' }} me-2"></i>
-                                {{ __('admin-dashboard.' . $statusValue) !== 'admin-dashboard.' . $statusValue ? __('admin-dashboard.' . $statusValue) : ucfirst($statusValue) }}
-                            </span>
-                            <p class="text-muted mt-2 small mb-0">{{ app()->getLocale() === 'ar' ? 'هذه نهاية رحلة الطلب.' : 'This is the end of the request journey.' }}</p>
-                        </div>
-                    @else
-                        <div class="timeline-steps">
-                            @foreach($allStatuses as $key => $step)
-                                @php
-                                    $stepIndex = array_search($key, array_keys($allStatuses));
-                                    $isCompleted = $stepIndex <= $currentIndex && $currentIndex !== false;
-                                    $isCurrent = $stepIndex === $currentIndex;
-                                @endphp
-                                <div class="timeline-step {{ $isCompleted ? 'completed' : '' }} {{ $isCurrent ? 'current' : '' }}">
-                                    <div class="timeline-icon {{ $isCompleted ? 'bg-primary text-white' : 'bg-light text-muted' }} {{ $isCurrent ? 'ring-primary' : '' }}">
-                                        <i class="fas {{ $step['icon'] }}"></i>
-                                    </div>
-                                    <div class="timeline-label {{ $isCurrent ? 'fw-bold text-primary' : ($isCompleted ? 'text-dark' : 'text-muted') }}">
-                                        {{ $step['label'] }}
-                                    </div>
-                                </div>
-                                @if(!$loop->last)
-                                    <div class="timeline-connector {{ $isCompleted ? 'active' : '' }}"></div>
-                                @endif
-                            @endforeach
-                        </div>
-                    @endif
+            <div class="row g-3">
+                <div class="col-12 col-lg-6">
+                    <div class="srd-note-box">
+                        <span>{{ $text('Request notes', 'ملاحظات الطلب') }}</span>
+                        <p>
+                            {{ $shipmentRequest->notes ?: $text('No request notes were provided.', 'لم يتم تقديم ملاحظات للطلب.') }}
+                        </p>
+                    </div>
+                </div>
 
-                    <div class="alert alert-light mt-3 mb-0 py-2 small">
-                        <i class="fas fa-info-circle me-1"></i>
-                        {{ app()->getLocale() === 'ar'
-                            ? 'هذا جدول زمني مبني على الحالة الحالية. سيتم تفعيل السجل الكامل للتحديثات في تحديث قادم.'
-                            : 'This timeline is built from the current status. Full status history will be available in a future update.' }}
+                <div class="col-12 col-lg-6">
+                    <div class="srd-note-box">
+                        <span>{{ $text('Package notes / reasons', 'ملاحظات الطرود / الأسباب') }}</span>
+
+                        @if ($shipmentRequest->packages->count())
+                            <ul>
+                                @foreach ($shipmentRequest->packages as $package)
+                                    <li>
+                                        <strong>{{ $package->package_name ?? ($text('Package', 'طرد') . ' #' . $loop->iteration) }}:</strong>
+                                        {{ $package->notes ?: data_get($package->metadata, 'reason') ?: $text('No package reason stored.', 'لا يوجد سبب مخزن للطرد.') }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p>{{ $text('No package reasons are available.', 'لا توجد أسباب متاحة للطرد.') }}</p>
+                        @endif
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 
-    {{-- ================= ADMIN NOTES ================= --}}
-    <div class="col-12 mb-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-sticky-note text-secondary me-2"></i>{{ __('admin-dashboard.notes_reasons') }}</h5>
-            </div>
-            <div class="card-body pt-3">
-                @if($shipmentRequest->notes)
-                    <div class="mb-2">
-                        <strong class="text-muted small">{{ __('admin-dashboard.request_notes') }}:</strong>
-                        <p class="mb-0 mt-1">{{ $shipmentRequest->notes }}</p>
-                    </div>
-                @else
-                    <p class="text-muted small mb-0">{{ __('admin-dashboard.no_notes_provided') }}</p>
-                @endif
-            </div>
-        </div>
-    </div>
+    <style>
+        .srd-page {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
 
-</div>
+        .srd-back-btn {
+            min-height: 44px;
+            padding: .55rem 1rem;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            color: #1f2937;
+            font-weight: 800;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, .04);
+        }
 
-<style>
-    .summary-table td { padding: 0.4rem 0; vertical-align: top; }
-    .summary-table .w-35 { width: 35%; }
-    .summary-table .w-40 { width: 40%; }
-    .package-card { background: #fafbfc; border-color: #e5e7eb !important; transition: box-shadow 0.2s ease; }
-    .package-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .status-pill {
-        display: inline-flex; align-items: center; gap: 0.4rem;
-        padding-inline: 0.85rem; border-radius: 999px;
-        min-height: 36px; font-weight: 600;
-        box-shadow: 0 8px 20px rgba(15,23,42,0.06);
-    }
-    .status-pill.btn-success { background-color: #10b981 !important; color: white !important; }
-    .status-pill.btn-warning { background-color: #f59e0b !important; color: white !important; }
-    .status-pill.btn-danger { background-color: #ef4444 !important; color: white !important; }
-    .status-pill.btn-info { background-color: #3b82f6 !important; color: white !important; }
-    .status-pill.btn-primary { background-color: #6366f1 !important; color: white !important; }
-    .status-pill.btn-dark { background-color: #1e293b !important; color: white !important; }
-    .status-pill.btn-secondary { background-color: #94a3b8 !important; color: white !important; }
-    .status-dot {
-        width: 8px; height: 8px; border-radius: 50%;
-        background: currentColor; box-shadow: 0 0 0 3px rgba(255,255,255,0.42);
-        flex: 0 0 auto;
-    }
-    .timeline-wrapper { overflow-x: auto; padding: 0.5rem 0; }
-    .timeline-steps { display: flex; align-items: flex-start; min-width: max-content; padding: 1rem 0; }
-    .timeline-step { display: flex; flex-direction: column; align-items: center; min-width: 90px; }
-    .timeline-icon {
-        width: 44px; height: 44px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1rem; transition: all 0.3s ease;
-    }
-    .timeline-icon.ring-primary { box-shadow: 0 0 0 4px rgba(99,102,241,0.2); }
-    .timeline-label { font-size: 0.78rem; text-align: center; margin-top: 0.5rem; white-space: nowrap; }
-    .timeline-connector {
-        flex: 1; height: 3px; background: #e5e7eb; margin-top: 22px; min-width: 30px;
-        transition: background 0.3s ease;
-    }
-    .timeline-connector.active { background: #6366f1; }
-    @media (max-width: 767.98px) {
-        .summary-table .w-35, .summary-table .w-40 { width: 45%; }
-    }
-</style>
+        .srd-back-btn:hover {
+            background: #f8fafc;
+            color: #111827;
+        }
+
+        .srd-hero,
+        .srd-route-card,
+        .srd-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, .04);
+        }
+
+        .srd-hero {
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .srd-hero-main {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .srd-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+
+        .srd-chip {
+            display: inline-flex;
+            width: fit-content;
+            padding: .28rem .7rem;
+            margin-bottom: .45rem;
+            border-radius: 999px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #2563eb;
+            font-size: .78rem;
+            font-weight: 900;
+        }
+
+        .srd-hero-text h3 {
+            margin: 0;
+            color: #111827;
+            font-size: 1.45rem;
+            font-weight: 900;
+            letter-spacing: -.02em;
+        }
+
+        .srd-meta-row {
+            margin-top: .7rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .srd-meta-pill,
+        .srd-status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem;
+            padding: .42rem .75rem;
+            border-radius: 999px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #475569;
+            font-size: .78rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .srd-status i {
+            width: .45rem;
+            height: .45rem;
+            border-radius: 999px;
+            background: currentColor;
+        }
+
+        .srd-status-warning {
+            background: #fffbeb;
+            color: #b45309;
+            border-color: #fde68a;
+        }
+
+        .srd-status-secondary {
+            background: #f8fafc;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        .srd-hero-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(120px, 1fr));
+            gap: .75rem;
+            flex-shrink: 0;
+        }
+
+        .srd-stat {
+            min-height: 74px;
+            padding: .9rem 1rem;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .srd-stat span {
+            color: #64748b;
+            font-size: .78rem;
+            font-weight: 900;
+            margin-bottom: .35rem;
+        }
+
+        .srd-stat strong {
+            color: #111827;
+            font-size: 1.35rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .srd-stat-text {
+            font-size: .95rem !important;
+            line-height: 1.3 !important;
+        }
+
+        .srd-route-card,
+        .srd-card {
+            padding: 1.25rem;
+        }
+
+        .srd-section-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .srd-section-head h5 {
+            margin: 0;
+            color: #111827;
+            font-size: 1rem;
+            font-weight: 900;
+        }
+
+        .srd-section-head p {
+            margin: .25rem 0 0;
+            color: #64748b;
+            font-size: .86rem;
+            line-height: 1.6;
+        }
+
+        .srd-route {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr);
+            align-items: stretch;
+            gap: .75rem;
+        }
+
+        .srd-route-point {
+            min-width: 0;
+            padding: 1rem;
+            border-radius: 18px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .srd-route-label {
+            display: inline-flex;
+            margin-bottom: .4rem;
+            padding: .2rem .55rem;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: .72rem;
+            font-weight: 900;
+        }
+
+        .srd-route-point strong {
+            display: block;
+            color: #111827;
+            font-size: .98rem;
+            font-weight: 900;
+            line-height: 1.5;
+        }
+
+        .srd-route-point small {
+            display: block;
+            color: #64748b;
+            font-size: .8rem;
+            margin-top: .1rem;
+        }
+
+        .srd-route-point p {
+            margin: .65rem 0 0;
+            color: #334155;
+            font-size: .85rem;
+            line-height: 1.7;
+        }
+
+        .srd-route-arrow {
+            width: 42px;
+            min-height: 42px;
+            align-self: center;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .srd-person {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .85rem;
+            margin-bottom: 1rem;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+        }
+
+        .srd-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .srd-person strong {
+            display: block;
+            color: #111827;
+            font-weight: 900;
+        }
+
+        .srd-person small {
+            color: #64748b;
+            font-size: .8rem;
+        }
+
+        .srd-info-list {
+            display: grid;
+            gap: .7rem;
+        }
+
+        .srd-info-list div {
+            padding: .8rem .9rem;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+        }
+
+        .srd-info-list span {
+            display: block;
+            margin-bottom: .25rem;
+            color: #64748b;
+            font-size: .78rem;
+            font-weight: 900;
+        }
+
+        .srd-info-list strong {
+            display: block;
+            color: #111827;
+            font-size: .9rem;
+            font-weight: 800;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .srd-count-pill {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            padding: .38rem .75rem;
+            border-radius: 999px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            color: #475569;
+            font-size: .78rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .srd-package-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .srd-package {
+            padding: 1rem;
+            border-radius: 18px;
+            border: 1px solid #e5e7eb;
+            background: #fcfdff;
+        }
+
+        .srd-package-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: .9rem;
+        }
+
+        .srd-package-top h6 {
+            margin: 0;
+            color: #111827;
+            font-size: .98rem;
+            font-weight: 900;
+        }
+
+        .srd-package-top p {
+            margin: .2rem 0 0;
+            color: #64748b;
+            font-size: .82rem;
+        }
+
+        .srd-package-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .75rem;
+        }
+
+        .srd-package-grid div,
+        .srd-package-note {
+            padding: .8rem .9rem;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+        }
+
+        .srd-package-grid span,
+        .srd-package-note span,
+        .srd-images > span,
+        .srd-note-box > span {
+            display: block;
+            margin-bottom: .25rem;
+            color: #64748b;
+            font-size: .78rem;
+            font-weight: 900;
+        }
+
+        .srd-package-grid strong {
+            display: block;
+            color: #111827;
+            font-size: .9rem;
+            font-weight: 900;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .srd-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .45rem;
+            margin-top: .8rem;
+        }
+
+        .srd-badges span {
+            display: inline-flex;
+            padding: .3rem .65rem;
+            border-radius: 999px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #1d4ed8;
+            font-size: .75rem;
+            font-weight: 900;
+        }
+
+        .srd-package-note {
+            margin-top: .8rem;
+        }
+
+        .srd-package-note p {
+            margin: 0;
+            color: #111827;
+            font-size: .88rem;
+            font-weight: 700;
+            line-height: 1.7;
+        }
+
+        .srd-images {
+            margin-top: .9rem;
+        }
+
+        .srd-images div {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .55rem;
+        }
+
+        .srd-image-link img {
+            width: 68px;
+            height: 68px;
+            object-fit: cover;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+        }
+
+        .srd-timeline {
+            display: grid;
+            gap: .75rem;
+        }
+
+        .srd-timeline-row {
+            display: flex;
+            align-items: flex-start;
+            gap: .75rem;
+            padding: .85rem;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+        }
+
+        .srd-timeline-row.is-active {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .srd-timeline-row.is-current {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .srd-timeline-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            background: #f8fafc;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .srd-timeline-row.is-active .srd-timeline-icon {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .srd-timeline-row.is-current .srd-timeline-icon {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .srd-timeline-row strong {
+            display: block;
+            color: #111827;
+            font-size: .9rem;
+            font-weight: 900;
+        }
+
+        .srd-timeline-row small {
+            color: #64748b;
+            font-size: .78rem;
+        }
+
+        .srd-helper-note,
+        .srd-empty-note {
+            margin-top: 1rem;
+            padding: .9rem;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            color: #475569;
+            font-size: .85rem;
+            line-height: 1.7;
+        }
+
+        .srd-empty-note {
+            margin-top: 0;
+        }
+
+        .srd-note-box {
+            height: 100%;
+            padding: 1rem;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+        }
+
+        .srd-note-box p {
+            margin: 0;
+            color: #111827;
+            font-size: .9rem;
+            font-weight: 700;
+            line-height: 1.8;
+        }
+
+        .srd-note-box ul {
+            margin: 0;
+            padding-inline-start: 1.1rem;
+            color: #111827;
+            font-size: .88rem;
+            line-height: 1.8;
+        }
+
+        .srd-note-box li + li {
+            margin-top: .35rem;
+        }
+
+        @media (max-width: 1199.98px) {
+            .srd-hero {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .srd-hero-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .srd-hero,
+            .srd-route-card,
+            .srd-card {
+                padding: 1rem;
+                border-radius: 18px;
+            }
+
+            .srd-hero-main {
+                flex-direction: column;
+            }
+
+            .srd-hero-text h3 {
+                font-size: 1.2rem;
+            }
+
+            .srd-route {
+                grid-template-columns: 1fr;
+            }
+
+            .srd-route-arrow {
+                margin-inline: auto;
+                transform: rotate(90deg);
+            }
+
+            .srd-package-top,
+            .srd-section-head {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .srd-package-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+@endsection

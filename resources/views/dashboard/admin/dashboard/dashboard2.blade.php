@@ -182,6 +182,18 @@
                 'icon' => 'fas fa-truck',
                 'url' => $routeOrNull('admin.shipment-companies'),
             ],
+            [
+                'label' => $text('Governorates', 'المحافظات'),
+                'helper' => $text('Open the governorate CRUD and manage city grouping.', 'افتح CRUD المحافظات وأدر تجميع المدن.'),
+                'icon' => 'fas fa-map-location-dot',
+                'url' => $routeOrNull('admin.settings.governorates.index'),
+            ],
+            [
+                'label' => $text('Cities', 'المدن'),
+                'helper' => $text('Open the city CRUD and manage governorate links.', 'افتح CRUD المدن وأدر ربطها بالمحافظات.'),
+                'icon' => 'fas fa-city',
+                'url' => $routeOrNull('admin.settings.cities.index'),
+            ],
         ];
     @endphp
 

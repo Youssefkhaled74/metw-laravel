@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Dashboard\Admin\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\City;
-use App\Models\State;
+use App\Models\Governorate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,133 +12,136 @@ class CityController extends Controller
 {
     public function index(Request $request)
     {
-        try {
-            if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.cities.index')) {
-                return view('dashboard.admin.no-permission');
-            }
-
-            $validated = $request->validate([
-                'search' => ['nullable', 'string', 'max:100'],
-                'state_id' => ['nullable', 'string'],
-                'status' => ['nullable', 'in:all,active,inactive'],
-                'sort_by' => ['nullable', 'in:id,name_ar,name_en,state,created_at'],
-                'sort_dir' => ['nullable', 'in:asc,desc'],
-            ]);
-
-            $sortBy = $validated['sort_by'] ?? 'created_at';
-            $sortDir = $validated['sort_dir'] ?? 'desc';
-
-            $citiesQuery = City::withoutGlobalScope('active')
-                ->with('state')
-                ->leftJoin('states', 'cities.state_id', '=', 'states.id')
-                ->select('cities.*');
-
-            if (!empty($validated['search'])) {
-                $search = trim($validated['search']);
-                $citiesQuery->where(function ($query) use ($search) {
-                    $query->where('cities.name_en', 'like', "%{$search}%")
-                        ->orWhere('cities.name_ar', 'like', "%{$search}%")
-                        ->orWhere('states.name_en', 'like', "%{$search}%")
-                        ->orWhere('states.name_ar', 'like', "%{$search}%");
-                });
-            }
-
-            if (!empty($validated['state_id']) && $validated['state_id'] !== 'all') {
-                $citiesQuery->where('cities.state_id', (int) $validated['state_id']);
-            }
-
-            if (!empty($validated['status']) && $validated['status'] !== 'all') {
-                $citiesQuery->where('cities.is_active', $validated['status'] === 'active');
-            }
-
-            if ($sortBy === 'state') {
-                $stateColumn = app()->getLocale() === 'ar' ? 'states.name_ar' : 'states.name_en';
-                $citiesQuery->orderBy($stateColumn, $sortDir);
-            } else {
-                $citiesQuery->orderBy('cities.' . $sortBy, $sortDir);
-            }
-
-            $cities = $citiesQuery
-                ->paginate(15)
-                ->appends($request->query());
-
-            $states = State::orderBy(app()->getLocale() === 'ar' ? 'name_ar' : 'name_en')->get(['id', 'name_en', 'name_ar']);
-
-            return view('dashboard.admin.settings.cities.index', compact('cities', 'states', 'sortBy', 'sortDir'));
-        } catch (\Throwable $e) {
-            return redirect()->back()->with('error', app()->getLocale() === 'ar' ? 'حدث خطأ غير متوقع' : 'Unexpected error occurred');
+        if (Auth::guard('employee')->check() && ! Auth::guard('employee')->user()->can('admin.settings.cities.index')) {
+            return view('dashboard.admin.no-permission');
         }
+
+        $allowedSortColumns = ['id', 'name_en', 'name_ar', 'governorate', 'created_at'];
+        $sortBy = $request->string('sort_by', 'created_at')->toString();
+        $sortDir = strtolower($request->string('sort_dir', 'desc')->toString()) === 'asc' ? 'asc' : 'desc';
+
+        if (! in_array($sortBy, $allowedSortColumns, true)) {
+            $sortBy = 'created_at';
+        }
+
+        $citiesQuery = City::withoutGlobalScope('active')
+            ->with('governorate')
+            ->leftJoin('governorates', 'cities.governorate_id', '=', 'governorates.id')
+            ->select('cities.*');
+
+        if ($request->filled('search')) {
+            $search = trim((string) $request->input('search'));
+            $citiesQuery->where(function ($query) use ($search) {
+                $query->where('cities.name_en', 'like', "%{$search}%")
+                    ->orWhere('cities.name_ar', 'like', "%{$search}%")
+                    ->orWhereHas('governorate', function ($governorateQuery) use ($search) {
+                        $governorateQuery->where('name_ar', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('governorate_id') && $request->input('governorate_id') !== 'all') {
+            $citiesQuery->where('cities.governorate_id', (int) $request->input('governorate_id'));
+        }
+
+        if ($request->filled('status') && $request->input('status') !== 'all') {
+            $citiesQuery->where('cities.is_active', $request->input('status') === 'active');
+        }
+
+        if ($sortBy === 'governorate') {
+            $governorateColumn = 'governorates.name_ar';
+            $citiesQuery->orderBy($governorateColumn, $sortDir);
+        } else {
+            $citiesQuery->orderBy('cities.' . $sortBy, $sortDir);
+        }
+
+        $cities = $citiesQuery->paginate(15)->withQueryString();
+        $governorates = Governorate::withoutGlobalScope('active')->orderBy('name_ar')->get(['id', 'name_ar']);
+
+        return view('dashboard.admin.settings.cities.index', compact('cities', 'governorates', 'sortBy', 'sortDir'));
     }
 
     public function create()
     {
-        if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.cities.create')) {
+        if (Auth::guard('employee')->check() && ! Auth::guard('employee')->user()->can('admin.settings.cities.create')) {
             return view('dashboard.admin.no-permission');
         }
-        $states = State::all();
-        return view('dashboard.admin.settings.cities.create', compact('states'));
+
+        $governorates = Governorate::withoutGlobalScope('active')->orderBy('name_ar')->get();
+
+        return view('dashboard.admin.settings.cities.create', compact('governorates'));
     }
 
     public function store(Request $request)
     {
-        if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.cities.store')) {
+        if (Auth::guard('employee')->check() && ! Auth::guard('employee')->user()->can('admin.settings.cities.store')) {
             return view('dashboard.admin.no-permission');
         }
+
         $data = $request->validate([
-            'name_en'   => 'required|string|max:255',
-            'name_ar'   => 'required|string|max:255',
-            'state_id'  => 'required|exists:states,id',
-            'is_active' => 'nullable|boolean',
+            'name_en' => ['required', 'string', 'max:255'],
+            'name_ar' => ['required', 'string', 'max:255'],
+            'governorate_id' => ['required', 'exists:governorates,id'],
+            'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $data['is_active'] = $request->has('is_active');
+        $data['is_active'] = $request->boolean('is_active');
+
         City::create($data);
 
-        return redirect()->route('admin.settings.cities.index')->with('success', 'City created successfully.');
+        return redirect()->route('admin.settings.cities.index')->with('success', app()->getLocale() === 'ar' ? 'تم إنشاء المدينة بنجاح.' : 'City created successfully.');
     }
 
     public function edit(City $city)
     {
-        if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.cities.edit')) {
+        if (Auth::guard('employee')->check() && ! Auth::guard('employee')->user()->can('admin.settings.cities.edit')) {
             return view('dashboard.admin.no-permission');
         }
-        $states = State::all();
-        return view('dashboard.admin.settings.cities.edit', compact('city', 'states'));
+
+        $governorates = Governorate::withoutGlobalScope('active')->orderBy('name_ar')->get();
+
+        return view('dashboard.admin.settings.cities.edit', compact('city', 'governorates'));
     }
 
     public function update(Request $request, City $city)
     {
-        if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.cities.update')) {
+        if (Auth::guard('employee')->check() && ! Auth::guard('employee')->user()->can('admin.settings.cities.update')) {
             return view('dashboard.admin.no-permission');
         }
+
         $data = $request->validate([
-            'name_en'   => 'required|string|max:255',
-            'name_ar'   => 'required|string|max:255',
-            'state_id'  => 'required|exists:states,id',
-            'is_active' => 'nullable|boolean',
+            'name_en' => ['required', 'string', 'max:255'],
+            'name_ar' => ['required', 'string', 'max:255'],
+            'governorate_id' => ['required', 'exists:governorates,id'],
+            'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $data['is_active'] = $request->has('is_active');
+        $data['is_active'] = $request->boolean('is_active');
+
         $city->update($data);
 
-        return redirect()->route('admin.settings.cities.index')->with('success', 'City updated successfully.');
+        return redirect()->route('admin.settings.cities.index')->with('success', app()->getLocale() === 'ar' ? 'تم تحديث المدينة بنجاح.' : 'City updated successfully.');
     }
 
     public function destroy(City $city)
     {
-        if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.cities.destroy')) {
+        if (Auth::guard('employee')->check() && ! Auth::guard('employee')->user()->can('admin.settings.cities.destroy')) {
             return view('dashboard.admin.no-permission');
         }
+
         $city->delete();
-        return redirect()->route('admin.settings.cities.index')->with('success', 'City deleted successfully.');
+
+        return redirect()->route('admin.settings.cities.index')->with('success', app()->getLocale() === 'ar' ? 'تم حذف المدينة بنجاح.' : 'City deleted successfully.');
     }
 
     public function toggle(City $city)
     {
-        if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.cities.toggle-status')) {
+        if (Auth::guard('employee')->check() && ! Auth::guard('employee')->user()->can('admin.settings.cities.toggle-status')) {
             return view('dashboard.admin.no-permission');
         }
-        $city->update(['is_active' => !$city->is_active]);
-        return redirect()->route('admin.settings.cities.index')->with('success', 'City status updated successfully.');
+
+        $city->update(['is_active' => ! $city->is_active]);
+
+        return redirect()->route('admin.settings.cities.index')->with('success', app()->getLocale() === 'ar' ? 'تم تغيير حالة المدينة بنجاح.' : 'City status updated successfully.');
     }
 }

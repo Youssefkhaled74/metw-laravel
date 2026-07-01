@@ -1,174 +1,353 @@
 @extends('layouts.admin')
 
-@section('title', __('admin-dashboard.shipment_requests'))
-@section('page-title', __('admin-dashboard.shipment_requests_management'))
+@section('title', app()->getLocale() === 'ar' ? 'طلبات الشحن' : 'Shipment Requests')
+@section('page-title', app()->getLocale() === 'ar' ? 'إدارة طلبات الشحن' : 'Shipment Requests Management')
+
+@php
+    use Illuminate\Support\Facades\Route;
+
+    $locale = app()->getLocale();
+    $isArabic = $locale === 'ar';
+
+    $text = static fn (string $en, string $ar) => $isArabic ? $ar : $en;
+
+    $statusLabel = static fn ($status) => match ((string) $status) {
+        'draft' => $text('Draft', 'مسودة'),
+        'submitted' => $text('Submitted', 'مُرسل'),
+        default => $text(
+            ucfirst(str_replace('_', ' ', (string) $status)),
+            ucfirst(str_replace('_', ' ', (string) $status))
+        ),
+    };
+
+    $statusTone = static fn ($status) => match ((string) $status) {
+        'submitted' => 'warning',
+        'draft' => 'secondary',
+        default => 'secondary',
+    };
+
+    $safeRoute = static function (string $name, mixed $parameters = []) {
+        return Route::has($name) ? route($name, $parameters) : null;
+    };
+
+    $locationLabel = static function ($address) use ($text) {
+        if (! $address) {
+            return $text('Not provided', 'غير متوفر');
+        }
+
+        $parts = array_filter([
+            data_get($address, 'city.name'),
+            data_get($address, 'governorate.name'),
+            data_get($address, 'state.name'),
+            data_get($address, 'zone.name'),
+            data_get($address, 'address_line_1'),
+            data_get($address, 'address_line_2'),
+            data_get($address, 'landmark'),
+        ]);
+
+        return ! empty($parts) ? implode(' · ', $parts) : $text('Not provided', 'غير متوفر');
+    };
+
+    $activeFilters = collect([
+        'search' => request('search'),
+        'status' => request('status'),
+        'from_location' => request('from_location'),
+        'to_location' => request('to_location'),
+        'date_from' => request('date_from'),
+        'date_to' => request('date_to'),
+    ])->filter(fn ($value) => filled($value));
+
+    $hasFilters = $activeFilters->isNotEmpty();
+
+    $visibleCount = $requests->count();
+    $totalCount = method_exists($requests, 'total') ? $requests->total() : $requests->count();
+    $submittedCount = $requests->filter(fn ($request) => $request->status?->value === 'submitted')->count();
+    $draftCount = $requests->filter(fn ($request) => $request->status?->value === 'draft')->count();
+
+    $routeIcon = $isArabic ? 'fa-arrow-left' : 'fa-arrow-right';
+@endphp
 
 @section('page-actions')
-    <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> {{ __('admin-dashboard.back_to_dashboard') }}
-    </a>
+    @if (Route::has('admin.dashboard'))
+        <a href="{{ route('admin.dashboard') }}" class="btn sr-back-btn">
+            <i class="fas {{ $isArabic ? 'fa-arrow-right ms-1' : 'fa-arrow-left me-1' }}"></i>
+            {{ $text('Back to dashboard', 'العودة إلى لوحة التحكم') }}
+        </a>
+    @endif
 @endsection
 
 @section('content')
-    <div class="card shadow-sm border-0 orders-card">
-        <div class="card-header bg-white border-0 py-3">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                <h5 class="mb-0">{{ __('admin-dashboard.all_shipment_requests') }}</h5>
-                <span class="badge rounded-pill text-bg-light border text-muted px-3 py-2 rows-counter-badge">
-                    <i class="fas fa-list me-2"></i>
-                    {{ $requests->count() }} / {{ $requests->total() }}
-                </span>
+    <div class="sr-page" dir="{{ $isArabic ? 'rtl' : 'ltr' }}">
+        <section class="sr-header-card">
+            <div class="sr-header-main">
+                <div class="sr-header-icon">
+                    <i class="fas fa-shipping-fast"></i>
+                </div>
+
+                <div class="sr-header-text">
+                    <span class="sr-chip">
+                        {{ $text('Shipment requests', 'طلبات الشحن') }}
+                    </span>
+
+                    <h4>{{ $text('Manage shipment requests', 'إدارة طلبات الشحن') }}</h4>
+
+                    <p>
+                        {{ $text(
+                            'Search, review, and open shipment requests from a simple focused screen.',
+                            'ابحث وراجع وافتح طلبات الشحن من شاشة بسيطة وواضحة.'
+                        ) }}
+                    </p>
+                </div>
             </div>
 
-            <form method="GET" action="{{ route('admin.shipment-requests.index') }}" class="row g-2 align-items-center">
-                <div class="col-lg-4">
-                    <div class="input-group input-group-sm search-shell">
-                        <span class="input-group-text bg-white border-end-0 search-icon-shell">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input name="search" type="text" class="form-control border-start-0 search-input-modern"
-                            placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث برقم الطلب أو الاسم أو الهاتف...' : 'Search by request number, name, or phone...' }}"
-                            value="{{ request('search') }}" autocomplete="off">
+            <div class="sr-metrics">
+                <div class="sr-metric-item">
+                    <span>{{ $text('Visible', 'المعروض') }}</span>
+                    <strong>{{ $visibleCount }}</strong>
+                </div>
+
+                <div class="sr-metric-item">
+                    <span>{{ $text('Total', 'الإجمالي') }}</span>
+                    <strong>{{ $totalCount }}</strong>
+                </div>
+
+                <div class="sr-metric-item">
+                    <span>{{ $text('Submitted', 'المُرسل') }}</span>
+                    <strong>{{ $submittedCount }}</strong>
+                </div>
+
+                <div class="sr-metric-item">
+                    <span>{{ $text('Draft', 'مسودة') }}</span>
+                    <strong>{{ $draftCount }}</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="sr-filter-card">
+            <div class="sr-section-head">
+                <div>
+                    <h5>{{ $text('Filters', 'الفلاتر') }}</h5>
+                    <p>{{ $text('Use search, status, route, or date to find requests faster.', 'استخدم البحث أو الحالة أو المسار أو التاريخ للوصول للطلبات بسرعة.') }}</p>
+                </div>
+
+                @if ($hasFilters)
+                    <a href="{{ $safeRoute('admin.shipment-requests.index') ?? url()->current() }}" class="btn btn-sm sr-clear-btn">
+                        <i class="fas fa-times {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
+                        {{ $text('Clear filters', 'مسح الفلاتر') }}
+                    </a>
+                @endif
+            </div>
+
+            <form method="GET" action="{{ $safeRoute('admin.shipment-requests.index') ?? url()->current() }}">
+                <div class="row g-3">
+                    <div class="col-12 col-xl-3 col-lg-4">
+                        <label class="sr-label">{{ $text('Search', 'بحث') }}</label>
+                        <div class="sr-input-icon">
+                            <i class="fas fa-search"></i>
+                            <input
+                                type="text"
+                                name="search"
+                                class="form-control sr-control"
+                                value="{{ request('search') }}"
+                                placeholder="{{ $text('Request number, customer, sender, receiver, package', 'رقم الطلب، العميل، المرسل، المستلم، الطرد') }}"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-2 col-lg-4">
+                        <label class="sr-label">{{ $text('Status', 'الحالة') }}</label>
+                        <select name="status" class="form-select sr-control">
+                            <option value="">{{ $text('All statuses', 'كل الحالات') }}</option>
+                            @foreach ($statuses as $status)
+                                <option value="{{ $status }}" @selected(request('status') === $status)>
+                                    {{ $statusLabel($status) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-xl-2 col-lg-4">
+                        <label class="sr-label">{{ $text('From location', 'من الموقع') }}</label>
+                        <input
+                            type="text"
+                            name="from_location"
+                            class="form-control sr-control"
+                            value="{{ request('from_location') }}"
+                            placeholder="{{ $text('Sender city or address', 'مدينة المرسل أو عنوانه') }}"
+                        >
+                    </div>
+
+                    <div class="col-12 col-xl-2 col-lg-4">
+                        <label class="sr-label">{{ $text('To location', 'إلى الموقع') }}</label>
+                        <input
+                            type="text"
+                            name="to_location"
+                            class="form-control sr-control"
+                            value="{{ request('to_location') }}"
+                            placeholder="{{ $text('Receiver city or address', 'مدينة المستلم أو عنوانه') }}"
+                        >
+                    </div>
+
+                    <div class="col-6 col-xl-1 col-lg-4">
+                        <label class="sr-label">{{ $text('From date', 'من تاريخ') }}</label>
+                        <input
+                            type="date"
+                            name="date_from"
+                            class="form-control sr-control"
+                            value="{{ request('date_from') }}"
+                        >
+                    </div>
+
+                    <div class="col-6 col-xl-1 col-lg-4">
+                        <label class="sr-label">{{ $text('To date', 'إلى تاريخ') }}</label>
+                        <input
+                            type="date"
+                            name="date_to"
+                            class="form-control sr-control"
+                            value="{{ request('date_to') }}"
+                        >
+                    </div>
+
+                    <div class="col-12 col-xl-1 col-lg-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary sr-submit-btn w-100">
+                            {{ $text('Filter', 'تصفية') }}
+                        </button>
                     </div>
                 </div>
 
-                <div class="col-lg-2">
-                    <select name="status" class="form-select form-select-sm filter-select-modern">
-                        <option value="all">{{ app()->getLocale() === 'ar' ? 'كل الحالات' : 'All statuses' }}</option>
-                        @foreach($statuses as $status)
-                            <option value="{{ $status }}" {{ request('status', 'all') === $status ? 'selected' : '' }}>
-                                {{ __('admin-dashboard.' . $status) !== 'admin-dashboard.' . $status ? __('admin-dashboard.' . $status) : ucfirst($status) }}
-                            </option>
+                @if ($hasFilters)
+                    <div class="sr-active-filters">
+                        <span class="sr-active-title">{{ $text('Active filters', 'الفلاتر الحالية') }}</span>
+
+                        @foreach ($activeFilters as $key => $value)
+                            <span class="sr-active-chip">
+                                {{ $text(str_replace('_', ' ', ucfirst($key)), str_replace('_', ' ', ucfirst($key))) }}:
+                                <strong>{{ $key === 'status' ? $statusLabel($value) : $value }}</strong>
+                            </span>
                         @endforeach
-                    </select>
-                </div>
-
-                <div class="col-lg-2">
-                    <input type="date" name="date_from" class="form-control form-select-sm filter-select-modern"
-                        value="{{ request('date_from') }}"
-                        placeholder="{{ app()->getLocale() === 'ar' ? 'من تاريخ' : 'From date' }}">
-                </div>
-
-                <div class="col-lg-2">
-                    <input type="date" name="date_to" class="form-control form-select-sm filter-select-modern"
-                        value="{{ request('date_to') }}"
-                        placeholder="{{ app()->getLocale() === 'ar' ? 'إلى تاريخ' : 'To date' }}">
-                </div>
-
-                <div class="col-lg-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary btn-sm flex-fill">
-                        <i class="fas fa-filter me-1"></i> {{ app()->getLocale() === 'ar' ? 'تطبيق' : 'Apply' }}
-                    </button>
-                    <a href="{{ route('admin.shipment-requests.index') }}" class="btn btn-outline-secondary btn-sm flex-fill">
-                        <i class="fas fa-undo me-1"></i> {{ app()->getLocale() === 'ar' ? 'إعادة ضبط' : 'Reset' }}
-                    </a>
-                </div>
+                    </div>
+                @endif
             </form>
-        </div>
+        </section>
 
-        <div class="card-body p-0 table-wrap">
-            @if ($requests->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 orders-table">
+        <section class="sr-table-card">
+            <div class="sr-section-head sr-table-head">
+                <div>
+                    <h5>{{ $text('Requests list', 'قائمة الطلبات') }}</h5>
+                    <p>{{ $text('Only the important request information is shown here.', 'يتم عرض أهم بيانات الطلب فقط هنا.') }}</p>
+                </div>
+
+                <span class="sr-page-count">
+                    {{ $visibleCount }} {{ $text('shown', 'معروض') }}
+                </span>
+            </div>
+
+            @if ($requests->count())
+                <div class="table-responsive sr-table-wrap">
+                    <table class="table align-middle mb-0 sr-table">
                         <thead>
                             <tr>
-                                <th class="text-nowrap">{{ __('admin-dashboard.request_number') }}</th>
-                                <th class="text-nowrap">{{ __('admin-dashboard.customer') }}</th>
-                                <th class="text-nowrap">{{ __('admin-dashboard.sender') }}</th>
-                                <th class="text-nowrap">{{ __('admin-dashboard.receiver') }}</th>
-                                <th class="text-nowrap">{{ __('admin-dashboard.route') }}</th>
-                                <th class="text-nowrap">{{ __('admin-dashboard.packages') }}</th>
-                                <th class="text-nowrap">{{ __('admin-dashboard.status') }}</th>
-                                <th class="text-nowrap">{{ __('admin-dashboard.created_at') }}</th>
-                                <th class="text-nowrap">{{ __('admin-dashboard.actions') }}</th>
+                                <th class="sr-col-request">{{ $text('Request / customer', 'الطلب / العميل') }}</th>
+                                <th class="sr-col-route">{{ $text('Route', 'المسار') }}</th>
+                                <th class="sr-col-package">{{ $text('Package', 'الطرد') }}</th>
+                                <th class="sr-col-status">{{ $text('Status', 'الحالة') }}</th>
+                                <th class="sr-col-action text-end">{{ $text('Action', 'الإجراء') }}</th>
                             </tr>
                         </thead>
+
                         <tbody>
-                            @foreach ($requests as $sr)
+                            @foreach ($requests as $shipmentRequest)
                                 @php
-                                    $statusValue = $sr->status?->value ?? 'unknown';
-                                    $statusColor = match ($statusValue) {
-                                        'submitted' => 'warning',
-                                        'draft' => 'secondary',
-                                        'assigned' => 'info',
-                                        'accepted' => 'primary',
-                                        'picked_up' => 'dark',
-                                        'in_transit' => 'primary',
-                                        'delivered' => 'success',
-                                        'cancelled' => 'danger',
-                                        'rejected' => 'danger',
-                                        default => 'secondary',
-                                    };
-                                    $sender = $sr->senderContact;
-                                    $receiver = $sr->receiverContact;
+                                    $sender = $shipmentRequest->senderContact;
+                                    $receiver = $shipmentRequest->receiverContact;
                                     $senderAddress = $sender?->primaryAddress;
                                     $receiverAddress = $receiver?->primaryAddress;
-                                    $packageCount = $sr->packages->count();
+
+                                    $firstPackage = $shipmentRequest->relationLoaded('packages')
+                                        ? $shipmentRequest->packages->first()
+                                        : null;
+
+                                    $packageLabel = $firstPackage?->package_name
+                                        ?? ($shipmentRequest->packages_count > 0
+                                            ? $shipmentRequest->packages_count . ' ' . $text('packages', 'طرود')
+                                            : $text('No packages', 'لا توجد طرود'));
+
+                                    $showUrl = $safeRoute('admin.shipment-requests.show', $shipmentRequest->id);
+
+                                    $requestDate = $shipmentRequest->submitted_at?->format('Y-m-d H:i')
+                                        ?? $shipmentRequest->created_at?->format('Y-m-d H:i')
+                                        ?? '--';
+
+                                    $customerName = $shipmentRequest->user?->username ?? $text('Guest', 'ضيف');
+                                    $customerContact = $shipmentRequest->user?->phone ?? $shipmentRequest->user?->email ?? '--';
+                                    $customerInitial = mb_substr($customerName, 0, 1);
                                 @endphp
+
                                 <tr>
-                                    <td class="fw-semibold text-primary">{{ $sr->request_number ?? '--' }}</td>
                                     <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="order-avatar" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1d4ed8;">
-                                                <i class="fas fa-user"></i>
-                                            </div>
-                                            <div>
-                                                <div class="fw-semibold text-dark order-name">{{ $sr->user->username ?? __('admin-dashboard.guest') }}</div>
-                                                @if ($sr->user && $sr->user->phone)
-                                                    <small class="text-muted d-block order-subname">{{ $sr->user->phone }}</small>
-                                                @endif
+                                        <div class="sr-request-cell">
+                                            <span class="sr-avatar">{{ $customerInitial }}</span>
+
+                                            <div class="sr-request-info">
+                                                <div class="sr-request-no">
+                                                    {{ $shipmentRequest->request_number ?? ('#' . $shipmentRequest->id) }}
+                                                </div>
+
+                                                <div class="sr-customer-name">{{ $customerName }}</div>
+
+                                                <div class="sr-muted">
+                                                    {{ $customerContact }}
+                                                    <span class="sr-dot-separator">•</span>
+                                                    {{ $requestDate }}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
+
                                     <td>
-                                        @if ($sender)
-                                            <div class="fw-semibold">{{ $sender->full_name }}</div>
-                                            <small class="text-muted d-block">{{ $sender->primary_mobile }}</small>
-                                            @if ($senderAddress && $senderAddress->city)
-                                                <small class="text-muted">{{ $senderAddress->city->name ?? '' }}</small>
-                                            @endif
-                                        @else
-                                            <span class="text-muted small">--</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($receiver)
-                                            <div class="fw-semibold">{{ $receiver->full_name }}</div>
-                                            <small class="text-muted d-block">{{ $receiver->primary_mobile }}</small>
-                                            @if ($receiverAddress && $receiverAddress->city)
-                                                <small class="text-muted">{{ $receiverAddress->city->name ?? '' }}</small>
-                                            @endif
-                                        @else
-                                            <span class="text-muted small">--</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($senderAddress && $receiverAddress)
-                                            <div class="d-flex align-items-center gap-1 small">
-                                                <span class="text-muted">{{ $senderAddress->city?->name ?? '--' }}</span>
-                                                <i class="fas fa-arrow-right text-primary mx-1"></i>
-                                                <span class="text-muted">{{ $receiverAddress->city?->name ?? '--' }}</span>
+                                        <div class="sr-route-box">
+                                            <div class="sr-route-person">
+                                                <span class="sr-route-label">{{ $text('From', 'من') }}</span>
+                                                <strong>{{ $sender?->full_name ?? '--' }}</strong>
+                                                <small>{{ $locationLabel($senderAddress) }}</small>
                                             </div>
-                                        @else
-                                            <span class="text-muted small">--</span>
-                                        @endif
+
+                                            <div class="sr-route-arrow">
+                                                <i class="fas {{ $routeIcon }}"></i>
+                                            </div>
+
+                                            <div class="sr-route-person">
+                                                <span class="sr-route-label">{{ $text('To', 'إلى') }}</span>
+                                                <strong>{{ $receiver?->full_name ?? '--' }}</strong>
+                                                <small>{{ $locationLabel($receiverAddress) }}</small>
+                                            </div>
+                                        </div>
                                     </td>
+
                                     <td>
-                                        <span class="shipment-pill">{{ $packageCount }} {{ __('admin-dashboard.package_unit') }}</span>
+                                        <div class="sr-package-name">{{ $packageLabel }}</div>
+                                        <div class="sr-muted">
+                                            {{ $shipmentRequest->packages_count ?? 0 }}
+                                            {{ $text('items', 'عنصر') }}
+                                        </div>
                                     </td>
+
                                     <td>
-                                        <span class="status-pill btn-{{ $statusColor }}">
-                                            <span class="status-dot"></span>
-                                            {{ __('admin-dashboard.' . $statusValue) !== 'admin-dashboard.' . $statusValue ? __('admin-dashboard.' . $statusValue) : ucfirst(str_replace('_', ' ', $statusValue)) }}
+                                        <span class="sr-status sr-status-{{ $statusTone($shipmentRequest->status?->value) }}">
+                                            <i></i>
+                                            {{ $statusLabel($shipmentRequest->status?->value) }}
                                         </span>
                                     </td>
-                                    <td>@include('admin.partials.date', ['date' => $sr->created_at])</td>
-                                    <td>
-                                        <div class="actions-group">
-                                            <a href="{{ route('admin.shipment-requests.show', $sr->id) }}" class="btn btn-sm btn-primary text-white action-icon-btn" title="{{ __('admin-dashboard.view') }}" data-bs-toggle="tooltip" data-bs-placement="top">
-                                                <i class="fas fa-eye"></i>
+
+                                    <td class="text-end">
+                                        @if ($showUrl)
+                                            <a href="{{ $showUrl }}" class="btn btn-sm sr-view-btn">
+                                                <i class="fas fa-eye {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
+                                                {{ $text('View', 'عرض') }}
                                             </a>
-                                        </div>
+                                        @else
+                                            <span class="sr-muted">--</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
@@ -176,115 +355,577 @@
                     </table>
                 </div>
 
-                <div class="d-flex justify-content-center mt-4 mb-3">
+                <div class="sr-pagination">
                     <x-pagination :paginator="$requests" />
                 </div>
             @else
-                <div class="text-center py-5">
-                    <div class="empty-state d-inline-block px-4 py-5">
-                        <i class="fas fa-shipping-fast empty-icon mb-3"></i>
-                        <h5 class="text-muted">{{ __('admin-dashboard.no_shipment_requests_found') }}</h5>
-                        <p class="text-muted mb-2">{{ __('admin-dashboard.no_shipment_requests_message') }}</p>
-                        @if(request('search') || request('status') !== 'all' || request('date_from') || request('date_to'))
-                            <a href="{{ route('admin.shipment-requests.index') }}" class="btn btn-outline-primary btn-sm mt-2">
-                                <i class="fas fa-undo me-1"></i> {{ app()->getLocale() === 'ar' ? 'مسح الفلاتر' : 'Clear filters' }}
-                            </a>
-                        @endif
+                <div class="sr-empty">
+                    <div class="sr-empty-icon">
+                        <i class="fas fa-box-open"></i>
                     </div>
+
+                    <h5>{{ $text('No shipment requests found', 'لا توجد طلبات شحن') }}</h5>
+
+                    <p>
+                        {{ $hasFilters
+                            ? $text('No requests match the selected filters. Try clearing filters or using different search terms.', 'لا توجد طلبات مطابقة للفلاتر الحالية. جرّب مسح الفلاتر أو استخدام كلمات بحث مختلفة.')
+                            : $text('Shipment requests will appear here once customers submit them.', 'ستظهر طلبات الشحن هنا عند إرسالها من العملاء.')
+                        }}
+                    </p>
+
+                    @if ($hasFilters)
+                        <a href="{{ $safeRoute('admin.shipment-requests.index') ?? url()->current() }}" class="btn sr-view-btn">
+                            <i class="fas fa-times {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
+                            {{ $text('Clear filters', 'مسح الفلاتر') }}
+                        </a>
+                    @endif
                 </div>
             @endif
-        </div>
+        </section>
     </div>
 
     <style>
-        .orders-card {
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-            border: 1px solid rgba(226, 232, 240, 0.9) !important;
+        .sr-page {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
-        .table-wrap { background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%); }
-        .search-shell .input-group-text, .search-shell .form-control, .filter-select-modern {
-            border-color: #e5e7eb;
+
+        .sr-back-btn {
             min-height: 44px;
+            padding: .55rem 1rem;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            color: #1f2937;
+            font-weight: 700;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, .04);
         }
-        .search-shell .input-group-text { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
-        .search-input-modern { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
-        .search-input-modern:focus, .filter-select-modern:focus {
-            box-shadow: 0 0 0 0.18rem rgba(59, 130, 246, 0.12);
-            border-color: #93c5fd;
+
+        .sr-back-btn:hover {
+            background: #f8fafc;
+            color: #111827;
         }
-        .filter-select-modern {
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+
+        .sr-header-card,
+        .sr-filter-card,
+        .sr-table-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, .04);
         }
-        .rows-counter-badge { min-height: 42px; display: inline-flex; align-items: center; }
-        .orders-table thead th {
+
+        .sr-header-card {
+            padding: 1.25rem;
+        }
+
+        .sr-header-main {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .sr-header-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+
+        .sr-chip {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            padding: .28rem .7rem;
+            margin-bottom: .5rem;
+            border-radius: 999px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #2563eb;
+            font-size: .78rem;
+            font-weight: 800;
+        }
+
+        .sr-header-text h4 {
+            margin: 0;
+            color: #111827;
+            font-size: 1.45rem;
+            font-weight: 900;
+            letter-spacing: -.02em;
+        }
+
+        .sr-header-text p {
+            margin: .45rem 0 0;
+            max-width: 820px;
+            color: #64748b;
+            font-size: .95rem;
+            line-height: 1.8;
+        }
+
+        .sr-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .75rem;
+            margin-top: 1.15rem;
+        }
+
+        .sr-metric-item {
+            min-height: 74px;
+            padding: .85rem 1rem;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .sr-metric-item span {
+            color: #64748b;
+            font-size: .78rem;
+            font-weight: 800;
+            margin-bottom: .35rem;
+        }
+
+        .sr-metric-item strong {
+            color: #111827;
+            font-size: 1.35rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .sr-filter-card {
+            padding: 1.25rem;
+        }
+
+        .sr-section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sr-section-head h5 {
+            margin: 0;
+            color: #111827;
+            font-size: 1rem;
+            font-weight: 900;
+        }
+
+        .sr-section-head p {
+            margin: .25rem 0 0;
+            color: #64748b;
+            font-size: .88rem;
+        }
+
+        .sr-clear-btn {
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            color: #475569;
+            font-weight: 700;
+        }
+
+        .sr-label {
+            display: block;
+            margin-bottom: .4rem;
+            color: #475569;
+            font-size: .8rem;
+            font-weight: 800;
+        }
+
+        .sr-control {
+            min-height: 44px;
+            border-radius: 13px;
+            border-color: #dbe3ea;
+            color: #111827;
+            font-size: .9rem;
+            box-shadow: none;
+        }
+
+        .sr-control:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 .2rem rgba(37, 99, 235, .1);
+        }
+
+        .sr-input-icon {
+            position: relative;
+        }
+
+        .sr-input-icon i {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            z-index: 2;
+        }
+
+        [dir="ltr"] .sr-input-icon i {
+            left: .85rem;
+        }
+
+        [dir="rtl"] .sr-input-icon i {
+            right: .85rem;
+        }
+
+        [dir="ltr"] .sr-input-icon .sr-control {
+            padding-left: 2.5rem;
+        }
+
+        [dir="rtl"] .sr-input-icon .sr-control {
+            padding-right: 2.5rem;
+        }
+
+        .sr-submit-btn {
+            min-height: 44px;
+            border-radius: 13px;
+            font-weight: 800;
+            box-shadow: 0 10px 18px rgba(37, 99, 235, .12);
+        }
+
+        .sr-active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .5rem;
+            margin-top: .9rem;
+        }
+
+        .sr-active-title {
+            color: #64748b;
+            font-size: .8rem;
+            font-weight: 800;
+        }
+
+        .sr-active-chip {
+            display: inline-flex;
+            gap: .25rem;
+            align-items: center;
+            padding: .35rem .75rem;
+            border-radius: 999px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #1d4ed8;
+            font-size: .78rem;
+            font-weight: 700;
+        }
+
+        .sr-table-card {
+            overflow: hidden;
+        }
+
+        .sr-table-head {
+            padding: 1.25rem 1.25rem 0;
+        }
+
+        .sr-page-count {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            padding: .42rem .8rem;
+            border-radius: 999px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            color: #475569;
+            font-size: .8rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .sr-table-wrap {
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .sr-table {
+            min-width: 880px;
+            table-layout: fixed;
+        }
+
+        .sr-table thead th {
+            padding: .85rem 1rem;
             background: #f8fafc;
             color: #475569;
-            font-weight: 600;
-            border-color: #e5e7eb;
-            padding: 0.95rem 1rem;
-            box-shadow: inset 0 -1px 0 #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: .76rem;
+            font-weight: 900;
+            white-space: nowrap;
         }
-        .orders-table tbody td { padding: 1rem; border-color: #edf0f5; }
-        .orders-table tbody tr { transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
-        .orders-table tbody tr:hover {
+
+        .sr-table tbody td {
+            padding: 1rem;
+            border-color: #eef2f7;
+            vertical-align: middle;
+        }
+
+        .sr-table tbody tr:hover {
+            background: #fbfdff;
+        }
+
+        .sr-col-request {
+            width: 28%;
+        }
+
+        .sr-col-route {
+            width: 38%;
+        }
+
+        .sr-col-package {
+            width: 14%;
+        }
+
+        .sr-col-status {
+            width: 10%;
+        }
+
+        .sr-col-action {
+            width: 10%;
+        }
+
+        .sr-request-cell {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            min-width: 0;
+        }
+
+        .sr-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .sr-request-info {
+            min-width: 0;
+        }
+
+        .sr-request-no {
+            color: #111827;
+            font-weight: 900;
+            line-height: 1.4;
+        }
+
+        .sr-customer-name {
+            color: #111827;
+            font-weight: 700;
+            font-size: .9rem;
+            line-height: 1.5;
+        }
+
+        .sr-muted {
+            color: #64748b;
+            font-size: .78rem;
+            line-height: 1.5;
+        }
+
+        .sr-dot-separator {
+            color: #cbd5e1;
+            padding-inline: .3rem;
+        }
+
+        .sr-route-box {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+            align-items: center;
+            gap: .55rem;
+        }
+
+        .sr-route-person {
+            min-width: 0;
+            padding: .65rem .75rem;
+            border-radius: 14px;
             background: #f8fafc;
-            box-shadow: inset 0 0 0 9999px rgba(248, 250, 252, 0.35);
-            transform: translateY(-1px);
+            border: 1px solid #e2e8f0;
         }
-        .order-avatar {
-            width: 42px; height: 42px; border-radius: 14px;
-            display: inline-flex; align-items: center; justify-content: center;
-            flex: 0 0 auto;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+
+        .sr-route-label {
+            display: inline-block;
+            margin-bottom: .2rem;
+            color: #2563eb;
+            font-size: .7rem;
+            font-weight: 900;
         }
-        .shipment-pill {
-            display: inline-block; padding: 0.38rem 0.75rem;
-            border-radius: 999px; background: #f8fafc; color: #334155;
-            font-size: 0.88rem; border: 1px solid #e2e8f0; white-space: nowrap;
+
+        .sr-route-person strong {
+            display: block;
+            color: #111827;
+            font-size: .86rem;
+            font-weight: 900;
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .status-pill {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            padding-inline: 0.85rem; border-radius: 999px;
-            min-height: 36px; font-weight: 600;
-            box-shadow: 0 8px 20px rgba(15,23,42,0.06);
+
+        .sr-route-person small {
+            display: block;
+            color: #64748b;
+            font-size: .75rem;
+            line-height: 1.5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .status-pill.btn-success { background-color: #10b981 !important; color: white !important; }
-        .status-pill.btn-warning { background-color: #f59e0b !important; color: white !important; }
-        .status-pill.btn-danger { background-color: #ef4444 !important; color: white !important; }
-        .status-pill.btn-info { background-color: #3b82f6 !important; color: white !important; }
-        .status-pill.btn-primary { background-color: #6366f1 !important; color: white !important; }
-        .status-pill.btn-dark { background-color: #1e293b !important; color: white !important; }
-        .status-pill.btn-secondary { background-color: #94a3b8 !important; color: white !important; }
-        .status-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: currentColor; box-shadow: 0 0 0 3px rgba(255,255,255,0.42);
-            flex: 0 0 auto;
+
+        .sr-route-arrow {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .75rem;
         }
-        .actions-group { display: inline-flex; flex-wrap: nowrap; align-items: center; gap: 0.45rem; }
-        .action-icon-btn {
-            width: 38px; min-width: 38px; height: 38px; padding: 0;
-            box-shadow: 0 8px 18px rgba(15,23,42,0.05);
-            border-radius: 999px !important;
-            display: inline-flex; align-items: center; justify-content: center;
+
+        .sr-package-name {
+            color: #111827;
+            font-size: .9rem;
+            font-weight: 900;
+            line-height: 1.5;
         }
-        .empty-state { background: linear-gradient(180deg, #fafafa 0%, #f8fafc 100%); border: 1px dashed #d1d5db; border-radius: 18px; }
-        .empty-icon { font-size: 2.25rem; color: #94a3b8; }
-        .order-name { line-height: 1.25; }
-        .order-subname { line-height: 1.2; }
-        @media (max-width: 991.98px) { .rows-counter-badge { margin-inline-start: auto; } }
+
+        .sr-status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem;
+            padding: .42rem .75rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            font-size: .78rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .sr-status i {
+            width: .45rem;
+            height: .45rem;
+            border-radius: 999px;
+            background: currentColor;
+        }
+
+        .sr-status-warning {
+            background: #fffbeb;
+            color: #b45309;
+            border-color: #fde68a;
+        }
+
+        .sr-status-secondary {
+            background: #f8fafc;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        .sr-view-btn {
+            border-radius: 999px;
+            border: 1px solid #bfdbfe;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 800;
+            padding-inline: .9rem;
+        }
+
+        .sr-view-btn:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+        }
+
+        .sr-pagination {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid #e5e7eb;
+            background: #fff;
+        }
+
+        .sr-empty {
+            padding: 4rem 1.5rem;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .sr-empty-icon {
+            width: 78px;
+            height: 78px;
+            margin: 0 auto 1rem;
+            border-radius: 26px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            color: #94a3b8;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.9rem;
+        }
+
+        .sr-empty h5 {
+            color: #111827;
+            font-weight: 900;
+            margin-bottom: .45rem;
+        }
+
+        .sr-empty p {
+            max-width: 520px;
+            margin: 0 auto 1rem;
+            color: #64748b;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 1199.98px) {
+            .sr-table {
+                min-width: 820px;
+            }
+        }
+
         @media (max-width: 767.98px) {
-            .orders-table thead th, .orders-table tbody td { padding: 0.8rem 0.85rem; font-size: 0.9rem; }
-            .actions-group { width: 100%; flex-wrap: wrap; }
-            .actions-group .action-icon-btn { min-width: 0; width: auto; flex: 1 1 calc(50% - 0.25rem); }
+            .sr-header-card,
+            .sr-filter-card {
+                padding: 1rem;
+                border-radius: 18px;
+            }
+
+            .sr-header-main {
+                flex-direction: column;
+            }
+
+            .sr-header-text h4 {
+                font-size: 1.2rem;
+            }
+
+            .sr-metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .sr-section-head {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .sr-table-head {
+                padding: 1rem 1rem 0;
+            }
+
+            .sr-table {
+                min-width: 780px;
+            }
         }
     </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el, { placement: 'top', fallbackPlacements: [] }); });
-        });
-    </script>
+@endsection

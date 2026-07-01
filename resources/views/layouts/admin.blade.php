@@ -1432,13 +1432,13 @@
                                     <span class="link-text">{{ __('admin-dashboard.monthly_revenue') }}</span>
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.shipment-orders*') ? 'active' : '' }}"
                                 href="{{ route('admin.shipment-orders') }}">
                                     <i class="fas fa-shipping-fast"></i>
                                     <span class="link-text">{{ __('admin-dashboard.shipment_orders') }}</span>
                                 </a>
-                            </li>
+                            </li> -->
 
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.shipment-requests*') ? 'active' : '' }}"
@@ -1893,12 +1893,12 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.states.index'))
+                                    @if($employee->can('admin.settings.governorates.index'))
                                         <li class="nav-item">
-                                            <a class="nav-link {{ request()->routeIs('admin.settings.states.*') ? 'active' : '' }}"
-                                            href="{{ route('admin.settings.states.index') }}">
-                                                    <i class="fas fa-globe"></i>
-                                                    <span class="link-text">{{ __('admin-dashboard.states') }}</span>
+                                            <a class="nav-link {{ request()->routeIs('admin.settings.governorates.*') ? 'active' : '' }}"
+                                            href="{{ route('admin.settings.governorates.index') }}">
+                                                    <i class="fas fa-map-location-dot"></i>
+                                                    <span class="link-text">{{ app()->getLocale() === 'ar' ? 'المحافظات' : 'Governorates' }}</span>
                                             </a>
                                         </li>
                                     @endif
@@ -1907,7 +1907,7 @@
                                             <a class="nav-link {{ request()->routeIs('admin.settings.cities.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.cities.index') }}">
                                                     <i class="fas fa-city"></i>
-                                                    <span class="link-text">{{ __('admin-dashboard.cities') }}</span>
+                                                    <span class="link-text">{{ app()->getLocale() === 'ar' ? 'المدن' : 'Cities' }}</span>
                                             </a>
                                         </li>
                                     @endif
