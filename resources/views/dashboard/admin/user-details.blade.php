@@ -3,387 +3,1159 @@
 @section('title', __('admin-dashboard.users_management'))
 @section('page-title', __('admin-dashboard.users_management'))
 
+@php
+    $locale = app()->getLocale();
+    $isArabic = $locale === 'ar';
+
+    $text = static fn (string $en, string $ar) => $isArabic ? $ar : $en;
+
+    $displayName = $user->name ?: ($user->username ?: $text('User', 'مستخدم'));
+    $initial = mb_substr($displayName, 0, 1);
+
+    $addressesCount = $user->addresses ? $user->addresses->count() : 0;
+    $defaultAddress = $user->addresses ? $user->addresses->firstWhere('is_default', true) : null;
+
+    $profileScoreChecks = [
+        filled($user->name),
+        filled($user->username),
+        filled($user->email),
+        ! empty($user->email_verified_at),
+        filled($user->phone),
+        ! empty($user->phone_verified_at),
+        $addressesCount > 0,
+    ];
+
+    $profileScore = (int) round((collect($profileScoreChecks)->filter()->count() / count($profileScoreChecks)) * 100);
+
+    $statusBadges = [
+        [
+            'label' => $user->phone_verified_at ? __('admin-dashboard.phone_verified') : __('admin-dashboard.phone_not_verified'),
+            'tone' => $user->phone_verified_at ? 'success' : 'danger',
+            'icon' => $user->phone_verified_at ? 'fa-check-circle' : 'fa-times-circle',
+        ],
+    ];
+
+    if ($user->email_verified_at) {
+        $statusBadges[] = [
+            'label' => __('admin-dashboard.email_verified'),
+            'tone' => 'success',
+            'icon' => 'fa-envelope-circle-check',
+        ];
+    } else {
+        $statusBadges[] = [
+            'label' => $text('Email not verified', 'البريد غير موثق'),
+            'tone' => 'danger',
+            'icon' => 'fa-envelope',
+        ];
+    }
+
+    $addressLabel = static function ($address) use ($locale, $text) {
+        if (! $address) {
+            return $text('Not provided', 'غير متوفر');
+        }
+
+        $parts = array_filter([
+            $address->street_name,
+            optional($address->zone)->{"name_{$locale}"} ?? optional($address->zone)->name_en,
+            optional($address->city)->{"name_{$locale}"} ?? optional($address->city)->name_en,
+            optional($address->state)->{"name_{$locale}"} ?? optional($address->state)->name_en,
+            $address->landmark,
+        ]);
+
+        return ! empty($parts) ? implode(' · ', $parts) : $text('Not provided', 'غير متوفر');
+    };
+
+    $addressTypeLabel = static fn ($type) => match ((string) $type) {
+        'home' => $text('Home', 'المنزل'),
+        'work' => $text('Work', 'العمل'),
+        default => $text(ucfirst((string) $type), ucfirst((string) $type)),
+    };
+
+    $addressTypeIcon = static fn ($type) => match ((string) $type) {
+        'home' => 'fa-home',
+        'work' => 'fa-briefcase',
+        default => 'fa-map-marker-alt',
+    };
+
+    $addressTypeTone = static fn ($type) => match ((string) $type) {
+        'home' => 'success',
+        'work' => 'primary',
+        default => 'secondary',
+    };
+@endphp
+
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('admin-dashboard.dashboard') }}</a></li>
-    <li class="breadcrumb-item active">{{ __('admin-dashboard.users') }}</li>
+    <li class="breadcrumb-item">
+        <a href="{{ route('admin.dashboard') }}">{{ __('admin-dashboard.dashboard') }}</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{{ route('admin.users') }}">{{ __('admin-dashboard.users') }}</a>
+    </li>
+    <li class="breadcrumb-item active">{{ __('admin-dashboard.user_details') }}</li>
 @endsection
 
 @section('content')
-    <div class="card shadow-sm">
-        <div class="card-header bg-white border-bottom">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h5 class="mb-0 fw-bold">
-                        <i class="fas fa-user-circle me-2 text-primary"></i>
+    <div class="usd-page" dir="{{ $isArabic ? 'rtl' : 'ltr' }}">
+        <section class="usd-hero-card">
+            <div class="usd-hero-main">
+                @if($user->avatar)
+                    <img src="{{ asset($user->avatar) }}" alt="{{ $displayName }}" class="usd-hero-avatar-img">
+                @else
+                    <span class="usd-hero-avatar">{{ $initial }}</span>
+                @endif
+
+                <div class="usd-hero-text">
+                    <span class="usd-chip">
                         {{ __('admin-dashboard.user_details') }}
-                    </h5>
-                    <small class="text-muted">
-                        <i class="fas fa-hashtag me-1"></i>
-                        ID: {{ $user->id }}
-                    </small>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    @if($user->phone_verified_at)
-                        <span class="badge bg-success px-3 py-2">
-                            <i class="fas fa-check-circle me-1"></i>
-                            {{ __('admin-dashboard.phone_verified') }}
+                    </span>
+
+                    <h3>{{ $displayName }}</h3>
+
+                    <div class="usd-meta-row">
+                        <span class="usd-meta-pill">
+                            <i class="fas fa-hashtag"></i>
+                            ID: {{ $user->id }}
                         </span>
-                    @else
-                        <span class="badge bg-danger px-3 py-2">
-                            <i class="fas fa-times-circle me-1"></i>
-                            {{ __('admin-dashboard.phone_not_verified') }}
-                        </span>
-                    @endif
-                    @if($user->email_verified_at)
-                        <span class="badge bg-success px-3 py-2">
-                            <i class="fas fa-envelope me-1"></i>
-                            {{ __('admin-dashboard.email_verified') }}
-                        </span>
-                    @endif
-                </div>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="row g-4">
-                <!-- Left Column - User Profile -->
-                <div class="col-md-4">
-                    <div class="text-center mb-4">
-                        @if($user->avatar)
-                            <img src="{{ asset($user->avatar) }}"
-                                 alt="{{ $user->name }}"
-                                 class="rounded-circle mb-3 border shadow-sm"
-                                 style="width: 140px; height: 140px; object-fit: cover;">
-                        @else
-                            <div class="bg-gradient rounded-circle d-flex align-items-center justify-content-center mb-3 mx-auto border shadow-sm"
-                                 style="width: 140px; height: 140px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                <i class="fas fa-user fa-4x text-white"></i>
-                            </div>
+
+                        @if($user->user_number)
+                            <span class="usd-meta-pill">
+                                <i class="fas fa-id-card"></i>
+                                {{ $user->user_number }}
+                            </span>
                         @endif
-                        <h4 class="mb-1 fw-bold">{{ $user->name }}</h4>
+
                         @if($user->username)
-                            <small class="text-muted d-block mb-3">
-                                <i class="fas fa-at me-1"></i>
+                            <span class="usd-meta-pill">
+                                <i class="fas fa-at"></i>
                                 {{ $user->username }}
-                            </small>
+                            </span>
                         @endif
                     </div>
 
-                    <!-- User Stats -->
-                    <div class="card mb-3 border-0 shadow-sm">
-                        <div class="card-body p-4">
-                            <div class="row text-center g-3">
-                                <div class="col-6">
-                                    <div class="p-3 rounded" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                        <div class="text-white mb-2">
-                                            <i class="fas fa-shipping-fast fa-2x"></i>
-                                        </div>
-                                        <div class="h3 mb-0 text-white fw-bold">{{ $user->orders_count }}</div>
-                                        <small class="text-white opacity-75">{{ __('admin-dashboard.shipments') }}</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="p-3 rounded" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
-                                        <div class="text-white mb-2">
-                                            <i class="fas fa-shopping-cart fa-2x"></i>
-                                        </div>
-                                        <div class="h3 mb-0 text-white fw-bold">{{ $user->ecommerce_orders_count }}</div>
-                                        <small class="text-white opacity-75">{{ __('admin-dashboard.ecommerce_orders') }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="usd-badges-row">
+                        @foreach($statusBadges as $badge)
+                            <span class="usd-badge usd-badge-{{ $badge['tone'] }}">
+                                <i class="fas {{ $badge['icon'] }}"></i>
+                                {{ $badge['label'] }}
+                            </span>
+                        @endforeach
                     </div>
-
-                    <!-- User Info -->
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body p-0">
-                            <div class="list-group list-group-flush">
-                                <div class="list-group-item border-0 d-flex justify-content-between align-items-center py-3">
-                                    <div>
-                                        <i class="fas fa-calendar-alt text-primary me-2"></i>
-                                        <span class="fw-medium">{{ __('admin-dashboard.join_date') }}</span>
-                                    </div>
-                                    <div class="text-end">
-                                        <div class="fw-semibold">{{ $user->created_at->format('M d, Y') }}</div>
-                                        <small class="text-muted">{{ $user->created_at->diffForHumans() }}</small>
-                                    </div>
-                                </div>
-                                @if($user->default_lang)
-                                <div class="list-group-item border-0 d-flex justify-content-between align-items-center py-3">
-                                    <div>
-                                        <i class="fas fa-language text-primary me-2"></i>
-                                        <span class="fw-medium">{{ __('admin-dashboard.default_language') }}</span>
-                                    </div>
-                                    <span class="badge bg-info px-3 py-2">{{ strtoupper($user->default_lang) }}</span>
-                                </div>
-                                @endif
-                                @if($user->notifications_enabled !== null)
-                                <div class="list-group-item border-0 d-flex justify-content-between align-items-center py-3">
-                                    <div>
-                                        <i class="fas fa-bell text-primary me-2"></i>
-                                        <span class="fw-medium">{{ __('admin-dashboard.notifications') }}</span>
-                                    </div>
-                                    <span class="badge bg-{{ $user->notifications_enabled ? 'success' : 'secondary' }} px-3 py-2">
-                                        <i class="fas fa-{{ $user->notifications_enabled ? 'check' : 'times' }}-circle me-1"></i>
-                                        {{ $user->notifications_enabled ? __('admin-dashboard.enabled') : __('admin-dashboard.disabled') }}
-                                    </span>
-                                </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Column - Details -->
-                <div class="col-md-8">
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-white border-bottom">
-                            <h6 class="mb-0 fw-bold">
-                                <i class="fas fa-info-circle me-2 text-primary"></i>
-                                {{ __('admin-dashboard.contact_information') }}
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted text-uppercase small mb-2 fw-semibold">
-                                        <i class="fas fa-envelope me-1 text-primary"></i>
-                                        {{ __('admin-dashboard.user_email') }}
-                                    </label>
-                                    <div class="d-flex align-items-center">
-                                        <a href="mailto:{{ $user->email }}" class="text-decoration-none fw-medium">
-                                            {{ $user->email }}
-                                        </a>
-                                        @if($user->email_verified_at)
-                                            <span class="badge bg-success ms-2 px-2 py-1">
-                                                <i class="fas fa-check-circle me-1"></i>
-                                                {{ __('admin-dashboard.verified') }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted text-uppercase small mb-2 fw-semibold">
-                                        <i class="fas fa-phone me-1 text-primary"></i>
-                                        {{ __('admin-dashboard.user_phone') }}
-                                    </label>
-                                    <div class="d-flex align-items-center flex-wrap gap-2">
-                                        @if($user->phone)
-                                            <a href="tel:{{ $user->phone }}" class="text-decoration-none fw-medium">
-                                                {{ $user->phone }}
-                                            </a>
-                                            <span class="badge bg-{{ $user->phone_verified_at ? 'success' : 'danger' }} px-2 py-1">
-                                                <i class="fas fa-{{ $user->phone_verified_at ? 'check' : 'times' }}-circle me-1"></i>
-                                                {{ __('admin-dashboard.' . ($user->phone_verified_at ? 'verified' : 'not_verified')) }}
-                                            </span>
-                                        @else
-                                            <span class="text-muted">
-                                                <i class="fas fa-phone-slash me-1"></i>
-                                                {{ __('admin-dashboard.not_provided') }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Addresses Section -->
-                    @if($user->addresses && $user->addresses->count())
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-white border-bottom">
-                                <h6 class="mb-0 fw-bold">
-                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>
-                                    {{ __('admin-dashboard.addresses') }}
-                                    <span class="badge bg-primary ms-2 px-2 py-1">{{ $user->addresses->count() }}</span>
-                                </h6>
-                            </div>
-                            <div class="card-body">
-
-                                <div class="row g-3">
-                                    @foreach($user->addresses as $address)
-                                        <div class="col-md-6">
-                                            <div class="card h-100 border-0 shadow-sm {{ $address->is_default ? 'border-primary border-2' : '' }}">
-                                                <div class="card-body p-4">
-                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <div>
-                                                        <span class="badge bg-{{ $address->address_type === 'home' ? 'success' : ($address->address_type === 'work' ? 'primary' : 'secondary') }} px-2 py-1">
-                                                            <i class="fas fa-{{ $address->address_type === 'home' ? 'home' : ($address->address_type === 'work' ? 'briefcase' : 'map-marker-alt') }} me-1"></i>
-                                                            {{ ucfirst($address->address_type) }}
-                                                        </span>
-                                                        @if($address->is_default)
-                                                            <span class="badge bg-warning text-dark ms-1 px-2 py-1">
-                                                                <i class="fas fa-star me-1"></i>
-                                                                {{ __('admin-dashboard.default') }}
-                                                            </span>
-                                                        @endif
-                                                    </div>
-                                                    <small class="text-muted">
-                                                        {{ $address->created_at->format('M d, Y') }}
-                                                    </small>
-                                                </div>
-
-                                                <div class="address-details small">
-                                                    @php
-                                                        $lang = app()->getLocale();
-                                                    @endphp
-                                                    <div class="mb-1">
-                                                        <i class="fas fa-road text-muted me-2"></i>
-                                                        <strong>{{ $address->street_name }}</strong>
-                                                    </div>
-
-                                                    @if($address->zone)
-                                                        <div class="mb-1">
-                                                            <i class="fas fa-map-pin text-muted me-2"></i>
-                                                            {{ optional($address->zone)->{"name_{$lang}"} ?? $address->zone->name_en }}
-                                                        </div>
-                                                    @endif
-
-                                                    <div class="row">
-                                                        @if($address->city)
-                                                            <div class="col-6">
-                                                                <small class="text-muted">{{ __('admin-dashboard.city') }}:</small>
-                                                                <div>{{ optional($address->city)->{"name_{$lang}"} ?? $address->city->name_en }}</div>
-                                                            </div>
-                                                        @endif
-                                                        @if($address->state)
-                                                            <div class="col-6">
-                                                                <small class="text-muted">{{ __('admin-dashboard.state') }}:</small>
-                                                                <div>{{ optional($address->state)->{"name_{$lang}"} ?? $address->state->name_en }}</div>
-                                                            </div>
-                                                        @endif
-                                                    </div>
-
-                                                    <div class="row mt-2">
-                                                        <div class="col-6">
-                                                            <small class="text-muted">{{ __('messages.building') }}:</small>
-                                                            <div class="fw-medium">{{ $address->building }}</div>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <small class="text-muted">{{ __('messages.floor') }}:</small>
-                                                            <div class="fw-medium">{{ $address->floor }}</div>
-                                                        </div>
-                                                    </div>
-
-                                                    @if($address->landmark)
-                                                        <div class="mt-2">
-                                                            <small class="text-muted">{{ __('messages.landmark') }}:</small>
-                                                            <div>{{ $address->landmark }}</div>
-                                                        </div>
-                                                    @endif
-
-                                                    @if($address->latitude && $address->longitude)
-                                                        <div class="mt-3">
-                                                            <a href="https://maps.google.com/?q={{ $address->latitude }},{{ $address->longitude }}"
-                                                               target="_blank"
-                                                               class="btn btn-sm btn-outline-primary">
-                                                                <i class="fas fa-map-marked-alt me-1"></i>
-                                                                {{ __('admin-dashboard.view_on_map') }}
-                                                            </a>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                                <div class="card-footer bg-light border-top py-2">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-hashtag me-1"></i>
-                                                            ID: {{ $address->id }}
-                                                        </small>
-                                                        <small class="badge bg-secondary px-2 py-1">
-                                                            {{ $address->is_village ? __('admin-dashboard.village') : __('admin-dashboard.city_area') }}
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body">
-                                <div class="text-center py-5">
-                                    <i class="fas fa-map-marker-alt fa-4x text-muted mb-3"></i>
-                                    <h6 class="text-muted mb-0">{{ __('admin-dashboard.no_addresses_found') }}</h6>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
                 </div>
             </div>
-        </div>
-        <div class="card-footer bg-white border-top">
-            <div class="d-flex justify-content-between">
-                <a href="{{ route('admin.users') }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>
+
+            <div class="usd-hero-side">
+                <div class="usd-score-card">
+                    <div class="usd-score-top">
+                        <span>{{ $text('Profile completeness', 'اكتمال الملف') }}</span>
+                        <strong>{{ $profileScore }}%</strong>
+                    </div>
+
+                    <div class="usd-score-bar">
+                        <span style="width: {{ $profileScore }}%"></span>
+                    </div>
+                </div>
+
+                <a href="{{ route('admin.users') }}" class="btn usd-back-btn">
+                    <i class="fas {{ $isArabic ? 'fa-arrow-right ms-1' : 'fa-arrow-left me-1' }}"></i>
                     {{ __('admin-dashboard.back_to_list') }}
                 </a>
             </div>
+        </section>
+
+        <section class="usd-metrics">
+            <div class="usd-metric-item">
+                <span>{{ __('admin-dashboard.shipments') }}</span>
+                <strong>{{ $user->orders_count }}</strong>
+            </div>
+
+            <div class="usd-metric-item">
+                <span>{{ __('admin-dashboard.ecommerce_orders') }}</span>
+                <strong>{{ $user->ecommerce_orders_count }}</strong>
+            </div>
+
+            <div class="usd-metric-item">
+                <span>{{ __('admin-dashboard.addresses') }}</span>
+                <strong>{{ $addressesCount }}</strong>
+            </div>
+
+            <div class="usd-metric-item">
+                <span>{{ __('admin-dashboard.join_date') }}</span>
+                <strong class="usd-metric-date">{{ $user->created_at->format('M d, Y') }}</strong>
+            </div>
+        </section>
+
+        <div class="row g-4">
+            <div class="col-12 col-xl-4">
+                <section class="usd-card h-100">
+                    <div class="usd-section-head">
+                        <div>
+                            <h5>{{ $text('Profile overview', 'ملخص المستخدم') }}</h5>
+                            <p>{{ $text('Basic account preferences and status.', 'بيانات الحساب والتفضيلات الأساسية.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="usd-profile-box">
+                        @if($user->avatar)
+                            <img src="{{ asset($user->avatar) }}" alt="{{ $displayName }}">
+                        @else
+                            <span>{{ $initial }}</span>
+                        @endif
+
+                        <div>
+                            <strong>{{ $displayName }}</strong>
+
+                            @if($user->username)
+                                <small>
+                                    <i class="fas fa-at"></i>
+                                    {{ $user->username }}
+                                </small>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="usd-info-list">
+                        <div>
+                            <span>{{ __('admin-dashboard.join_date') }}</span>
+                            <strong>{{ $user->created_at->format('M d, Y') }}</strong>
+                            <small>{{ $user->created_at->diffForHumans() }}</small>
+                        </div>
+
+                        @if($user->default_lang)
+                            <div>
+                                <span>{{ __('admin-dashboard.default_language') }}</span>
+                                <strong>{{ strtoupper($user->default_lang) }}</strong>
+                            </div>
+                        @endif
+
+                        @if($user->notifications_enabled !== null)
+                            <div>
+                                <span>{{ __('admin-dashboard.notifications') }}</span>
+
+                                <strong class="{{ $user->notifications_enabled ? 'usd-text-success' : 'usd-text-muted' }}">
+                                    <i class="fas fa-{{ $user->notifications_enabled ? 'check' : 'times' }}-circle {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
+                                    {{ $user->notifications_enabled ? __('admin-dashboard.enabled') : __('admin-dashboard.disabled') }}
+                                </strong>
+                            </div>
+                        @endif
+
+                        <div>
+                            <span>{{ $text('Default address', 'العنوان الافتراضي') }}</span>
+                            <strong>{{ $defaultAddress ? $addressLabel($defaultAddress) : __('admin-dashboard.not_provided') }}</strong>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-12 col-xl-8">
+                <section class="usd-card h-100">
+                    <div class="usd-section-head">
+                        <div>
+                            <h5>{{ __('admin-dashboard.contact_information') }}</h5>
+                            <p>{{ $text('Email and phone verification status.', 'حالة توثيق البريد والهاتف.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="usd-contact-grid">
+                        <div class="usd-contact-card">
+                            <div class="usd-contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+
+                            <div class="usd-contact-content">
+                                <span>{{ __('admin-dashboard.user_email') }}</span>
+
+                                @if($user->email)
+                                    <a href="mailto:{{ $user->email }}">{{ $user->email }}</a>
+                                @else
+                                    <strong>{{ __('admin-dashboard.not_provided') }}</strong>
+                                @endif
+
+                                @if($user->email_verified_at)
+                                    <small class="usd-inline-status success">
+                                        <i class="fas fa-check-circle"></i>
+                                        {{ __('admin-dashboard.verified') }}
+                                    </small>
+                                @else
+                                    <small class="usd-inline-status danger">
+                                        <i class="fas fa-times-circle"></i>
+                                        {{ __('admin-dashboard.not_verified') }}
+                                    </small>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="usd-contact-card">
+                            <div class="usd-contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+
+                            <div class="usd-contact-content">
+                                <span>{{ __('admin-dashboard.user_phone') }}</span>
+
+                                @if($user->phone)
+                                    <a href="tel:{{ $user->phone }}">{{ $user->phone }}</a>
+                                @else
+                                    <strong>{{ __('admin-dashboard.not_provided') }}</strong>
+                                @endif
+
+                                <small class="usd-inline-status {{ $user->phone_verified_at ? 'success' : 'danger' }}">
+                                    <i class="fas fa-{{ $user->phone_verified_at ? 'check' : 'times' }}-circle"></i>
+                                    {{ __('admin-dashboard.' . ($user->phone_verified_at ? 'verified' : 'not_verified')) }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="usd-activity-strip">
+                        <div>
+                            <span>{{ __('admin-dashboard.shipments') }}</span>
+                            <strong>{{ $user->orders_count }}</strong>
+                        </div>
+
+                        <div>
+                            <span>{{ __('admin-dashboard.ecommerce_orders') }}</span>
+                            <strong>{{ $user->ecommerce_orders_count }}</strong>
+                        </div>
+
+                        <div>
+                            <span>{{ __('admin-dashboard.addresses') }}</span>
+                            <strong>{{ $addressesCount }}</strong>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <section class="usd-card">
+            <div class="usd-section-head">
+                <div>
+                    <h5>{{ __('admin-dashboard.addresses') }}</h5>
+                    <p>
+                        {{ $addressesCount
+                            ? $text('Saved delivery addresses for this user.', 'العناوين المحفوظة لهذا المستخدم.')
+                            : $text('No saved addresses are available yet.', 'لا توجد عناوين محفوظة حتى الآن.')
+                        }}
+                    </p>
+                </div>
+
+                <span class="usd-count-pill">
+                    <i class="fas fa-map-marker-alt {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
+                    {{ $addressesCount }}
+                </span>
+            </div>
+
+            @if($user->addresses && $user->addresses->count())
+                <div class="usd-address-grid">
+                    @foreach($user->addresses as $address)
+                        @php
+                            $typeTone = $addressTypeTone($address->address_type);
+                            $typeIcon = $addressTypeIcon($address->address_type);
+                        @endphp
+
+                        <article class="usd-address-card {{ $address->is_default ? 'is-default' : '' }}">
+                            <div class="usd-address-top">
+                                <div class="usd-address-badges">
+                                    <span class="usd-address-type usd-address-type-{{ $typeTone }}">
+                                        <i class="fas {{ $typeIcon }}"></i>
+                                        {{ $addressTypeLabel($address->address_type) }}
+                                    </span>
+
+                                    @if($address->is_default)
+                                        <span class="usd-address-default">
+                                            <i class="fas fa-star"></i>
+                                            {{ __('admin-dashboard.default') }}
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <small>{{ $address->created_at->format('M d, Y') }}</small>
+                            </div>
+
+                            <div class="usd-address-main">
+                                <h6>{{ $address->street_name ?: __('admin-dashboard.not_provided') }}</h6>
+                                <p>{{ $addressLabel($address) }}</p>
+                            </div>
+
+                            <div class="usd-address-details">
+                                @if($address->city)
+                                    <div>
+                                        <span>{{ __('admin-dashboard.city') }}</span>
+                                        <strong>{{ optional($address->city)->{"name_{$locale}"} ?? $address->city->name_en }}</strong>
+                                    </div>
+                                @endif
+
+                                @if($address->state)
+                                    <div>
+                                        <span>{{ __('admin-dashboard.state') }}</span>
+                                        <strong>{{ optional($address->state)->{"name_{$locale}"} ?? $address->state->name_en }}</strong>
+                                    </div>
+                                @endif
+
+                                <div>
+                                    <span>{{ __('messages.building') }}</span>
+                                    <strong>{{ $address->building ?: '--' }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>{{ __('messages.floor') }}</span>
+                                    <strong>{{ $address->floor ?: '--' }}</strong>
+                                </div>
+
+                                @if($address->landmark)
+                                    <div class="usd-address-wide">
+                                        <span>{{ __('messages.landmark') }}</span>
+                                        <strong>{{ $address->landmark }}</strong>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="usd-address-footer">
+                                <span>
+                                    <i class="fas fa-hashtag"></i>
+                                    ID: {{ $address->id }}
+                                </span>
+
+                                <span class="usd-area-badge">
+                                    {{ $address->is_village ? __('admin-dashboard.village') : __('admin-dashboard.city_area') }}
+                                </span>
+                            </div>
+
+                            @if($address->latitude && $address->longitude)
+                                <a
+                                    href="https://maps.google.com/?q={{ $address->latitude }},{{ $address->longitude }}"
+                                    target="_blank"
+                                    class="btn btn-sm usd-map-btn"
+                                >
+                                    <i class="fas fa-map-marked-alt {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
+                                    {{ __('admin-dashboard.view_on_map') }}
+                                </a>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @else
+                <div class="usd-empty">
+                    <div class="usd-empty-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+
+                    <h5>{{ __('admin-dashboard.no_addresses_found') }}</h5>
+
+                    <p>{{ $text('This user has not saved any addresses yet.', 'هذا المستخدم لم يقم بحفظ أي عناوين بعد.') }}</p>
+                </div>
+            @endif
+        </section>
+
+        <div class="usd-footer-actions">
+            <a href="{{ route('admin.users') }}" class="btn usd-back-btn">
+                <i class="fas {{ $isArabic ? 'fa-arrow-right ms-1' : 'fa-arrow-left me-1' }}"></i>
+                {{ __('admin-dashboard.back_to_list') }}
+            </a>
         </div>
     </div>
 @endsection
 
 @push('styles')
-<style>
-    .card {
-        border-radius: 12px;
-        transition: all 0.3s ease;
-    }
-    
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
-    }
-    
-    .card-header {
-        border-radius: 12px 12px 0 0 !important;
-        padding: 1rem 1.25rem;
-    }
-    
-    .address-details {
-        line-height: 1.8;
-    }
-    
-    .address-details .fa {
-        width: 18px;
-        text-align: center;
-    }
-    
-    .list-group-item {
-        border-color: #f0f0f0;
-        transition: background-color 0.15s ease;
-    }
-    
-    .list-group-item:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .badge {
-        font-weight: 500;
-        font-size: 0.8125rem;
-    }
-    
-    .btn {
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-    }
-    
-    .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    @media (max-width: 768px) {
-        .card-body {
+    <style>
+        .usd-page {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .usd-hero-card,
+        .usd-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, .04);
+        }
+
+        .usd-hero-card {
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .usd-hero-main {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .usd-hero-avatar,
+        .usd-hero-avatar-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 24px;
+            flex-shrink: 0;
+        }
+
+        .usd-hero-avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #2563eb;
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .usd-hero-avatar-img {
+            object-fit: cover;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+        }
+
+        .usd-chip {
+            display: inline-flex;
+            width: fit-content;
+            padding: .28rem .7rem;
+            margin-bottom: .45rem;
+            border-radius: 999px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #2563eb;
+            font-size: .78rem;
+            font-weight: 900;
+        }
+
+        .usd-hero-text h3 {
+            margin: 0;
+            color: #111827;
+            font-size: 1.45rem;
+            font-weight: 900;
+            letter-spacing: -.02em;
+        }
+
+        .usd-meta-row,
+        .usd-badges-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .5rem;
+            margin-top: .65rem;
+        }
+
+        .usd-meta-pill,
+        .usd-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .35rem;
+            padding: .38rem .7rem;
+            border-radius: 999px;
+            font-size: .78rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .usd-meta-pill {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            color: #475569;
+        }
+
+        .usd-badge-success {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #047857;
+        }
+
+        .usd-badge-danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+        }
+
+        .usd-hero-side {
+            display: grid;
+            gap: .75rem;
+            min-width: 240px;
+            flex-shrink: 0;
+        }
+
+        .usd-score-card {
+            padding: .85rem;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+        }
+
+        .usd-score-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            margin-bottom: .45rem;
+        }
+
+        .usd-score-top span {
+            color: #64748b;
+            font-size: .78rem;
+            font-weight: 900;
+        }
+
+        .usd-score-top strong {
+            color: #111827;
+            font-size: .9rem;
+            font-weight: 900;
+        }
+
+        .usd-score-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            overflow: hidden;
+        }
+
+        .usd-score-bar span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: #2563eb;
+        }
+
+        .usd-back-btn {
+            min-height: 42px;
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            color: #475569;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .usd-back-btn:hover {
+            background: #f8fafc;
+            color: #111827;
+        }
+
+        .usd-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .75rem;
+        }
+
+        .usd-metric-item {
+            min-height: 78px;
+            padding: .9rem 1rem;
+            border-radius: 18px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, .04);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .usd-metric-item span {
+            color: #64748b;
+            font-size: .78rem;
+            font-weight: 900;
+            margin-bottom: .35rem;
+        }
+
+        .usd-metric-item strong {
+            color: #111827;
+            font-size: 1.4rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .usd-metric-date {
+            font-size: .95rem !important;
+            line-height: 1.4 !important;
+        }
+
+        .usd-card {
+            padding: 1.25rem;
+        }
+
+        .usd-section-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .usd-section-head h5 {
+            margin: 0;
+            color: #111827;
+            font-size: 1rem;
+            font-weight: 900;
+        }
+
+        .usd-section-head p {
+            margin: .25rem 0 0;
+            color: #64748b;
+            font-size: .86rem;
+            line-height: 1.6;
+        }
+
+        .usd-profile-box {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .9rem;
+            margin-bottom: 1rem;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+        }
+
+        .usd-profile-box img,
+        .usd-profile-box span {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            flex-shrink: 0;
+        }
+
+        .usd-profile-box img {
+            object-fit: cover;
+            border: 1px solid #e2e8f0;
+        }
+
+        .usd-profile-box span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #2563eb;
+            font-weight: 900;
+        }
+
+        .usd-profile-box strong {
+            display: block;
+            color: #111827;
+            font-weight: 900;
+            line-height: 1.4;
+        }
+
+        .usd-profile-box small {
+            display: block;
+            color: #64748b;
+            font-size: .8rem;
+        }
+
+        .usd-info-list {
+            display: grid;
+            gap: .7rem;
+        }
+
+        .usd-info-list div {
+            padding: .8rem .9rem;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+        }
+
+        .usd-info-list span {
+            display: block;
+            margin-bottom: .25rem;
+            color: #64748b;
+            font-size: .78rem;
+            font-weight: 900;
+        }
+
+        .usd-info-list strong {
+            display: block;
+            color: #111827;
+            font-size: .9rem;
+            font-weight: 800;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .usd-info-list small {
+            display: block;
+            margin-top: .15rem;
+            color: #64748b;
+            font-size: .76rem;
+        }
+
+        .usd-text-success {
+            color: #047857 !important;
+        }
+
+        .usd-text-muted {
+            color: #64748b !important;
+        }
+
+        .usd-contact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .9rem;
+        }
+
+        .usd-contact-card {
+            display: flex;
+            align-items: flex-start;
+            gap: .8rem;
             padding: 1rem;
+            border-radius: 18px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            min-width: 0;
         }
-        
-        .card-header {
-            padding: 0.75rem 1rem;
+
+        .usd-contact-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
-    }
-</style>
+
+        .usd-contact-content {
+            min-width: 0;
+        }
+
+        .usd-contact-content span {
+            display: block;
+            color: #64748b;
+            font-size: .78rem;
+            font-weight: 900;
+            margin-bottom: .25rem;
+        }
+
+        .usd-contact-content a,
+        .usd-contact-content strong {
+            display: block;
+            color: #111827;
+            font-size: .92rem;
+            font-weight: 900;
+            line-height: 1.5;
+            word-break: break-word;
+            text-decoration: none;
+        }
+
+        .usd-contact-content a:hover {
+            color: #1d4ed8;
+        }
+
+        .usd-inline-status {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            margin-top: .45rem;
+            padding: .22rem .55rem;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 900;
+        }
+
+        .usd-inline-status.success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .usd-inline-status.danger {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .usd-activity-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .75rem;
+            margin-top: 1rem;
+        }
+
+        .usd-activity-strip div {
+            padding: .85rem;
+            border-radius: 16px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+        }
+
+        .usd-activity-strip span {
+            display: block;
+            color: #64748b;
+            font-size: .76rem;
+            font-weight: 900;
+            margin-bottom: .25rem;
+        }
+
+        .usd-activity-strip strong {
+            color: #111827;
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+
+        .usd-count-pill {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            padding: .38rem .75rem;
+            border-radius: 999px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            color: #475569;
+            font-size: .78rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .usd-address-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .usd-address-card {
+            padding: 1rem;
+            border-radius: 18px;
+            border: 1px solid #e5e7eb;
+            background: #fcfdff;
+        }
+
+        .usd-address-card.is-default {
+            border-color: #bfdbfe;
+            background: #eff6ff;
+        }
+
+        .usd-address-top,
+        .usd-address-footer {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: .75rem;
+        }
+
+        .usd-address-top small,
+        .usd-address-footer span {
+            color: #64748b;
+            font-size: .76rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .usd-address-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .4rem;
+        }
+
+        .usd-address-type,
+        .usd-address-default,
+        .usd-area-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .25rem .6rem;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 900;
+        }
+
+        .usd-address-type-primary {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .usd-address-type-success {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #047857;
+        }
+
+        .usd-address-type-secondary {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+        }
+
+        .usd-address-default {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #b45309;
+        }
+
+        .usd-address-main {
+            margin-top: .9rem;
+        }
+
+        .usd-address-main h6 {
+            margin: 0;
+            color: #111827;
+            font-size: .98rem;
+            font-weight: 900;
+        }
+
+        .usd-address-main p {
+            margin: .4rem 0 0;
+            color: #334155;
+            font-size: .85rem;
+            line-height: 1.7;
+        }
+
+        .usd-address-details {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .65rem;
+            margin-top: .9rem;
+        }
+
+        .usd-address-details div {
+            padding: .7rem;
+            border-radius: 14px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+        }
+
+        .usd-address-details span {
+            display: block;
+            color: #64748b;
+            font-size: .72rem;
+            font-weight: 900;
+            margin-bottom: .2rem;
+        }
+
+        .usd-address-details strong {
+            display: block;
+            color: #111827;
+            font-size: .84rem;
+            font-weight: 800;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .usd-address-wide {
+            grid-column: 1 / -1;
+        }
+
+        .usd-address-footer {
+            margin-top: .9rem;
+            padding-top: .8rem;
+            border-top: 1px solid #e5e7eb;
+            align-items: center;
+        }
+
+        .usd-area-badge {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #475569 !important;
+        }
+
+        .usd-map-btn {
+            margin-top: .9rem;
+            border-radius: 999px;
+            border: 1px solid #bfdbfe;
+            background: #fff;
+            color: #1d4ed8;
+            font-weight: 900;
+        }
+
+        .usd-map-btn:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+        }
+
+        .usd-empty {
+            padding: 3rem 1.5rem;
+            text-align: center;
+            border-radius: 18px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .usd-empty-icon {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 1rem;
+            border-radius: 26px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            color: #94a3b8;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        .usd-empty h5 {
+            color: #111827;
+            font-weight: 900;
+            margin-bottom: .4rem;
+        }
+
+        .usd-empty p {
+            max-width: 520px;
+            margin: 0 auto;
+            color: #64748b;
+            line-height: 1.7;
+        }
+
+        .usd-footer-actions {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        @media (max-width: 1199.98px) {
+            .usd-hero-card {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .usd-hero-side {
+                min-width: 0;
+            }
+
+            .usd-address-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .usd-hero-card,
+            .usd-card {
+                padding: 1rem;
+                border-radius: 18px;
+            }
+
+            .usd-hero-main {
+                flex-direction: column;
+            }
+
+            .usd-hero-text h3 {
+                font-size: 1.2rem;
+            }
+
+            .usd-metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .usd-section-head,
+            .usd-address-top,
+            .usd-address-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .usd-contact-grid,
+            .usd-activity-strip,
+            .usd-address-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 @endpush

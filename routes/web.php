@@ -6,6 +6,7 @@ use App\Http\Controllers\Dashboard\Admin\AdminDashboardController;
 use App\Http\Controllers\Dashboard\Admin\ShipmentRequestController;
 use App\Http\Controllers\Dashboard\Admin\Settings\ConfigController;
 use App\Http\Controllers\Dashboard\Admin\Settings\GovernorateController;
+use App\Http\Controllers\Dashboard\Admin\Settings\TransportTypeController;
 use App\Http\Controllers\Dashboard\Admin\ShipmentController;
 use App\Http\Controllers\Dashboard\Admin\RoleController;
 use App\Http\Controllers\Dashboard\Admin\PermissionController;
@@ -337,6 +338,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('/delivery-types/{deliveryType}', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'update'])->name('delivery-types.update');
             Route::delete('/delivery-types/{deliveryType}', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'destroy'])->name('delivery-types.destroy');
             Route::patch('/delivery-types/{deliveryType}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'toggleStatus'])->name('delivery-types.toggle-status');
+
+            Route::prefix('transport-types')->name('transport-types.')->group(function () {
+                Route::get('/', [TransportTypeController::class, 'index'])->name('index');
+                Route::get('/create', [TransportTypeController::class, 'create'])->name('create');
+                Route::post('/', [TransportTypeController::class, 'store'])->name('store');
+                Route::get('/{transportType}/edit', [TransportTypeController::class, 'edit'])->name('edit');
+                Route::patch('/{transportType}', [TransportTypeController::class, 'update'])->name('update');
+                Route::delete('/{transportType}', [TransportTypeController::class, 'destroy'])->name('destroy');
+                Route::patch('/{transportType}/toggle-status', [TransportTypeController::class, 'toggleStatus'])->name('toggle-status');
+            });
 
             // Page Management
             Route::get('/pages', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'index'])->name('pages.index');

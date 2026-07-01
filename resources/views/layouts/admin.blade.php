@@ -1625,6 +1625,13 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.settings.transport-types.*') ? 'active' : '' }}"
+                                           href="{{ route('admin.settings.transport-types.index') }}">
+                                            <i class="fas fa-truck-fast"></i>
+                                            <span class="link-text">{{ app()->getLocale() === 'ar' ? 'أنواع النقل' : 'Transport Types' }}</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.settings.pages.*') ? 'active' : '' }}"
                                            href="{{ route('admin.settings.pages.index') }}">
                                             <i class="fas fa-file-alt"></i>
@@ -1935,6 +1942,15 @@
                                             href="{{ route('admin.settings.delivery-types.index') }}">
                                                     <i class="fas fa-truck-loading"></i>
                                                     <span class="link-text">{{ __('admin-dashboard.delivery_types') }}</span>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($employee->can('admin.settings.transport-types.index'))
+                                        <li class="nav-item">
+                                            <a class="nav-link {{ request()->routeIs('admin.settings.transport-types.*') ? 'active' : '' }}"
+                                            href="{{ route('admin.settings.transport-types.index') }}">
+                                                    <i class="fas fa-truck-fast"></i>
+                                                    <span class="link-text">{{ app()->getLocale() === 'ar' ? 'أنواع النقل' : 'Transport Types' }}</span>
                                             </a>
                                         </li>
                                     @endif

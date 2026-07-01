@@ -269,4 +269,12 @@ return array (
   'admin.settings.governorates.destroy' => '??? ??????',
   'admin.settings.governorates.toggle-status' => '????? ???? ????????',
   'admin.settings.governorates' => '?????????',
+  'admin.settings.transport-types.index' => 'Ø¥Ø¯Ø§Ø±Ø© Ø£Ù†ÙˆØ§Ø¹ Ø§Ù„Ù†Ù‚Ù„',
+  'admin.settings.transport-types.create' => 'Ø¥Ø¶Ø§ÙØ© Ù†ÙˆØ¹ Ù†Ù‚Ù„',
+  'admin.settings.transport-types.store' => 'Ø­ÙØ¸ Ù†ÙˆØ¹ Ù†Ù‚Ù„',
+  'admin.settings.transport-types.edit' => 'ØªØ¹Ø¯ÙŠÙ„ Ù†ÙˆØ¹ Ù†Ù‚Ù„',
+  'admin.settings.transport-types.update' => 'ØªØ­Ø¯ÙŠØ« Ù†ÙˆØ¹ Ù†Ù‚Ù„',
+  'admin.settings.transport-types.destroy' => 'Ø­Ø°Ù Ù†ÙˆØ¹ Ù†Ù‚Ù„',
+  'admin.settings.transport-types.toggle-status' => 'ØªØºÙŠÙŠØ± Ø­Ø§Ù„Ø© Ù†ÙˆØ¹ Ø§Ù„Ù†Ù‚Ù„',
+  'admin.settings.transport-types' => 'Ø£Ù†ÙˆØ§Ø¹ Ø§Ù„Ù†Ù‚Ù„',
 );
