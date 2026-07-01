@@ -20,6 +20,12 @@
     $statusLabel = match ($statusValue) {
         'draft' => $text('Draft', 'مسودة'),
         'submitted' => $text('Submitted', 'مُرسل'),
+        'under_review' => $text('Under review', 'قيد المراجعة'),
+        'assigned' => $text('Assigned', 'تم التعيين'),
+        'picked_up' => $text('Picked up', 'تم الاستلام'),
+        'in_transit' => $text('In transit', 'قيد النقل'),
+        'delivered' => $text('Delivered', 'تم التسليم'),
+        'cancelled' => $text('Cancelled', 'ملغي'),
         default => $text(
             ucfirst(str_replace('_', ' ', $statusValue)),
             ucfirst(str_replace('_', ' ', $statusValue))
@@ -28,6 +34,10 @@
 
     $statusTone = match ($statusValue) {
         'submitted' => 'warning',
+        'under_review' => 'info',
+        'assigned', 'picked_up', 'in_transit' => 'primary',
+        'delivered' => 'success',
+        'cancelled' => 'danger',
         'draft' => 'secondary',
         default => 'secondary',
     };
@@ -76,6 +86,7 @@
     $submittedAt = $shipmentRequest->submitted_at?->format('Y-m-d H:i');
 
     $packagesCount = $shipmentRequest->packages->count();
+
     $customerName = $shipmentRequest->user?->username ?? $text('Guest', 'ضيف');
     $customerPhone = $shipmentRequest->user?->phone ?? '--';
     $customerEmail = $shipmentRequest->user?->email ?? '--';
@@ -83,12 +94,61 @@
 
     $routeIcon = $isArabic ? 'fa-arrow-left' : 'fa-arrow-right';
 
-    $statusSteps = [
-        'draft' => ['label' => $text('Draft', 'مسودة'), 'icon' => 'fa-pen'],
-        'submitted' => ['label' => $text('Submitted', 'مُرسل'), 'icon' => 'fa-paper-plane'],
+    $completionChecks = [
+        (bool) $shipmentRequest->user,
+        (bool) $sender,
+        (bool) $senderAddress,
+        (bool) $receiver,
+        (bool) $receiverAddress,
+        $packagesCount > 0,
     ];
 
-    $currentStepIndex = array_search($statusValue, array_keys($statusSteps), true);
+    $completionScore = (int) round((collect($completionChecks)->filter()->count() / count($completionChecks)) * 100);
+
+    $activityTimeline = [
+        [
+            'label' => $text('Request created', 'تم إنشاء الطلب'),
+            'value' => $createdAt,
+            'icon' => 'fa-plus',
+            'active' => true,
+        ],
+    ];
+
+    if ($submittedAt) {
+        $activityTimeline[] = [
+            'label' => $text('Request submitted', 'تم إرسال الطلب'),
+            'value' => $submittedAt,
+            'icon' => 'fa-paper-plane',
+            'active' => true,
+        ];
+    }
+
+    $activityTimeline[] = [
+        'label' => $text('Current status', 'الحالة الحالية'),
+        'value' => $statusLabel,
+        'icon' => 'fa-circle-info',
+        'active' => true,
+        'current' => true,
+    ];
+
+    $copySummary = implode("\n", [
+        $text('Shipment Request Summary', 'ملخص طلب الشحن'),
+        $text('Request number: ', 'رقم الطلب: ') . $requestNumber,
+        $text('Status: ', 'الحالة: ') . $statusLabel,
+        $text('Customer: ', 'العميل: ') . $customerName,
+        $text('Customer phone: ', 'هاتف العميل: ') . $customerPhone,
+        $text('Sender: ', 'المرسل: ') . ($sender?->full_name ?? '--'),
+        $text('Sender phone: ', 'هاتف المرسل: ') . ($sender?->primary_mobile ?? '--'),
+        $text('From: ', 'من: ') . $locationLabel($senderAddress),
+        $text('Receiver: ', 'المستلم: ') . ($receiver?->full_name ?? '--'),
+        $text('Receiver phone: ', 'هاتف المستلم: ') . ($receiver?->primary_mobile ?? '--'),
+        $text('To: ', 'إلى: ') . $locationLabel($receiverAddress),
+        $text('Packages: ', 'عدد الطرود: ') . $packagesCount,
+        $text('Created at: ', 'تاريخ الإنشاء: ') . $createdAt,
+        $submittedAt ? $text('Submitted at: ', 'تاريخ الإرسال: ') . $submittedAt : '',
+    ]);
+
+    $copySummary = trim($copySummary);
 @endphp
 
 @section('page-actions')
@@ -110,7 +170,6 @@
 
                 <div class="srd-hero-text">
                     <span class="srd-chip">{{ $text('Shipment request', 'طلب شحن') }}</span>
-
                     <h3>{{ $requestNumber }}</h3>
 
                     <div class="srd-meta-row">
@@ -134,15 +193,21 @@
                 </div>
             </div>
 
-            <div class="srd-hero-stats">
-                <div class="srd-stat">
-                    <span>{{ $text('Packages', 'الطرود') }}</span>
-                    <strong>{{ $packagesCount }}</strong>
-                </div>
+            <div class="srd-hero-actions">
+                <button type="button" class="btn srd-copy-btn" id="copyShipmentSummary">
+                    <i class="far fa-copy {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
+                    {{ $text('Copy summary', 'نسخ الملخص') }}
+                </button>
 
-                <div class="srd-stat">
-                    <span>{{ $text('Status', 'الحالة') }}</span>
-                    <strong class="srd-stat-text">{{ $statusLabel }}</strong>
+                <div class="srd-score-card">
+                    <div class="srd-score-top">
+                        <span>{{ $text('Data completeness', 'اكتمال البيانات') }}</span>
+                        <strong>{{ $completionScore }}%</strong>
+                    </div>
+
+                    <div class="srd-score-bar">
+                        <span style="width: {{ $completionScore }}%"></span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -151,13 +216,13 @@
             <div class="srd-section-head">
                 <div>
                     <h5>{{ $text('Shipment route', 'مسار الشحنة') }}</h5>
-                    <p>{{ $text('Sender and receiver route overview.', 'نظرة سريعة على المرسل والمستلم.') }}</p>
+                    <p>{{ $text('Pickup and delivery overview.', 'نظرة واضحة على الاستلام والتسليم.') }}</p>
                 </div>
             </div>
 
             <div class="srd-route">
                 <div class="srd-route-point">
-                    <span class="srd-route-label">{{ $text('From', 'من') }}</span>
+                    <span class="srd-route-label">{{ $text('Pickup', 'الاستلام') }}</span>
                     <strong>{{ $sender?->full_name ?? '--' }}</strong>
                     <small>{{ $sender?->primary_mobile ?? '--' }}</small>
                     <p>{{ $locationLabel($senderAddress) }}</p>
@@ -168,7 +233,7 @@
                 </div>
 
                 <div class="srd-route-point">
-                    <span class="srd-route-label">{{ $text('To', 'إلى') }}</span>
+                    <span class="srd-route-label">{{ $text('Delivery', 'التسليم') }}</span>
                     <strong>{{ $receiver?->full_name ?? '--' }}</strong>
                     <small>{{ $receiver?->primary_mobile ?? '--' }}</small>
                     <p>{{ $locationLabel($receiverAddress) }}</p>
@@ -409,39 +474,24 @@
                 <section class="srd-card mb-4">
                     <div class="srd-section-head">
                         <div>
-                            <h5>{{ $text('Status timeline', 'الجدول الزمني') }}</h5>
-                            <p>{{ $text('Current request progress.', 'تقدم الطلب الحالي.') }}</p>
+                            <h5>{{ $text('Activity timeline', 'سجل النشاط') }}</h5>
+                            <p>{{ $text('Based on available request timestamps.', 'بناءً على التواريخ المتاحة في الطلب.') }}</p>
                         </div>
                     </div>
 
                     <div class="srd-timeline">
-                        @foreach ($statusSteps as $key => $step)
-                            @php
-                                $stepIndex = array_search($key, array_keys($statusSteps), true);
-                                $isActive = $currentStepIndex !== false && $stepIndex <= $currentStepIndex;
-                                $isCurrent = $currentStepIndex !== false && $stepIndex === $currentStepIndex;
-                            @endphp
-
-                            <div class="srd-timeline-row {{ $isActive ? 'is-active' : '' }} {{ $isCurrent ? 'is-current' : '' }}">
+                        @foreach ($activityTimeline as $item)
+                            <div class="srd-timeline-row {{ ! empty($item['current']) ? 'is-current' : 'is-active' }}">
                                 <div class="srd-timeline-icon">
-                                    <i class="fas {{ $step['icon'] }}"></i>
+                                    <i class="fas {{ $item['icon'] }}"></i>
                                 </div>
 
                                 <div>
-                                    <strong>{{ $step['label'] }}</strong>
-                                    <small>
-                                        {{ $isCurrent ? $text('Current step', 'المرحلة الحالية') : ($isActive ? $text('Completed', 'مكتمل') : $text('Pending', 'قيد الانتظار')) }}
-                                    </small>
+                                    <strong>{{ $item['label'] }}</strong>
+                                    <small>{{ $item['value'] }}</small>
                                 </div>
                             </div>
                         @endforeach
-                    </div>
-
-                    <div class="srd-helper-note">
-                        {{ $text(
-                            'Only the current status is stored, so this timeline shows the available draft/submitted flow.',
-                            'الحالة الحالية فقط هي المخزنة، لذلك يعرض المخطط التدفق المتاح: مسودة / مُرسل.'
-                        ) }}
                     </div>
                 </section>
 
@@ -453,11 +503,23 @@
                         </div>
                     </div>
 
-                    <div class="srd-empty-note">
-                        {{ $text(
-                            'No shipment company relation is stored yet, so this request is currently shown as unassigned.',
-                            'لا توجد علاقة مخزنة لشركة الشحن بعد، لذلك يظهر هذا الطلب كغير مُعيّن حالياً.'
-                        ) }}
+                    <div class="srd-assignment-empty">
+                        <div>
+                            <i class="fas fa-truck"></i>
+                        </div>
+
+                        <strong>{{ $text('Not assigned yet', 'لم يتم التعيين بعد') }}</strong>
+
+                        <p>
+                            {{ $text(
+                                'No shipment company relation is stored yet. This area is ready for the future assign action.',
+                                'لا توجد علاقة مخزنة لشركة الشحن بعد. هذا الجزء جاهز لاحقًا لإضافة إجراء التعيين.'
+                            ) }}
+                        </p>
+
+                        <button type="button" class="btn btn-sm srd-disabled-btn" disabled>
+                            {{ $text('Assign company soon', 'تعيين شركة قريبًا') }}
+                        </button>
                     </div>
                 </section>
             </div>
@@ -502,6 +564,47 @@
             </div>
         </section>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const button = document.getElementById('copyShipmentSummary');
+
+            if (! button) {
+                return;
+            }
+
+            const originalText = button.innerHTML;
+            const summary = @json($copySummary);
+
+            button.addEventListener('click', async function () {
+                try {
+                    await navigator.clipboard.writeText(summary);
+
+                    button.innerHTML = '<i class="fas fa-check {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>{{ $text('Copied', 'تم النسخ') }}';
+
+                    setTimeout(function () {
+                        button.innerHTML = originalText;
+                    }, 1800);
+                } catch (error) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = summary;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+
+                    button.innerHTML = '<i class="fas fa-check {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>{{ $text('Copied', 'تم النسخ') }}';
+
+                    setTimeout(function () {
+                        button.innerHTML = originalText;
+                    }, 1800);
+                }
+            });
+        });
+    </script>
 
     <style>
         .srd-page {
@@ -622,47 +725,97 @@
             border-color: #fde68a;
         }
 
+        .srd-status-info {
+            background: #ecfeff;
+            color: #0e7490;
+            border-color: #a5f3fc;
+        }
+
+        .srd-status-primary {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+
+        .srd-status-success {
+            background: #ecfdf5;
+            color: #047857;
+            border-color: #a7f3d0;
+        }
+
+        .srd-status-danger {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-color: #fecaca;
+        }
+
         .srd-status-secondary {
             background: #f8fafc;
             color: #475569;
             border-color: #cbd5e1;
         }
 
-        .srd-hero-stats {
+        .srd-hero-actions {
             display: grid;
-            grid-template-columns: repeat(2, minmax(120px, 1fr));
             gap: .75rem;
+            min-width: 230px;
             flex-shrink: 0;
         }
 
-        .srd-stat {
-            min-height: 74px;
-            padding: .9rem 1rem;
+        .srd-copy-btn {
+            min-height: 42px;
+            border-radius: 999px;
+            border: 1px solid #bfdbfe;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 900;
+        }
+
+        .srd-copy-btn:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+        }
+
+        .srd-score-card {
+            padding: .85rem;
             border-radius: 16px;
             background: #f8fafc;
             border: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
 
-        .srd-stat span {
+        .srd-score-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            margin-bottom: .45rem;
+        }
+
+        .srd-score-top span {
             color: #64748b;
             font-size: .78rem;
             font-weight: 900;
-            margin-bottom: .35rem;
         }
 
-        .srd-stat strong {
+        .srd-score-top strong {
             color: #111827;
-            font-size: 1.35rem;
+            font-size: .9rem;
             font-weight: 900;
-            line-height: 1;
         }
 
-        .srd-stat-text {
-            font-size: .95rem !important;
-            line-height: 1.3 !important;
+        .srd-score-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            overflow: hidden;
+        }
+
+        .srd-score-bar span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: #2563eb;
         }
 
         .srd-route-card,
@@ -910,9 +1063,9 @@
             display: inline-flex;
             padding: .3rem .65rem;
             border-radius: 999px;
-            background: #eff6ff;
-            border: 1px solid #dbeafe;
-            color: #1d4ed8;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #c2410c;
             font-size: .75rem;
             font-weight: 900;
         }
@@ -977,17 +1130,12 @@
             width: 38px;
             height: 38px;
             border-radius: 999px;
-            background: #f8fafc;
-            color: #64748b;
+            background: #dbeafe;
+            color: #2563eb;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-        }
-
-        .srd-timeline-row.is-active .srd-timeline-icon {
-            background: #dbeafe;
-            color: #2563eb;
         }
 
         .srd-timeline-row.is-current .srd-timeline-icon {
@@ -1007,9 +1155,8 @@
             font-size: .78rem;
         }
 
-        .srd-helper-note,
         .srd-empty-note {
-            margin-top: 1rem;
+            margin-top: 0;
             padding: .9rem;
             border-radius: 14px;
             background: #f8fafc;
@@ -1019,8 +1166,48 @@
             line-height: 1.7;
         }
 
-        .srd-empty-note {
-            margin-top: 0;
+        .srd-assignment-empty {
+            text-align: center;
+            padding: 1.25rem;
+            border-radius: 18px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .srd-assignment-empty div {
+            width: 54px;
+            height: 54px;
+            margin: 0 auto .75rem;
+            border-radius: 18px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .srd-assignment-empty strong {
+            display: block;
+            color: #111827;
+            font-weight: 900;
+            margin-bottom: .35rem;
+        }
+
+        .srd-assignment-empty p {
+            margin: 0 auto .9rem;
+            color: #64748b;
+            font-size: .85rem;
+            line-height: 1.7;
+        }
+
+        .srd-disabled-btn {
+            border-radius: 999px;
+            background: #e5e7eb;
+            border-color: #e5e7eb;
+            color: #64748b;
+            font-weight: 900;
+            cursor: not-allowed;
         }
 
         .srd-note-box {
@@ -1057,8 +1244,8 @@
                 flex-direction: column;
             }
 
-            .srd-hero-stats {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+            .srd-hero-actions {
+                min-width: 0;
             }
         }
 

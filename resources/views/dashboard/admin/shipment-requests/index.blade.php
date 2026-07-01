@@ -14,6 +14,12 @@
     $statusLabel = static fn ($status) => match ((string) $status) {
         'draft' => $text('Draft', 'مسودة'),
         'submitted' => $text('Submitted', 'مُرسل'),
+        'under_review' => $text('Under review', 'قيد المراجعة'),
+        'assigned' => $text('Assigned', 'تم التعيين'),
+        'picked_up' => $text('Picked up', 'تم الاستلام'),
+        'in_transit' => $text('In transit', 'قيد النقل'),
+        'delivered' => $text('Delivered', 'تم التسليم'),
+        'cancelled' => $text('Cancelled', 'ملغي'),
         default => $text(
             ucfirst(str_replace('_', ' ', (string) $status)),
             ucfirst(str_replace('_', ' ', (string) $status))
@@ -22,6 +28,10 @@
 
     $statusTone = static fn ($status) => match ((string) $status) {
         'submitted' => 'warning',
+        'under_review' => 'info',
+        'assigned', 'picked_up', 'in_transit' => 'primary',
+        'delivered' => 'success',
+        'cancelled' => 'danger',
         'draft' => 'secondary',
         default => 'secondary',
     };
@@ -48,6 +58,45 @@
         return ! empty($parts) ? implode(' · ', $parts) : $text('Not provided', 'غير متوفر');
     };
 
+    $riskBadges = static function ($packages) use ($text) {
+        $badges = [];
+
+        foreach ($packages ?? [] as $package) {
+            $meta = $package->metadata ?? [];
+
+            if (! empty(data_get($meta, 'is_fragile'))) {
+                $badges['fragile'] = $text('Fragile', 'قابل للكسر');
+            }
+
+            if (! empty(data_get($meta, 'needs_cooling'))) {
+                $badges['cooling'] = $text('Cooling', 'تبريد');
+            }
+
+            if (! empty(data_get($meta, 'is_valuable'))) {
+                $badges['valuable'] = $text('Valuable', 'ثمين');
+            }
+
+            if (! empty(data_get($meta, 'is_documents'))) {
+                $badges['documents'] = $text('Documents', 'مستندات');
+            }
+        }
+
+        return array_values($badges);
+    };
+
+    $completionScore = static function ($shipmentRequest) {
+        $checks = [
+            (bool) $shipmentRequest->user,
+            (bool) $shipmentRequest->senderContact,
+            (bool) $shipmentRequest->senderContact?->primaryAddress,
+            (bool) $shipmentRequest->receiverContact,
+            (bool) $shipmentRequest->receiverContact?->primaryAddress,
+            (int) ($shipmentRequest->packages_count ?? $shipmentRequest->packages?->count() ?? 0) > 0,
+        ];
+
+        return (int) round((collect($checks)->filter()->count() / count($checks)) * 100);
+    };
+
     $activeFilters = collect([
         'search' => request('search'),
         'status' => request('status'),
@@ -60,11 +109,37 @@
     $hasFilters = $activeFilters->isNotEmpty();
 
     $visibleCount = $requests->count();
-    $totalCount = method_exists($requests, 'total') ? $requests->total() : $requests->count();
-    $submittedCount = $requests->filter(fn ($request) => $request->status?->value === 'submitted')->count();
-    $draftCount = $requests->filter(fn ($request) => $request->status?->value === 'draft')->count();
+    $totalCount = $summary['total_requests'] ?? (method_exists($requests, 'total') ? $requests->total() : $requests->count());
+    $submittedCount = $summary['submitted_requests'] ?? $requests->filter(fn ($request) => $request->status?->value === 'submitted')->count();
+    $draftCount = $summary['draft_requests'] ?? $requests->filter(fn ($request) => $request->status?->value === 'draft')->count();
+    $todayCount = $summary['today_requests'] ?? null;
 
     $routeIcon = $isArabic ? 'fa-arrow-left' : 'fa-arrow-right';
+
+    $baseIndexUrl = $safeRoute('admin.shipment-requests.index') ?? url()->current();
+
+    $quickFilters = [
+        [
+            'label' => $text('All', 'الكل'),
+            'params' => [],
+            'active' => ! request()->hasAny(['status', 'date_from', 'date_to']),
+        ],
+        [
+            'label' => $text('Submitted', 'مُرسل'),
+            'params' => ['status' => 'submitted'],
+            'active' => request('status') === 'submitted',
+        ],
+        [
+            'label' => $text('Draft', 'مسودة'),
+            'params' => ['status' => 'draft'],
+            'active' => request('status') === 'draft',
+        ],
+        [
+            'label' => $text('Today', 'اليوم'),
+            'params' => ['date_from' => now()->toDateString(), 'date_to' => now()->toDateString()],
+            'active' => request('date_from') === now()->toDateString() && request('date_to') === now()->toDateString(),
+        ],
+    ];
 @endphp
 
 @section('page-actions')
@@ -85,16 +160,12 @@
                 </div>
 
                 <div class="sr-header-text">
-                    <span class="sr-chip">
-                        {{ $text('Shipment requests', 'طلبات الشحن') }}
-                    </span>
-
+                    <span class="sr-chip">{{ $text('Shipment requests', 'طلبات الشحن') }}</span>
                     <h4>{{ $text('Manage shipment requests', 'إدارة طلبات الشحن') }}</h4>
-
                     <p>
                         {{ $text(
-                            'Search, review, and open shipment requests from a simple focused screen.',
-                            'ابحث وراجع وافتح طلبات الشحن من شاشة بسيطة وواضحة.'
+                            'Review the most important shipment data, route, package risks, completion score, and request status.',
+                            'راجع أهم بيانات الشحنة والمسار ومخاطر الطرود ونسبة اكتمال البيانات وحالة الطلب.'
                         ) }}
                     </p>
                 </div>
@@ -117,8 +188,8 @@
                 </div>
 
                 <div class="sr-metric-item">
-                    <span>{{ $text('Draft', 'مسودة') }}</span>
-                    <strong>{{ $draftCount }}</strong>
+                    <span>{{ $todayCount !== null ? $text('Today', 'اليوم') : $text('Draft', 'مسودة') }}</span>
+                    <strong>{{ $todayCount ?? $draftCount }}</strong>
                 </div>
             </div>
         </section>
@@ -127,18 +198,30 @@
             <div class="sr-section-head">
                 <div>
                     <h5>{{ $text('Filters', 'الفلاتر') }}</h5>
-                    <p>{{ $text('Use search, status, route, or date to find requests faster.', 'استخدم البحث أو الحالة أو المسار أو التاريخ للوصول للطلبات بسرعة.') }}</p>
+                    <p>{{ $text('Use quick filters or detailed filters to find requests faster.', 'استخدم الفلاتر السريعة أو التفصيلية للوصول للطلبات بسرعة.') }}</p>
                 </div>
 
                 @if ($hasFilters)
-                    <a href="{{ $safeRoute('admin.shipment-requests.index') ?? url()->current() }}" class="btn btn-sm sr-clear-btn">
+                    <a href="{{ $baseIndexUrl }}" class="btn btn-sm sr-clear-btn">
                         <i class="fas fa-times {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
                         {{ $text('Clear filters', 'مسح الفلاتر') }}
                     </a>
                 @endif
             </div>
 
-            <form method="GET" action="{{ $safeRoute('admin.shipment-requests.index') ?? url()->current() }}">
+            <div class="sr-quick-filters">
+                @foreach ($quickFilters as $filter)
+                    @php
+                        $url = $baseIndexUrl . (count($filter['params']) ? '?' . http_build_query($filter['params']) : '');
+                    @endphp
+
+                    <a href="{{ $url }}" class="sr-quick-chip {{ $filter['active'] ? 'active' : '' }}">
+                        {{ $filter['label'] }}
+                    </a>
+                @endforeach
+            </div>
+
+            <form method="GET" action="{{ $baseIndexUrl }}">
                 <div class="row g-3">
                     <div class="col-12 col-xl-3 col-lg-4">
                         <label class="sr-label">{{ $text('Search', 'بحث') }}</label>
@@ -234,7 +317,7 @@
             <div class="sr-section-head sr-table-head">
                 <div>
                     <h5>{{ $text('Requests list', 'قائمة الطلبات') }}</h5>
-                    <p>{{ $text('Only the important request information is shown here.', 'يتم عرض أهم بيانات الطلب فقط هنا.') }}</p>
+                    <p>{{ $text('Only the most useful information is displayed.', 'يتم عرض البيانات الأكثر أهمية فقط.') }}</p>
                 </div>
 
                 <span class="sr-page-count">
@@ -250,6 +333,7 @@
                                 <th class="sr-col-request">{{ $text('Request / customer', 'الطلب / العميل') }}</th>
                                 <th class="sr-col-route">{{ $text('Route', 'المسار') }}</th>
                                 <th class="sr-col-package">{{ $text('Package', 'الطرد') }}</th>
+                                <th class="sr-col-health">{{ $text('Health', 'الجاهزية') }}</th>
                                 <th class="sr-col-status">{{ $text('Status', 'الحالة') }}</th>
                                 <th class="sr-col-action text-end">{{ $text('Action', 'الإجراء') }}</th>
                             </tr>
@@ -271,6 +355,12 @@
                                         ?? ($shipmentRequest->packages_count > 0
                                             ? $shipmentRequest->packages_count . ' ' . $text('packages', 'طرود')
                                             : $text('No packages', 'لا توجد طرود'));
+
+                                    $badges = $riskBadges($shipmentRequest->packages ?? collect());
+                                    $visibleBadges = array_slice($badges, 0, 2);
+                                    $hiddenBadgesCount = max(count($badges) - 2, 0);
+
+                                    $score = $completionScore($shipmentRequest);
 
                                     $showUrl = $safeRoute('admin.shipment-requests.show', $shipmentRequest->id);
 
@@ -326,9 +416,35 @@
 
                                     <td>
                                         <div class="sr-package-name">{{ $packageLabel }}</div>
+
                                         <div class="sr-muted">
                                             {{ $shipmentRequest->packages_count ?? 0 }}
                                             {{ $text('items', 'عنصر') }}
+                                        </div>
+
+                                        @if (count($visibleBadges))
+                                            <div class="sr-risk-badges">
+                                                @foreach ($visibleBadges as $badge)
+                                                    <span>{{ $badge }}</span>
+                                                @endforeach
+
+                                                @if ($hiddenBadgesCount > 0)
+                                                    <span>+{{ $hiddenBadgesCount }}</span>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </td>
+
+                                    <td>
+                                        <div class="sr-score">
+                                            <div class="sr-score-top">
+                                                <span>{{ $text('Complete', 'مكتمل') }}</span>
+                                                <strong>{{ $score }}%</strong>
+                                            </div>
+
+                                            <div class="sr-score-bar">
+                                                <span style="width: {{ $score }}%"></span>
+                                            </div>
                                         </div>
                                     </td>
 
@@ -374,7 +490,7 @@
                     </p>
 
                     @if ($hasFilters)
-                        <a href="{{ $safeRoute('admin.shipment-requests.index') ?? url()->current() }}" class="btn sr-view-btn">
+                        <a href="{{ $baseIndexUrl }}" class="btn sr-view-btn">
                             <i class="fas fa-times {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
                             {{ $text('Clear filters', 'مسح الفلاتر') }}
                         </a>
@@ -416,7 +532,8 @@
             box-shadow: 0 10px 26px rgba(15, 23, 42, .04);
         }
 
-        .sr-header-card {
+        .sr-header-card,
+        .sr-filter-card {
             padding: 1.25rem;
         }
 
@@ -502,10 +619,6 @@
             line-height: 1;
         }
 
-        .sr-filter-card {
-            padding: 1.25rem;
-        }
-
         .sr-section-head {
             display: flex;
             justify-content: space-between;
@@ -533,6 +646,35 @@
             background: #fff;
             color: #475569;
             font-weight: 700;
+        }
+
+        .sr-quick-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+            margin-bottom: 1rem;
+        }
+
+        .sr-quick-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: .35rem .8rem;
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            color: #475569;
+            font-size: .82rem;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .sr-quick-chip:hover,
+        .sr-quick-chip.active {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1d4ed8;
         }
 
         .sr-label {
@@ -646,7 +788,7 @@
         }
 
         .sr-table {
-            min-width: 880px;
+            min-width: 980px;
             table-layout: fixed;
         }
 
@@ -671,23 +813,27 @@
         }
 
         .sr-col-request {
-            width: 28%;
+            width: 25%;
         }
 
         .sr-col-route {
-            width: 38%;
+            width: 32%;
         }
 
         .sr-col-package {
-            width: 14%;
+            width: 16%;
+        }
+
+        .sr-col-health {
+            width: 12%;
         }
 
         .sr-col-status {
-            width: 10%;
+            width: 8%;
         }
 
         .sr-col-action {
-            width: 10%;
+            width: 7%;
         }
 
         .sr-request-cell {
@@ -803,6 +949,62 @@
             line-height: 1.5;
         }
 
+        .sr-risk-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .35rem;
+            margin-top: .45rem;
+        }
+
+        .sr-risk-badges span {
+            display: inline-flex;
+            padding: .25rem .55rem;
+            border-radius: 999px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #c2410c;
+            font-size: .72rem;
+            font-weight: 900;
+        }
+
+        .sr-score {
+            min-width: 90px;
+        }
+
+        .sr-score-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .5rem;
+            margin-bottom: .35rem;
+        }
+
+        .sr-score-top span {
+            color: #64748b;
+            font-size: .72rem;
+            font-weight: 900;
+        }
+
+        .sr-score-top strong {
+            color: #111827;
+            font-size: .78rem;
+            font-weight: 900;
+        }
+
+        .sr-score-bar {
+            height: 7px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            overflow: hidden;
+        }
+
+        .sr-score-bar span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: #2563eb;
+        }
+
         .sr-status {
             display: inline-flex;
             align-items: center;
@@ -827,6 +1029,30 @@
             background: #fffbeb;
             color: #b45309;
             border-color: #fde68a;
+        }
+
+        .sr-status-info {
+            background: #ecfeff;
+            color: #0e7490;
+            border-color: #a5f3fc;
+        }
+
+        .sr-status-primary {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+
+        .sr-status-success {
+            background: #ecfdf5;
+            color: #047857;
+            border-color: #a7f3d0;
+        }
+
+        .sr-status-danger {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-color: #fecaca;
         }
 
         .sr-status-secondary {
@@ -891,7 +1117,7 @@
 
         @media (max-width: 1199.98px) {
             .sr-table {
-                min-width: 820px;
+                min-width: 940px;
             }
         }
 
@@ -924,7 +1150,7 @@
             }
 
             .sr-table {
-                min-width: 780px;
+                min-width: 900px;
             }
         }
     </style>
