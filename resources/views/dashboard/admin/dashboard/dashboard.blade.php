@@ -173,7 +173,7 @@
                         <input type="text"
                                class="form-control form-control-sm table-search-input"
                                data-table-id="admin-shipment-orders-table"
-                               placeholder="Search..."
+                               placeholder="{{ app()->getLocale() === 'ar' ? 'بحث...' : 'Search...' }}"
                                style="max-width: 200px;">
                     </div>
                 </div>
@@ -209,7 +209,7 @@
                                             </td>
                                             <td>
                                                 <span class="badge bg-{{ $order->status === 'delivered' ? 'success' : ($order->status === 'pending' ? 'warning' : 'info') }} px-2 py-1">
-                                                    {{ ucfirst($order->status->name) }}
+                                                    {{ app()->getLocale() === 'ar' ? __('admin-dashboard.' . $order->status->name) : ucfirst($order->status->name) }}
                                                 </span>
                                             </td>
                                             <td class="text-end fw-semibold">
@@ -248,7 +248,7 @@
                         <input type="text"
                                class="form-control form-control-sm table-search-input"
                                data-table-id="admin-ecommerce-orders-table"
-                               placeholder="Search..."
+                               placeholder="{{ app()->getLocale() === 'ar' ? 'بحث...' : 'Search...' }}"
                                style="max-width: 200px;">
                     </div>
                 </div>
@@ -279,7 +279,7 @@
                                             </td>
                                             <td>
                                                 <span class="badge bg-{{ $order->status === 'delivered' ? 'success' : ($order->status === 'pending' ? 'warning' : 'info') }} px-2 py-1">
-                                                    {{ ucfirst($order->status) }}
+                                                    {{ app()->getLocale() === 'ar' ? __('admin-dashboard.' . $order->status) : ucfirst($order->status) }}
                                                 </span>
                                             </td>
                                             <td class="text-end fw-semibold">

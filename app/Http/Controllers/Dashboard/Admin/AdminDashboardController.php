@@ -56,6 +56,18 @@ class AdminDashboardController extends Controller
             }
         };
 
+        $statusLabel = function ($status) {
+            if ($status === null || $status === '') {
+                return '';
+            }
+
+            $statusKey = strtolower((string) $status);
+
+            return app()->getLocale() === 'ar'
+                ? __('admin-dashboard.' . $statusKey)
+                : ucfirst($statusKey);
+        };
+
         $stats = [
             'total_users' => User::count(),
             'total_vendors' => Vendor::count(),
@@ -213,7 +225,7 @@ class AdminDashboardController extends Controller
                         'title' => __('admin-dashboard.pending_payments'),
                         'count' => EcommerceOrder::where('payment_status', PaymentStatus::PENDING->value)->count(),
                         'latest_title' => $latestPendingPaymentOrder?->order_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestPendingPaymentOrder ? ucfirst($latestPendingPaymentOrder->status) : '',
+                        'latest_meta' => $latestPendingPaymentOrder ? $statusLabel($latestPendingPaymentOrder->status) : '',
                         'latest_status' => __('admin-dashboard.needs_review'),
                         'latest_url' => $latestPendingPaymentOrder ? route('admin.ecommerce-orders.show', $latestPendingPaymentOrder->id) : null,
                         'view_all_url' => route('admin.ecommerce-orders'),
@@ -222,7 +234,7 @@ class AdminDashboardController extends Controller
                         'title' => __('admin-dashboard.approved_cancellations'),
                         'count' => EcommerceOrder::where('status', 'cancelled')->count(),
                         'latest_title' => $latestCancelledEcommerceOrder?->order_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestCancelledEcommerceOrder ? ucfirst($latestCancelledEcommerceOrder->status) : '',
+                        'latest_meta' => $latestCancelledEcommerceOrder ? $statusLabel($latestCancelledEcommerceOrder->status) : '',
                         'latest_status' => __('admin-dashboard.approved'),
                         'latest_url' => $latestCancelledEcommerceOrder ? route('admin.ecommerce-orders.show', $latestCancelledEcommerceOrder->id) : null,
                         'view_all_url' => route('admin.ecommerce-orders'),
@@ -255,7 +267,7 @@ class AdminDashboardController extends Controller
                         'title' => __('admin-dashboard.pending_shipment_orders'),
                         'count' => Order::where('status', 'pending')->count(),
                         'latest_title' => $latestPendingShipmentOrder?->order_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestPendingShipmentOrder ? ucfirst($latestPendingShipmentOrder->status->name) : '',
+                        'latest_meta' => $latestPendingShipmentOrder ? $statusLabel($latestPendingShipmentOrder->status->name) : '',
                         'latest_status' => __('admin-dashboard.pending'),
                         'latest_url' => $latestPendingShipmentOrder ? route('admin.shipment-orders.show', $latestPendingShipmentOrder->id) : null,
                         'view_all_url' => route('admin.shipment-orders'),
@@ -264,7 +276,7 @@ class AdminDashboardController extends Controller
                         'title' => __('admin-dashboard.pending_ecommerce_orders'),
                         'count' => EcommerceOrder::where('status', 'pending')->count(),
                         'latest_title' => $latestPendingEcommerceOrder?->order_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestPendingEcommerceOrder ? ucfirst($latestPendingEcommerceOrder->status) : '',
+                        'latest_meta' => $latestPendingEcommerceOrder ? $statusLabel($latestPendingEcommerceOrder->status) : '',
                         'latest_status' => __('admin-dashboard.pending'),
                         'latest_url' => $latestPendingEcommerceOrder ? route('admin.ecommerce-orders.show', $latestPendingEcommerceOrder->id) : null,
                         'view_all_url' => route('admin.ecommerce-orders'),

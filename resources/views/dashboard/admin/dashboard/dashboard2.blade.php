@@ -8,6 +8,9 @@
         $stats = $stats ?? [];
         $dashboardCycles = $dashboardCycles ?? [];
         $cycleUiLabels = $cycleUiLabels ?? [];
+        $isArabic = app()->getLocale() === 'ar';
+
+        $text = fn (string $english, string $arabic) => $isArabic ? $arabic : $english;
 
         $safeNumber = fn ($value) => number_format((int) ($value ?? 0));
         $label = fn ($key, $fallback) => __($key) === $key ? $fallback : __($key);
@@ -15,39 +18,39 @@
 
         $actionCards = [
             [
-                'label' => 'Pending Shipments',
+                'label' => $text('Pending Shipments', 'طلبات الشحن المعلقة'),
                 'value' => $stats['pending_shipment_requests'] ?? $stats['pending_shipment_orders'] ?? 0,
-                'helper' => 'Waiting for review, pricing, or assignment.',
+                'helper' => $text('Waiting for review, pricing, or assignment.', 'في انتظار المراجعة أو التسعير أو التعيين.'),
                 'icon' => 'fas fa-clock',
                 'tone' => 'warning',
-                'badge' => 'Needs action',
+                'badge' => $text('Needs action', 'يحتاج إجراء'),
                 'url' => $routeOrNull('admin.shipment-orders'),
             ],
             [
-                'label' => 'Pending Vendors',
+                'label' => $text('Pending Vendors', 'البائعون المعلقون'),
                 'value' => $stats['pending_vendor_approvals'] ?? 0,
-                'helper' => 'Business profiles waiting for approval.',
+                'helper' => $text('Business profiles waiting for approval.', 'الملفات التجارية في انتظار الموافقة.'),
                 'icon' => 'fas fa-store-alt',
                 'tone' => 'danger',
-                'badge' => 'Review',
+                'badge' => $text('Review', 'مراجعة'),
                 'url' => $routeOrNull('admin.vendors'),
             ],
             [
-                'label' => 'Pending Warehouses',
+                'label' => $text('Pending Warehouses', 'المستودعات المعلقة'),
                 'value' => $stats['pending_warehouse_approvals'] ?? 0,
-                'helper' => 'Warehouses waiting for admin approval.',
+                'helper' => $text('Warehouses waiting for admin approval.', 'المستودعات في انتظار موافقة الإدارة.'),
                 'icon' => 'fas fa-warehouse',
                 'tone' => 'primary',
-                'badge' => 'Review',
+                'badge' => $text('Review', 'مراجعة'),
                 'url' => $routeOrNull('admin.settings.warehouses.index'),
             ],
             [
-                'label' => 'Pending Orders',
+                'label' => $text('Pending Orders', 'الطلبات المعلقة'),
                 'value' => $stats['pending_ecommerce_orders'] ?? 0,
-                'helper' => 'Ecommerce orders that still need follow-up.',
+                'helper' => $text('Ecommerce orders that still need follow-up.', 'طلبات المتجر التي ما زالت تحتاج متابعة.'),
                 'icon' => 'fas fa-shopping-bag',
                 'tone' => 'info',
-                'badge' => 'Follow up',
+                'badge' => $text('Follow up', 'متابعة'),
                 'url' => $routeOrNull('admin.orders'),
             ],
         ];
@@ -56,7 +59,7 @@
             [
                 'label' => $label('admin-dashboard.total_users', 'Total Users'),
                 'value' => $stats['total_users'] ?? 0,
-                'helper' => 'All registered customer accounts.',
+                'helper' => $text('All registered customer accounts.', 'جميع حسابات العملاء المسجلة.'),
                 'icon' => 'fas fa-users',
                 'tone' => 'primary',
                 'url' => $routeOrNull('admin.users'),
@@ -64,7 +67,7 @@
             [
                 'label' => $label('admin-dashboard.total_vendors', 'Total Vendors'),
                 'value' => $stats['total_vendors'] ?? 0,
-                'helper' => 'Vendor accounts inside the platform.',
+                'helper' => $text('Vendor accounts inside the platform.', 'حسابات البائعين داخل المنصة.'),
                 'icon' => 'fas fa-store',
                 'tone' => 'success',
                 'url' => $routeOrNull('admin.vendors'),
@@ -72,7 +75,7 @@
             [
                 'label' => $label('admin-dashboard.shipment_companies', 'Shipment Companies'),
                 'value' => $stats['total_shipment_companies'] ?? $stats['active_shipment_companies'] ?? 0,
-                'helper' => 'Companies connected to shipping operations.',
+                'helper' => $text('Companies connected to shipping operations.', 'الشركات المرتبطة بعمليات الشحن.'),
                 'icon' => 'fas fa-truck-moving',
                 'tone' => 'info',
                 'url' => $routeOrNull('admin.shipment-companies'),
@@ -80,7 +83,7 @@
             [
                 'label' => $label('admin-dashboard.total_products', 'Total Products'),
                 'value' => $stats['total_products'] ?? 0,
-                'helper' => 'Products currently available in the system.',
+                'helper' => $text('Products currently available in the system.', 'المنتجات المتوفرة حاليًا في النظام.'),
                 'icon' => 'fas fa-box',
                 'tone' => 'warning',
                 'url' => $routeOrNull('admin.products'),
@@ -89,65 +92,65 @@
 
         $phase2Cards = [
             [
-                'label' => 'Shipment Requests',
+                'label' => $text('Shipment Requests', 'طلبات الشحن'),
                 'value' => $stats['total_shipment_requests'] ?? $stats['total_shipment_orders'] ?? 0,
-                'helper' => 'New shipping request flow from Phase 2.',
+                'helper' => $text('New shipping request flow from Phase 2.', 'مسار طلبات الشحن الجديد في المرحلة الثانية.'),
                 'icon' => 'fas fa-file-invoice',
                 'tone' => 'primary',
                 'url' => $routeOrNull('admin.shipment-orders'),
             ],
             [
-                'label' => 'Assigned Shipments',
+                'label' => $text('Assigned Shipments', 'الطلبات المعينة'),
                 'value' => $stats['assigned_shipment_requests'] ?? 0,
-                'helper' => 'Requests already assigned to a company or courier.',
+                'helper' => $text('Requests already assigned to a company or courier.', 'الطلبات التي تم تعيينها لشركة أو مندوب بالفعل.'),
                 'icon' => 'fas fa-clipboard-check',
                 'tone' => 'info',
                 'url' => $routeOrNull('admin.shipment-orders'),
             ],
             [
-                'label' => 'Completed Shipments',
+                'label' => $text('Completed Shipments', 'الطلبات المكتملة'),
                 'value' => $stats['completed_shipment_requests'] ?? $stats['completed_shipment_orders'] ?? 0,
-                'helper' => 'Delivered or completed shipment requests.',
+                'helper' => $text('Delivered or completed shipment requests.', 'طلبات الشحن التي تم تسليمها أو إكمالها.'),
                 'icon' => 'fas fa-check-circle',
                 'tone' => 'success',
                 'url' => $routeOrNull('admin.shipment-orders'),
             ],
             [
-                'label' => 'Cancelled Shipments',
+                'label' => $text('Cancelled Shipments', 'الطلبات الملغاة'),
                 'value' => $stats['cancelled_shipment_requests'] ?? $stats['cancelled_shipment_orders'] ?? 0,
-                'helper' => 'Cancelled or rejected shipment requests.',
+                'helper' => $text('Cancelled or rejected shipment requests.', 'طلبات الشحن الملغاة أو المرفوضة.'),
                 'icon' => 'fas fa-ban',
                 'tone' => 'danger',
                 'url' => $routeOrNull('admin.shipment-orders'),
             ],
             [
-                'label' => 'Approved Vendors',
+                'label' => $text('Approved Vendors', 'البائعون المعتمدون'),
                 'value' => $stats['approved_vendors'] ?? 0,
-                'helper' => 'Vendors approved to operate normally.',
+                'helper' => $text('Vendors approved to operate normally.', 'البائعون المعتمدون للعمل بشكل طبيعي.'),
                 'icon' => 'fas fa-user-check',
                 'tone' => 'success',
                 'url' => $routeOrNull('admin.vendors'),
             ],
             [
-                'label' => 'Approved Warehouses',
+                'label' => $text('Approved Warehouses', 'المستودعات المعتمدة'),
                 'value' => $stats['approved_warehouses'] ?? 0,
-                'helper' => 'Warehouses approved for business use.',
+                'helper' => $text('Warehouses approved for business use.', 'المستودعات المعتمدة للاستخدام التجاري.'),
                 'icon' => 'fas fa-warehouse',
                 'tone' => 'primary',
                 'url' => $routeOrNull('admin.settings.warehouses.index'),
             ],
             [
-                'label' => 'Active Representatives',
+                'label' => $text('Active Representatives', 'المندوبون النشطون'),
                 'value' => $stats['active_representatives'] ?? 0,
-                'helper' => 'Representatives available for operations.',
+                'helper' => $text('Representatives available for operations.', 'المندوبون المتاحون للعمليات.'),
                 'icon' => 'fas fa-user-tie',
                 'tone' => 'info',
                 'url' => $routeOrNull('admin.representatives.index'),
             ],
             [
-                'label' => 'Ecommerce Orders',
+                'label' => $text('Ecommerce Orders', 'طلبات المتجر'),
                 'value' => $stats['total_ecommerce_orders'] ?? 0,
-                'helper' => 'Marketplace order flow overview.',
+                'helper' => $text('Marketplace order flow overview.', 'نظرة عامة على طلبات المتجر.'),
                 'icon' => 'fas fa-shopping-cart',
                 'tone' => 'warning',
                 'url' => $routeOrNull('admin.orders'),
@@ -156,26 +159,26 @@
 
         $quickLinks = [
             [
-                'label' => 'Shipment Requests',
-                'helper' => 'Review sender, receiver, package, status, and assignment.',
+                'label' => $text('Shipment Requests', 'طلبات الشحن'),
+                'helper' => $text('Review sender, receiver, package, status, and assignment.', 'راجع بيانات المرسل والمستلم والطرد والحالة والتعيين.'),
                 'icon' => 'fas fa-shipping-fast',
                 'url' => $routeOrNull('admin.shipment-orders'),
             ],
             [
-                'label' => 'Vendors',
-                'helper' => 'Review vendor profile, branches, products, and approvals.',
+                'label' => $text('Vendors', 'البائعون'),
+                'helper' => $text('Review vendor profile, branches, products, and approvals.', 'راجع ملف البائع والفروع والمنتجات والموافقات.'),
                 'icon' => 'fas fa-store',
                 'url' => $routeOrNull('admin.vendors'),
             ],
             [
-                'label' => 'Warehouses',
-                'helper' => 'Manage warehouse approval and business data.',
+                'label' => $text('Warehouses', 'المستودعات'),
+                'helper' => $text('Manage warehouse approval and business data.', 'إدارة موافقات المستودعات وبياناتها التجارية.'),
                 'icon' => 'fas fa-warehouse',
                 'url' => $routeOrNull('admin.settings.warehouses.index'),
             ],
             [
-                'label' => 'Shipment Companies',
-                'helper' => 'Manage shipping partners and company coverage.',
+                'label' => $text('Shipment Companies', 'شركات الشحن'),
+                'helper' => $text('Manage shipping partners and company coverage.', 'إدارة شركاء الشحن وتغطية الشركات.'),
                 'icon' => 'fas fa-truck',
                 'url' => $routeOrNull('admin.shipment-companies'),
             ],
@@ -186,16 +189,16 @@
         <div class="dashboard-hero mb-4">
             <div class="dashboard-hero-content">
                 <div>
-                    <span class="dashboard-eyebrow">Metw Admin Control Center</span>
-                    <h1 class="dashboard-title">{{ $label('admin-dashboard.dashboard_overview', 'Dashboard Overview') }}</h1>
+                    <span class="dashboard-eyebrow">{{ $text('Metw Admin Control Center', 'مركز تحكم MetwGo') }}</span>
+                    <h1 class="dashboard-title">{{ $label('admin-dashboard.dashboard_overview', $text('Dashboard Overview', 'نظرة عامة على لوحة التحكم')) }}</h1>
                     <p class="dashboard-subtitle mb-0">
-                        Understand what needs action, what is moving, and what belongs to the new Phase 2 business flow.
+                        {{ $text('Understand what needs action, what is moving, and what belongs to the new Phase 2 business flow.', 'اعرف ما يحتاج إلى إجراء، وما يتحرك، وما يخص مسار الأعمال الجديد في المرحلة الثانية.') }}
                     </p>
                 </div>
                 <div class="dashboard-hero-summary">
-                    <span class="summary-label">Action items</span>
+                    <span class="summary-label">{{ $text('Action items', 'العناصر المطلوبة') }}</span>
                     <strong>{{ $safeNumber(collect($actionCards)->sum('value')) }}</strong>
-                    <small>items need attention</small>
+                    <small>{{ $text('items need attention', 'عنصر يحتاج إلى متابعة') }}</small>
                 </div>
             </div>
         </div>
@@ -203,9 +206,9 @@
         <section class="dashboard-section mb-4">
             <div class="section-heading">
                 <div>
-                    <span class="section-kicker">Start here</span>
-                    <h2>Action Required</h2>
-                    <p>Critical items that need admin review or operational follow-up.</p>
+                    <span class="section-kicker">{{ $text('Start here', 'ابدأ من هنا') }}</span>
+                    <h2>{{ $text('Action Required', 'الإجراءات المطلوبة') }}</h2>
+                    <p>{{ $text('Critical items that need admin review or operational follow-up.', 'عناصر مهمة تحتاج مراجعة من الإدارة أو متابعة تشغيلية.') }}</p>
                 </div>
             </div>
 
@@ -224,7 +227,7 @@
                                 <div class="metric-value">{{ $safeNumber($card['value']) }}</div>
                                 <p class="metric-helper">{{ $card['helper'] }}</p>
                                 <div class="metric-action">
-                                    <span>{{ !empty($card['url']) ? 'Open details' : 'Route not available' }}</span>
+                                    <span>{{ !empty($card['url']) ? $text('Open details', 'عرض التفاصيل') : $text('Route not available', 'المسار غير متاح') }}</span>
                                     <i class="fas fa-arrow-right"></i>
                                 </div>
                             </div>
@@ -239,9 +242,9 @@
         <section class="dashboard-section mb-4">
             <div class="section-heading section-heading-inline">
                 <div>
-                    <span class="section-kicker">Business health</span>
-                    <h2>Main Platform Numbers</h2>
-                    <p>High-level numbers for users, vendors, products, and shipment partners.</p>
+                    <span class="section-kicker">{{ $text('Business health', 'صحة المنصة') }}</span>
+                    <h2>{{ $text('Main Platform Numbers', 'الأرقام الرئيسية للمنصة') }}</h2>
+                    <p>{{ $text('High-level numbers for users, vendors, products, and shipment partners.', 'أرقام عامة للمستخدمين والبائعين والمنتجات وشركاء الشحن.') }}</p>
                 </div>
             </div>
 
@@ -270,9 +273,9 @@
         <section class="dashboard-section mb-4">
             <div class="section-heading">
                 <div>
-                    <span class="section-kicker">Phase 2 operations</span>
-                    <h2>New Flow Visibility</h2>
-                    <p>Shipment requests, approvals, warehouses, representatives, and order flow.</p>
+                    <span class="section-kicker">{{ $text('Phase 2 operations', 'عمليات المرحلة الثانية') }}</span>
+                    <h2>{{ $text('New Flow Visibility', 'وضوح المسار الجديد') }}</h2>
+                    <p>{{ $text('Shipment requests, approvals, warehouses, representatives, and order flow.', 'طلبات الشحن، الموافقات، المستودعات، المندوبون، ومسار الطلبات.') }}</p>
                 </div>
             </div>
 
@@ -301,9 +304,9 @@
         <section class="dashboard-section mb-4">
             <div class="section-heading">
                 <div>
-                    <span class="section-kicker">Navigation</span>
-                    <h2>Quick Access</h2>
-                    <p>Go directly to the operational pages related to Phase 2.</p>
+                    <span class="section-kicker">{{ $text('Navigation', 'التنقل') }}</span>
+                    <h2>{{ $text('Quick Access', 'وصول سريع') }}</h2>
+                    <p>{{ $text('Go directly to the operational pages related to Phase 2.', 'انتقل مباشرة إلى الصفحات التشغيلية الخاصة بالمرحلة الثانية.') }}</p>
                 </div>
             </div>
 
@@ -335,9 +338,9 @@
             <section class="dashboard-cycle-section mb-4" id="approvalCycles">
                 <div class="cycle-section-header mb-3">
                     <div>
-                        <span class="section-kicker">Approval cycle</span>
-                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['approvals']['title'] ?? 'Approvals' }}</h5>
-                        <p class="mb-0 text-muted small">{{ $dashboardCycles['approvals']['subtitle'] ?? 'Items waiting for approval.' }}</p>
+                        <span class="section-kicker">{{ $text('Approval cycle', 'دورة الموافقات') }}</span>
+                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['approvals']['title'] ?? $text('Approvals', 'الموافقات') }}</h5>
+                        <p class="mb-0 text-muted small">{{ $dashboardCycles['approvals']['subtitle'] ?? $text('Items waiting for approval.', 'العناصر التي تنتظر الموافقة.') }}</p>
                     </div>
                 </div>
                 <div class="row g-3">
@@ -381,9 +384,9 @@
             <section class="dashboard-cycle-section mb-4" id="trustCycles">
                 <div class="cycle-section-header mb-3">
                     <div>
-                        <span class="section-kicker">Trust cycle</span>
-                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['trust']['title'] ?? 'Trust' }}</h5>
-                        <p class="mb-0 text-muted small">{{ $dashboardCycles['trust']['subtitle'] ?? 'Trusted and rejected records.' }}</p>
+                        <span class="section-kicker">{{ $text('Trust cycle', 'دورة الثقة') }}</span>
+                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['trust']['title'] ?? $text('Trust', 'الثقة') }}</h5>
+                        <p class="mb-0 text-muted small">{{ $dashboardCycles['trust']['subtitle'] ?? $text('Trusted and rejected records.', 'السجلات الموثوقة والمرفوضة.') }}</p>
                     </div>
                 </div>
                 <div class="row g-3">
@@ -442,9 +445,9 @@
             <section class="dashboard-cycle-section mb-4" id="adminApprovalCycles">
                 <div class="cycle-section-header mb-3">
                     <div>
-                        <span class="section-kicker">Admin approvals</span>
-                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['adminApprovals']['title'] ?? 'Admin Approvals' }}</h5>
-                        <p class="mb-0 text-muted small">{{ $dashboardCycles['adminApprovals']['subtitle'] ?? 'Admin-controlled approval items.' }}</p>
+                        <span class="section-kicker">{{ $text('Admin approvals', 'موافقات الإدارة') }}</span>
+                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['adminApprovals']['title'] ?? $text('Admin Approvals', 'موافقات الإدارة') }}</h5>
+                        <p class="mb-0 text-muted small">{{ $dashboardCycles['adminApprovals']['subtitle'] ?? $text('Admin-controlled approval items.', 'عناصر الموافقة التي تتحكم بها الإدارة.') }}</p>
                     </div>
                 </div>
                 <div class="row g-3">
@@ -487,9 +490,9 @@
             <section class="dashboard-cycle-section mb-4" id="pendingCycles">
                 <div class="cycle-section-header mb-3">
                     <div>
-                        <span class="section-kicker">Pending cycles</span>
-                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['pending']['title'] ?? 'Pending' }}</h5>
-                        <p class="mb-0 text-muted small">{{ $dashboardCycles['pending']['subtitle'] ?? 'Pending operational cycles.' }}</p>
+                        <span class="section-kicker">{{ $text('Pending cycles', 'الدورات المعلقة') }}</span>
+                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['pending']['title'] ?? $text('Pending', 'معلق') }}</h5>
+                        <p class="mb-0 text-muted small">{{ $dashboardCycles['pending']['subtitle'] ?? $text('Pending operational cycles.', 'الدورات التشغيلية المعلقة.') }}</p>
                     </div>
                 </div>
                 <div class="row g-3">
@@ -528,21 +531,21 @@
             </section>
         @endif
 
-        <section class="dashboard-cycle-section mb-4" id="complaintsCycles">
-            <div class="cycle-section-header mb-3">
-                <div>
-                    <span class="section-kicker">Support</span>
-                    <h5 class="mb-1 fw-bold">{{ $dashboardCycles['complaints']['title'] ?? 'Complaints' }}</h5>
-                    <p class="mb-0 text-muted small">{{ $dashboardCycles['complaints']['subtitle'] ?? 'Complaints and customer support signals.' }}</p>
+            <section class="dashboard-cycle-section mb-4" id="complaintsCycles">
+                <div class="cycle-section-header mb-3">
+                    <div>
+                        <span class="section-kicker">{{ $text('Support', 'الدعم') }}</span>
+                        <h5 class="mb-1 fw-bold">{{ $dashboardCycles['complaints']['title'] ?? $text('Complaints', 'الشكاوى') }}</h5>
+                        <p class="mb-0 text-muted small">{{ $dashboardCycles['complaints']['subtitle'] ?? $text('Complaints and customer support signals.', 'إشارات الشكاوى والدعم الفني للعملاء.') }}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="empty-state-card">
-                <i class="fas fa-comment-dots"></i>
-                <strong>{{ $cycleUiLabels['no_complaints_source'] ?? 'No complaints source is connected yet.' }}</strong>
-                <span>When complaint data is available, this area can show open complaints and urgent support issues.</span>
-            </div>
-        </section>
-    </div>
+                <div class="empty-state-card">
+                    <i class="fas fa-comment-dots"></i>
+                    <strong>{{ $cycleUiLabels['no_complaints_source'] ?? $text('No complaints source is connected yet.', 'لم يتم ربط مصدر للشكاوى بعد.') }}</strong>
+                    <span>{{ $text('When complaint data is available, this area can show open complaints and urgent support issues.', 'عندما تتوفر بيانات الشكاوى، يمكن لهذه المساحة عرض الشكاوى المفتوحة ومشكلات الدعم العاجلة.') }}</span>
+                </div>
+            </section>
+        </div>
 @endsection
 
 @section('scripts')

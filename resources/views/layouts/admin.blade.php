@@ -11,6 +11,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Arabic font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -100,9 +104,13 @@
                 radial-gradient(circle at top left, rgba(123, 0, 168, 0.10), transparent 34rem),
                 radial-gradient(circle at top right, rgba(255, 112, 67, 0.09), transparent 30rem),
                 linear-gradient(180deg, #FFFFFF 0%, var(--metw-bg) 100%);
-            font-family: "Cairo", "Tajawal", "IBM Plex Sans Arabic", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
+        }
+
+        html[dir="rtl"] body {
+            font-family: "El Messiri", "Cairo", "Tajawal", "IBM Plex Sans Arabic", sans-serif;
         }
 
         a {

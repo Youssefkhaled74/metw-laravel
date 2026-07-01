@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SetLocale
 {
@@ -14,19 +15,25 @@ class SetLocale
     {
         $fallback = config('app.locale', 'en');
 
-        // Use session locale if available, else from header
         $sessionLocale = null;
         if ($request->hasSession()) {
             $sessionLocale = $request->session()->get('locale');
         }
 
         $headerLocale = $request->header('Accept-Language');
-        $locale = $sessionLocale ?: ($headerLocale ?: $fallback);
+        $locale = $sessionLocale ?: $headerLocale ?: $fallback;
+        $locale = strtolower((string) $locale);
 
-        if (in_array($locale, ['en', 'ar'])) {
-            app()->setLocale($locale);
+        if (Str::startsWith($locale, 'ar')) {
+            app()->setLocale('ar');
+        } elseif (Str::startsWith($locale, 'en')) {
+            app()->setLocale('en');
         } else {
             app()->setLocale($fallback);
+        }
+
+        if ($request->hasSession()) {
+            $request->session()->put('locale', app()->getLocale());
         }
 
         return $next($request);
