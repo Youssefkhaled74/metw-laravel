@@ -7,8 +7,9 @@
 <div class="row">
 
     <div class="card shadow mb-4">
-        <div class="card-header bg-secondary text-white">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
             <h6 class="m-0">{{__('shipment-dashboard.rules')}}</h6>
+            <small class="text-white-50"><i class="fas fa-info-circle me-1"></i> @lang('shipment-dashboard.rules_help')</small>
         </div>
 
         <div class="card-body">
@@ -100,10 +101,13 @@
 
     <div class="col-lg-8">
         <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    @lang('shipment-dashboard.category_pricing')
-                </h6>
+            <div class="card-header py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        @lang('shipment-dashboard.category_pricing')
+                    </h6>
+                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i> @lang('shipment-dashboard.category_pricing_help')</small>
+                </div>
                 <button type="button" class="btn btn-sm btn-success" id="addCategoryRow">
                     <i class="fas fa-plus"></i> @lang('shipment-dashboard.add_category_pricing')
                 </button>

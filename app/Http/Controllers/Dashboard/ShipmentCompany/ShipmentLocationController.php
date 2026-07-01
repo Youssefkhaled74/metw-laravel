@@ -22,6 +22,7 @@ class ShipmentLocationController extends Controller
         $company = Auth::guard('shipment')->user();
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:120'],
+            'is_active' => ['nullable', 'in:all,0,1'],
             'sort_by' => ['nullable', 'in:created_at,country,state,city'],
             'sort_dir' => ['nullable', 'in:asc,desc'],
         ]);
@@ -63,6 +64,10 @@ class ShipmentLocationController extends Controller
                     $query->orWhereJsonContains('city', (int) $id);
                 }
             });
+        }
+
+        if (isset($validated['is_active']) && $validated['is_active'] !== 'all') {
+            $locationsQuery->where('is_active', $validated['is_active'] === '1' ? 1 : 0);
         }
 
         if ($sortBy === 'country') {

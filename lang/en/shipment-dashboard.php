@@ -600,6 +600,34 @@ return [
     'not_set' => 'Not set',
     'estimated_delivery_note' => 'Estimated delivery date will be :date based on the days you set',
 
+    // Dashboard sections
+    'today_operations' => 'Today Operations',
+    'today_assigned' => 'Assigned Today',
+    'today_picked_up' => 'Picked Up Today',
+    'today_delivered' => 'Delivered Today',
+    'today_cancelled' => 'Cancelled Today',
+    'shipment_flow' => 'Shipment Flow',
+    'coverage_pricing' => 'Coverage & Pricing',
+    'active_coverage' => 'Active',
+    'inactive_coverage' => 'Inactive',
+    'manage_coverage' => 'Manage Coverage',
+    'representatives' => 'Representatives',
+    'representatives_info' => 'Manage your delivery representatives',
+    'representatives_count' => 'Active Representatives',
+
+    // Orders columns
+    'sender_receiver' => 'Sender & Receiver',
+    'operational_summary' => 'Operational Summary',
+    'route' => 'Route',
+    'package' => 'Package',
+    'price' => 'Price',
+    'assignment' => 'Assignment',
+    'clear_filters' => 'Clear Filters',
+
+    // Pricing help
+    'category_pricing_help' => 'Set pricing per category based on weight/size type',
+    'rules_help' => 'Distance rules determine shipping cost by km range',
+
 ];
 
 

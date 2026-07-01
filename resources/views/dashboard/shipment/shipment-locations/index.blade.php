@@ -23,7 +23,7 @@
             </div>
 
             <form method="GET" action="{{ route('shipment.shipment-locations.index') }}" class="row g-2 align-items-center">
-                <div class="col-lg-10">
+                <div class="col-lg-5">
                     <div class="input-group input-group-sm search-shell">
                         <span class="input-group-text bg-white border-end-0 search-icon-shell">
                             <i class="fas fa-search text-muted"></i>
@@ -39,10 +39,24 @@
                     </div>
                 </div>
 
+                <div class="col-lg-3">
+                    <select name="is_active" class="form-select form-select-sm filter-select-modern">
+                        <option value="all" {{ request('is_active', 'all') === 'all' ? 'selected' : '' }}>
+                            {{ app()->getLocale() === 'ar' ? 'جميع الحالات' : 'All statuses' }}
+                        </option>
+                        <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>
+                            @lang('shipment-dashboard.active')
+                        </option>
+                        <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>
+                            @lang('shipment-dashboard.inactive')
+                        </option>
+                    </select>
+                </div>
+
                 <input type="hidden" name="sort_by" value="{{ request('sort_by', 'created_at') }}">
                 <input type="hidden" name="sort_dir" value="{{ request('sort_dir', 'desc') }}">
 
-                <div class="col-lg-2 d-flex gap-2">
+                <div class="col-lg-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-sm">
                         <i class="fas fa-filter me-1"></i> {{ app()->getLocale() === 'ar' ? 'تطبيق' : 'Apply' }}
                     </button>
@@ -218,6 +232,11 @@
                         <i class="fas fa-map-marker-alt empty-icon mb-3"></i>
                         <h5 class="text-muted">@lang('shipment-dashboard.no_shipment_locations_found')</h5>
                         <p class="text-muted mb-0">@lang('shipment-dashboard.no_shipment_locations_yet')</p>
+                        @if(request('search') || request('is_active') !== 'all')
+                            <a href="{{ route('shipment.shipment-locations.index') }}" class="btn btn-outline-primary btn-sm mt-3">
+                                <i class="fas fa-undo me-1"></i> @lang('shipment-dashboard.clear_filters')
+                            </a>
+                        @endif
                     </div>
                 </div>
             @endif

@@ -600,6 +600,34 @@ return [
     'not_set' => 'غير محدد',
     'estimated_delivery_note' => 'سيكون تاريخ التوصيل المتوقع هو :date بناءً على عدد الأيام الذي قمت بتعيينه',
 
+    // Dashboard sections
+    'today_operations' => 'عمليات اليوم',
+    'today_assigned' => 'تم التعيين اليوم',
+    'today_picked_up' => 'تم الاستلام اليوم',
+    'today_delivered' => 'تم التوصيل اليوم',
+    'today_cancelled' => 'تم الإلغاء اليوم',
+    'shipment_flow' => 'تدفق الشحنات',
+    'coverage_pricing' => 'التغطية والتسعير',
+    'active_coverage' => 'نشط',
+    'inactive_coverage' => 'غير نشط',
+    'manage_coverage' => 'إدارة التغطية',
+    'representatives' => 'المندوبين',
+    'representatives_info' => 'إدارة مندوبي التوصيل',
+    'representatives_count' => 'المندوبين النشطين',
+
+    // Orders columns
+    'sender_receiver' => 'المرسل والمستلم',
+    'operational_summary' => 'الملخص التشغيلي',
+    'route' => 'المسار',
+    'package' => 'الطرد',
+    'price' => 'السعر',
+    'assignment' => 'التعيين',
+    'clear_filters' => 'مسح الفلاتر',
+
+    // Pricing help
+    'category_pricing_help' => 'تعيين التسعير لكل تصنيف حسب نوع الوزن/الحجم',
+    'rules_help' => 'تحدد قواعد المسافة تكلفة الشحن حسب نطاق الكيلومترات',
+
 ];
 
 

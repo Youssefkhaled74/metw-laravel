@@ -3,6 +3,7 @@
 use App\Http\Controllers\Dashboard\Admin\CommissionController;
 use App\Http\Controllers\Dashboard\Admin\NotificationController;
 use App\Http\Controllers\Dashboard\Admin\AdminDashboardController;
+use App\Http\Controllers\Dashboard\Admin\ShipmentRequestController;
 use App\Http\Controllers\Dashboard\Admin\Settings\ConfigController;
 use App\Http\Controllers\Dashboard\Admin\ShipmentController;
 use App\Http\Controllers\Dashboard\Admin\RoleController;
@@ -56,6 +57,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('/orders/{id}/status', [\App\Http\Controllers\Dashboard\Admin\ShipmentController::class, 'updateOrderStatus'])->name('orders.update-status');
             Route::patch('/orders/{id}/assign', [\App\Http\Controllers\Dashboard\Admin\ShipmentController::class, 'assignCompany'])->name('orders.assign-company');
             Route::patch('/orders/{orderId}/items/{itemId}/status', [\App\Http\Controllers\Dashboard\Admin\ShipmentController::class, 'updateItemStatus'])->name('orders.update-item-status');
+
+            // Phase 2 - Shipment Requests
+            Route::get('/requests', [\App\Http\Controllers\Dashboard\Admin\ShipmentRequestController::class, 'index'])->name('requests.index');
+            Route::get('/requests/{id}', [\App\Http\Controllers\Dashboard\Admin\ShipmentRequestController::class, 'show'])->name('requests.show');
 
             Route::get('/companies', [\App\Http\Controllers\Dashboard\Admin\ShipmentController::class, 'companies'])->name('companies');
             Route::get('/companies/create', [\App\Http\Controllers\Dashboard\Admin\ShipmentController::class, 'createCompany'])->name('companies.create');

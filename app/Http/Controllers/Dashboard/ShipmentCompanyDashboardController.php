@@ -84,6 +84,30 @@ class ShipmentCompanyDashboardController extends Controller
             'price_per_km_max' => $pricePerKmMax ? (float) $pricePerKmMax->value : 100,
         ];
 
+        // Today operations
+        $todayStart = now()->startOfDay();
+        $todayAssigned = OrderItem::where('shipment_company_id', $company->id)->whereDate('created_at', $todayStart)->count();
+        $todayPickedUp = OrderItem::where('shipment_company_id', $company->id)->where('status', 'pickup')->whereDate('updated_at', $todayStart)->count();
+        $todayDelivered = OrderItem::where('shipment_company_id', $company->id)->where('status', 'delivered')->whereDate('updated_at', $todayStart)->count();
+        $todayCancelled = OrderItem::where('shipment_company_id', $company->id)->where('status', 'cancelled')->whereDate('updated_at', $todayStart)->count();
+
+        // Coverage
+        $activeLocations = $company->shipmentLocations()->where('is_active', true)->count();
+        $inactiveLocations = $company->shipmentLocations()->where('is_active', false)->count();
+
+        // Flow counts
+        $flowCounts = [
+            'pending' => OrderItem::where('shipment_company_id', $company->id)->where('status', 'pending')->count(),
+            'accepted' => OrderItem::where('shipment_company_id', $company->id)->where('status', 'accepted')->count(),
+            'pickup' => OrderItem::where('shipment_company_id', $company->id)->where('status', 'pickup')->count(),
+            'on_way' => OrderItem::where('shipment_company_id', $company->id)->where('status', 'on_way')->count(),
+            'delivered' => OrderItem::where('shipment_company_id', $company->id)->where('status', 'delivered')->count(),
+            'cancelled' => OrderItem::where('shipment_company_id', $company->id)->where('status', 'cancelled')->count(),
+            'returned' => OrderItem::where('shipment_company_id', $company->id)->where('status', 'returned')->count(),
+        ];
+
+        $totalFlowItems = collect($flowCounts)->sum();
+
         $shippingOrdersBase = Order::where(function ($query) use ($company) {
             $query->whereHas('orderItems.route', function ($q) use ($company) {
                 $q->where(function ($q2) use ($company) {
@@ -303,7 +327,15 @@ class ShipmentCompanyDashboardController extends Controller
         return view('dashboard.shipment.dashboard', compact(
             'stats',
             'urgent_tasks',
-            'monthly_revenue'
+            'monthly_revenue',
+            'todayAssigned',
+            'todayPickedUp',
+            'todayDelivered',
+            'todayCancelled',
+            'activeLocations',
+            'inactiveLocations',
+            'flowCounts',
+            'totalFlowItems'
         ));
     }
 

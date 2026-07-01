@@ -23,7 +23,7 @@
             </div>
 
             <form method="GET" action="{{ route('shipment.orders') }}" class="row g-2 align-items-center">
-                <div class="col-lg-8">
+                <div class="col-lg-4">
                     <div class="input-group input-group-sm search-shell">
                         <span class="input-group-text bg-white border-end-0 search-icon-shell">
                             <i class="fas fa-search text-muted"></i>
@@ -32,7 +32,7 @@
                             type="text"
                             name="search"
                             class="form-control border-start-0 search-input-modern"
-                            placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث برقم الطلب أو اسم العميل أو الإيميل...' : 'Search by order number, customer, or email...' }}"
+                            placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث برقم الطلب أو اسم العميل...' : 'Search by order number or customer...' }}"
                             value="{{ request('search') }}"
                             autocomplete="off"
                         >
@@ -55,7 +55,7 @@
                 <input type="hidden" name="sort_by" value="{{ request('sort_by', 'created_at') }}">
                 <input type="hidden" name="sort_dir" value="{{ request('sort_dir', 'desc') }}">
 
-                <div class="col-lg-2 d-flex gap-2">
+                <div class="col-lg-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-sm">
                         <i class="fas fa-filter me-1"></i> {{ app()->getLocale() === 'ar' ? 'تطبيق' : 'Apply' }}
                     </button>
@@ -80,43 +80,21 @@
                                         <i class="fas {{ request('sort_by') === 'order_number' ? (request('sort_dir', 'desc') === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort' }} sort-indicator"></i>
                                     </a>
                                 </th>
-                                <th class="text-nowrap sortable-col">
-                                    @php
-                                        $customerDir = request('sort_by') === 'customer' && request('sort_dir', 'desc') === 'asc' ? 'desc' : 'asc';
-                                    @endphp
-                                    <a class="text-decoration-none text-reset" href="{{ route('shipment.orders', array_merge(request()->except('page'), ['sort_by' => 'customer', 'sort_dir' => $customerDir])) }}">
-                                        <span>@lang('shipment-dashboard.customer')</span>
-                                        <i class="fas {{ request('sort_by') === 'customer' ? (request('sort_dir', 'desc') === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort' }} sort-indicator"></i>
-                                    </a>
-                                </th>
-                                <th>@lang('shipment-dashboard.status')</th>
+                                <th class="text-nowrap">@lang('shipment-dashboard.sender')</th>
+                                <th class="text-nowrap">@lang('shipment-dashboard.receiver')</th>
+                                <th class="text-nowrap">@lang('shipment-dashboard.route')</th>
+                                <th class="text-nowrap">@lang('shipment-dashboard.package')</th>
                                 <th class="text-nowrap sortable-col">
                                     @php
                                         $totalPriceDir = request('sort_by') === 'total_price' && request('sort_dir', 'desc') === 'asc' ? 'desc' : 'asc';
                                     @endphp
                                     <a class="text-decoration-none text-reset" href="{{ route('shipment.orders', array_merge(request()->except('page'), ['sort_by' => 'total_price', 'sort_dir' => $totalPriceDir])) }}">
-                                        <span>@lang('shipment-dashboard.total_price')</span>
+                                        <span>@lang('shipment-dashboard.price')</span>
                                         <i class="fas {{ request('sort_by') === 'total_price' ? (request('sort_dir', 'desc') === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort' }} sort-indicator"></i>
                                     </a>
                                 </th>
-                                <th class="text-nowrap sortable-col">
-                                    @php
-                                        $packagesDir = request('sort_by') === 'packages' && request('sort_dir', 'desc') === 'asc' ? 'desc' : 'asc';
-                                    @endphp
-                                    <a class="text-decoration-none text-reset" href="{{ route('shipment.orders', array_merge(request()->except('page'), ['sort_by' => 'packages', 'sort_dir' => $packagesDir])) }}">
-                                        <span>@lang('shipment-dashboard.packages_count')</span>
-                                        <i class="fas {{ request('sort_by') === 'packages' ? (request('sort_dir', 'desc') === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort' }} sort-indicator"></i>
-                                    </a>
-                                </th>
-                                <th class="text-nowrap sortable-col mobile-hide">
-                                    @php
-                                        $createdAtDir = request('sort_by', 'created_at') === 'created_at' && request('sort_dir', 'desc') === 'asc' ? 'desc' : 'asc';
-                                    @endphp
-                                    <a class="text-decoration-none text-reset" href="{{ route('shipment.orders', array_merge(request()->except('page'), ['sort_by' => 'created_at', 'sort_dir' => $createdAtDir])) }}">
-                                        <span>@lang('shipment-dashboard.created_at')</span>
-                                        <i class="fas {{ request('sort_by', 'created_at') === 'created_at' ? (request('sort_dir', 'desc') === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort' }} sort-indicator"></i>
-                                    </a>
-                                </th>
+                                <th class="text-nowrap">@lang('shipment-dashboard.assignment')</th>
+                                <th>@lang('shipment-dashboard.status')</th>
                                 <th>@lang('shipment-dashboard.actions')</th>
                             </tr>
                         </thead>
@@ -124,27 +102,66 @@
                             @foreach ($orders as $order)
                                 @php
                                     $statusValue = $order->status->value ?? (string) $order->status;
+                                    $firstItem = $order->orderItems->first();
+                                    $details = $firstItem?->package?->packageDetails;
+                                    $pickup = $firstItem?->package?->pickupAddress;
+                                    $dropoff = $firstItem?->package?->dropoffAddress;
                                 @endphp
                                 <tr>
                                     <td>
                                         <strong class="text-primary">{{ $order->order_number }}</strong>
                                     </td>
                                     <td>
-                                        {{ $order->user->username ?? 'N/A' }}
-                                        @if ($order->user->email)
-                                            <br><small class="text-muted">{{ $order->user->email }}</small>
+                                        @if($details)
+                                            <small>{{ $details->sender_name ?? __('shipment-dashboard.na') }}</small>
+                                            @if($details->sender_phone)
+                                                <br><small class="text-muted">{{ $details->sender_phone }}</small>
+                                            @endif
+                                        @else
+                                            <small class="text-muted">—</small>
                                         @endif
+                                    </td>
+                                    <td>
+                                        @if($details)
+                                            <small>{{ $details->recive_name ?? __('shipment-dashboard.na') }}</small>
+                                            @if($details->recive_phone)
+                                                <br><small class="text-muted">{{ $details->recive_phone }}</small>
+                                            @endif
+                                        @else
+                                            <small class="text-muted">—</small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            @if($pickup && $dropoff)
+                                                {{ $pickup->city ?? __('shipment-dashboard.na') }}
+                                                <i class="fas fa-arrow-right mx-1"></i>
+                                                {{ $dropoff->city ?? __('shipment-dashboard.na') }}
+                                            @else
+                                                —
+                                            @endif
+                                        </small>
+                                    </td>
+                                    <td>
+                                        @if($firstItem?->package)
+                                            <small>
+                                                {{ $firstItem->package->type->name ?? '' }}
+                                                {{ $firstItem->package->weight ? '(' . $firstItem->package->weight . ' ' . __('shipment-dashboard.kg') . ')' : '' }}
+                                            </small>
+                                        @else
+                                            <small class="text-muted">—</small>
+                                        @endif
+                                    </td>
+                                    <td>{{ __('admin-dashboard.EGP') }}{{ number_format($order->final_price, 2) }}</td>
+                                    <td>
+                                        <span class="count-pill packages-pill">{{ $order->company_packages_count ?? $order->orderItems->count() }}</span>
+                                        <small class="text-muted d-block">@lang('shipment-dashboard.items')</small>
                                     </td>
                                     <td>
                                         <span class="status-pill {{ in_array($statusValue, ['delivered']) ? 'status-active' : (in_array($statusValue, ['cancelled','returned']) ? 'status-inactive' : 'packages-pill') }}">
                                             {{ ucfirst(str_replace('_', ' ', $statusValue)) }}
                                         </span>
                                     </td>
-                                    <td>{{__('admin-dashboard.EGP')}}{{ number_format($order->final_price, 2) }}</td>
-                                    <td>
-                                        <span class="count-pill packages-pill">{{ $order->company_packages_count ?? $order->orderItems->count() }}</span>
-                                    </td>
-                                    <td class="mobile-hide">@include('admin.partials.date', ['date' => $order->created_at])</td>
                                     <td>
                                         <div class="actions-group">
                                             <a href="{{ route('shipment.orders.show', $order->id) }}"
@@ -249,16 +266,20 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Pagination -->
                 <div class="d-flex justify-content-center mt-4 mb-3">
                     {{ $orders->links('pagination::bootstrap-5') }}
                 </div>
             @else
                 <div class="text-center py-5">
                     <div class="empty-state d-inline-block px-4 py-5">
-                        <i class="fas fa-shopping-cart empty-icon mb-3"></i>
+                        <i class="fas fa-truck empty-icon mb-3"></i>
                         <h5 class="text-muted">@lang('shipment-dashboard.no_orders_found')</h5>
                         <p class="text-muted mb-0">@lang('shipment-dashboard.no_orders_yet')</p>
+                        @if(request('search') || request('status') !== 'all')
+                            <a href="{{ route('shipment.orders') }}" class="btn btn-outline-primary btn-sm mt-3">
+                                <i class="fas fa-undo me-1"></i> @lang('shipment-dashboard.clear_filters')
+                            </a>
+                        @endif
                     </div>
                 </div>
             @endif

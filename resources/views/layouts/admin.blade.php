@@ -1431,6 +1431,14 @@
                                     <span class="link-text">{{ __('admin-dashboard.shipment_orders') }}</span>
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.shipment-requests*') ? 'active' : '' }}"
+                                href="{{ route('admin.shipment-requests.index') }}">
+                                    <i class="fas fa-file-invoice"></i>
+                                    <span class="link-text">{{ __('admin-dashboard.shipment_requests') }}</span>
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.ecommerce-orders*') ? 'active' : '' }}"
                                 href="{{ route('admin.ecommerce-orders') }}">
@@ -1697,6 +1705,15 @@
                                 href="{{ route('admin.shipment-orders') }}">
                                         <i class="fas fa-shipping-fast"></i>
                                         <span class="link-text">{{ __('admin-dashboard.shipment_orders') }}</span>
+                                </a>
+                            </li>
+                        @endif
+                        @if($employee->can('admin.shipment-requests.index'))
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.shipment-requests*') ? 'active' : '' }}"
+                                href="{{ route('admin.shipment-requests.index') }}">
+                                        <i class="fas fa-file-invoice"></i>
+                                        <span class="link-text">{{ __('admin-dashboard.shipment_requests') }}</span>
                                 </a>
                             </li>
                         @endif
