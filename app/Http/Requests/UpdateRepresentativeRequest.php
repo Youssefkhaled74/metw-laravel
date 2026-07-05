@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enum\RepresentativeAccountType;
 use App\Enum\RepresentativeStatus;
-use App\Enum\RepresentativeWorkType;
+use App\Models\RepresentativeWorkTypeOption;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -40,7 +40,7 @@ class UpdateRepresentativeRequest extends FormRequest
             'metadata' => ['sometimes', 'nullable', 'array'],
 
             'work_types' => ['sometimes', 'array', 'min:1'],
-            'work_types.*' => ['required', Rule::enum(RepresentativeWorkType::class), 'distinct'],
+            'work_types.*' => ['required', Rule::in(RepresentativeWorkTypeOption::activeCodes()), 'distinct'],
 
             'service_governorate_ids' => ['sometimes', 'array', 'min:1'],
             'service_governorate_ids.*' => ['required', 'integer', 'exists:governorates,id', 'distinct'],

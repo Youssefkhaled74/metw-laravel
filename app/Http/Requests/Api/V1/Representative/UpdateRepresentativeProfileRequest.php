@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Api\V1\Representative;
 
 use App\Enum\RepresentativeAccountType;
-use App\Enum\RepresentativeWorkType;
 use App\Models\City;
+use App\Models\RepresentativeWorkTypeOption;
 use App\Models\TransportType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -33,7 +33,9 @@ class UpdateRepresentativeProfileRequest extends FormRequest
             'notes' => ['sometimes', 'nullable', 'string'],
             'metadata' => ['sometimes', 'nullable', 'array'],
             'work_types' => ['sometimes', 'array', 'min:1'],
-            'work_types.*' => ['required', Rule::enum(RepresentativeWorkType::class)],
+            'work_types.*' => ['required', Rule::in(RepresentativeWorkTypeOption::selectableCodes(
+                $representative?->workTypes?->pluck('work_type')->all() ?? []
+            ))],
             'governorate_ids' => ['sometimes', 'array'],
             'governorate_ids.*' => ['integer', 'exists:governorates,id'],
             'city_ids' => ['sometimes', 'array'],
@@ -66,11 +68,12 @@ class UpdateRepresentativeProfileRequest extends FormRequest
             $governorateIds = array_values(array_filter((array) $this->input('governorate_ids', [])));
             $representative = $this->user()?->representative;
             $existingWorkTypes = $representative
-                ? $representative->workTypes->map(fn ($workType) => $workType->work_type?->value ?? $workType->work_type)
+                ? $representative->workTypes->map(fn ($workType) => $workType->work_type)
                 : collect();
             $workTypes = collect((array) ($this->input('work_types', $existingWorkTypes->all())))
                 ->filter()
                 ->values();
+            $exclusiveCodes = RepresentativeWorkTypeOption::exclusiveCodes();
             $transportTypeId = data_get(
                 $this->all(),
                 'vehicle.transport_type_id',
@@ -78,7 +81,7 @@ class UpdateRepresentativeProfileRequest extends FormRequest
             );
 
             if (
-                $workTypes->contains(RepresentativeWorkType::LOCAL_DELIVERY->value)
+                $workTypes->intersect($exclusiveCodes)->isNotEmpty()
                 && $workTypes->count() > 1
             ) {
                 $validator->errors()->add(
@@ -88,7 +91,7 @@ class UpdateRepresentativeProfileRequest extends FormRequest
             }
 
             if (
-                $workTypes->contains(RepresentativeWorkType::LOCAL_DELIVERY->value)
+                $workTypes->intersect($exclusiveCodes)->isNotEmpty()
                 && count($governorateIds) > 1
             ) {
                 $validator->errors()->add(
@@ -98,7 +101,7 @@ class UpdateRepresentativeProfileRequest extends FormRequest
             }
 
             if (
-                $workTypes->contains(RepresentativeWorkType::LOCAL_DELIVERY->value)
+                $workTypes->intersect($exclusiveCodes)->isNotEmpty()
                 && empty($cityIds)
                 && $this->has('work_types')
             ) {

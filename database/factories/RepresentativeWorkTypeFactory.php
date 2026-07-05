@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enum\RepresentativeWorkType as RepresentativeWorkTypeEnum;
 use App\Models\Representative;
 use App\Models\RepresentativeWorkType;
+use App\Models\RepresentativeWorkTypeOption;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,9 +17,13 @@ class RepresentativeWorkTypeFactory extends Factory
 
     public function definition(): array
     {
+        $codes = RepresentativeWorkTypeOption::activeCodes();
+
         return [
             'representative_id' => Representative::factory(),
-            'work_type' => fake()->randomElement(array_column(RepresentativeWorkTypeEnum::cases(), 'value')),
+            'work_type' => ! empty($codes)
+                ? fake()->randomElement($codes)
+                : fake()->randomElement(array_column(RepresentativeWorkTypeEnum::cases(), 'value')),
         ];
     }
 }

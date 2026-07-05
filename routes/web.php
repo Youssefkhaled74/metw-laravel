@@ -6,6 +6,7 @@ use App\Http\Controllers\Dashboard\Admin\AdminDashboardController;
 use App\Http\Controllers\Dashboard\Admin\ShipmentRequestController;
 use App\Http\Controllers\Dashboard\Admin\Settings\ConfigController;
 use App\Http\Controllers\Dashboard\Admin\Settings\GovernorateController;
+use App\Http\Controllers\Dashboard\Admin\Settings\RepresentativeWorkTypeController;
 use App\Http\Controllers\Dashboard\Admin\Settings\TransportTypeController;
 use App\Http\Controllers\Dashboard\Admin\ShipmentController;
 use App\Http\Controllers\Dashboard\Admin\RoleController;
@@ -347,6 +348,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::patch('/{transportType}', [TransportTypeController::class, 'update'])->name('update');
                 Route::delete('/{transportType}', [TransportTypeController::class, 'destroy'])->name('destroy');
                 Route::patch('/{transportType}/toggle-status', [TransportTypeController::class, 'toggleStatus'])->name('toggle-status');
+            });
+
+            Route::prefix('representative-work-types')->name('representative-work-types.')->group(function () {
+                Route::get('/', [RepresentativeWorkTypeController::class, 'index'])->name('index');
+                Route::get('/create', [RepresentativeWorkTypeController::class, 'create'])->name('create');
+                Route::post('/', [RepresentativeWorkTypeController::class, 'store'])->name('store');
+                Route::get('/{representativeWorkType}/edit', [RepresentativeWorkTypeController::class, 'edit'])->name('edit');
+                Route::patch('/{representativeWorkType}', [RepresentativeWorkTypeController::class, 'update'])->name('update');
+                Route::delete('/{representativeWorkType}', [RepresentativeWorkTypeController::class, 'destroy'])->name('destroy');
+                Route::patch('/{representativeWorkType}/toggle-status', [RepresentativeWorkTypeController::class, 'toggleStatus'])->name('toggle-status');
             });
 
             // Page Management

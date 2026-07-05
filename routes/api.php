@@ -83,6 +83,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::put('me', [RepresentativeController::class, 'update']);
         Route::post('documents', [RepresentativeDocumentController::class, 'store']);
         Route::get('transport-types', [RepresentativeController::class, 'transportTypes']);
+        Route::get('work-types', [RepresentativeController::class, 'workTypes']);
     });
     Route::prefix('shipment-companies')->group(function () {
         Route::get('/', [ShipmentCompanyController::class, 'index'])->withoutMiddleware('auth:sanctum');

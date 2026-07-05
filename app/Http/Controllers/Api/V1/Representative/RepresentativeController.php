@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\Representative\RegisterRepresentativeRequest;
 use App\Http\Requests\Api\V1\Representative\UpdateRepresentativeProfileRequest;
 use App\Http\Resources\RepresentativeResource;
 use App\Http\Resources\TransportTypeResource;
+use App\Models\RepresentativeWorkTypeOption;
 use App\Services\RepresentativeService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -88,6 +89,38 @@ class RepresentativeController extends Controller
                 true,
                 'Transport types fetched successfully',
                 ['transport_types' => TransportTypeResource::collection($transportTypes)->resolve()]
+            );
+        } catch (\Throwable $th) {
+            return responseJson(false, $th->getMessage(), null, 500);
+        }
+    }
+
+    public function workTypes()
+    {
+        try {
+            $workTypes = RepresentativeWorkTypeOption::query()
+                ->active()
+                ->orderBy('sort_order')
+                ->orderBy('name_en')
+                ->get()
+                ->map(function ($workType) {
+                    return [
+                        'id' => $workType->id,
+                        'code' => $workType->code,
+                        'name_en' => $workType->name_en,
+                        'name_ar' => $workType->name_ar,
+                        'name' => $workType->name,
+                        'description' => $workType->description,
+                        'is_exclusive' => $workType->is_exclusive,
+                        'sort_order' => $workType->sort_order,
+                    ];
+                })
+                ->values();
+
+            return responseJson(
+                true,
+                'Work types fetched successfully',
+                ['work_types' => $workTypes]
             );
         } catch (\Throwable $th) {
             return responseJson(false, $th->getMessage(), null, 500);

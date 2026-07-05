@@ -1632,6 +1632,13 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.settings.representative-work-types.*') ? 'active' : '' }}"
+                                           href="{{ route('admin.settings.representative-work-types.index') }}">
+                                            <i class="fas fa-briefcase"></i>
+                                            <span class="link-text">{{ app()->getLocale() === 'ar' ? 'Ø£Ù†ÙˆØ§Ø¹ Ø¹Ù…Ù„ Ø§Ù„Ù…Ø¯Ù†Ø¨' : 'Representative Work Types' }}</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.settings.pages.*') ? 'active' : '' }}"
                                            href="{{ route('admin.settings.pages.index') }}">
                                             <i class="fas fa-file-alt"></i>
@@ -1951,6 +1958,15 @@
                                             href="{{ route('admin.settings.transport-types.index') }}">
                                                     <i class="fas fa-truck-fast"></i>
                                                     <span class="link-text">{{ app()->getLocale() === 'ar' ? 'أنواع النقل' : 'Transport Types' }}</span>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($employee->can('admin.settings.representative-work-types.index'))
+                                        <li class="nav-item">
+                                            <a class="nav-link {{ request()->routeIs('admin.settings.representative-work-types.*') ? 'active' : '' }}"
+                                            href="{{ route('admin.settings.representative-work-types.index') }}">
+                                                    <i class="fas fa-briefcase"></i>
+                                                    <span class="link-text">{{ app()->getLocale() === 'ar' ? 'Ø£Ù†ÙˆØ§Ø¹ Ø¹Ù…Ù„ Ø§Ù„Ù…Ø¯Ù†Ø¨' : 'Representative Work Types' }}</span>
                                             </a>
                                         </li>
                                     @endif

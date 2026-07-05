@@ -33,7 +33,13 @@ class RepresentativeResource extends JsonResource
             }),
             'work_types' => $this->whenLoaded('workTypes', function () {
                 return $this->workTypes
-                    ->map(fn ($workType) => $workType->work_type?->value ?? $workType->work_type)
+                    ->map(fn ($workType) => [
+                        'id' => $workType->id,
+                        'code' => $workType->work_type,
+                        'name_en' => $workType->relationLoaded('option') && $workType->option ? $workType->option->name_en : null,
+                        'name_ar' => $workType->relationLoaded('option') && $workType->option ? $workType->option->name_ar : null,
+                        'name' => $workType->relationLoaded('option') && $workType->option ? $workType->option->name : $workType->work_type,
+                    ])
                     ->values();
             }),
             'governorates' => $this->whenLoaded('governorates', function () {

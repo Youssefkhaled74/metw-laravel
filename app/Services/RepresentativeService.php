@@ -45,6 +45,7 @@ class RepresentativeService
                 'user',
                 'warehouse',
                 'workTypes',
+                'workTypes.option',
                 'governorates',
                 'cities',
                 'vehicle.transportType',
@@ -114,6 +115,7 @@ class RepresentativeService
 
         $representative->loadMissing([
             'workTypes',
+            'workTypes.option',
             'governorates',
             'cities',
             'vehicle.transportType',
@@ -125,6 +127,7 @@ class RepresentativeService
             'user',
             'warehouse',
             'workTypes',
+            'workTypes.option',
             'governorates',
             'cities',
             'vehicle.transportType',

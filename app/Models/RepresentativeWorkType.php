@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enum\RepresentativeWorkType as RepresentativeWorkTypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,11 +15,16 @@ class RepresentativeWorkType extends Model
     ];
 
     protected $casts = [
-        'work_type' => RepresentativeWorkTypeEnum::class,
+        'work_type' => 'string',
     ];
 
     public function representative()
     {
         return $this->belongsTo(Representative::class);
+    }
+
+    public function option()
+    {
+        return $this->belongsTo(RepresentativeWorkTypeOption::class, 'work_type', 'code');
     }
 }

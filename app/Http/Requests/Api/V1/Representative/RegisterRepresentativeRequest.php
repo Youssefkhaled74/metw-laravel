@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Api\V1\Representative;
 
 use App\Enum\RepresentativeAccountType;
-use App\Enum\RepresentativeWorkType;
 use App\Models\City;
+use App\Models\RepresentativeWorkTypeOption;
 use App\Models\TransportType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -30,7 +30,7 @@ class RegisterRepresentativeRequest extends FormRequest
             'notes' => ['nullable', 'string'],
             'metadata' => ['nullable', 'array'],
             'work_types' => ['required', 'array', 'min:1'],
-            'work_types.*' => ['required', Rule::enum(RepresentativeWorkType::class)],
+            'work_types.*' => ['required', Rule::in(RepresentativeWorkTypeOption::activeCodes())],
             'governorate_ids' => ['nullable', 'array'],
             'governorate_ids.*' => ['integer', 'exists:governorates,id'],
             'city_ids' => ['nullable', 'array'],
@@ -59,6 +59,7 @@ class RegisterRepresentativeRequest extends FormRequest
             $workTypes = collect((array) $this->input('work_types', []))
                 ->filter()
                 ->values();
+            $exclusiveCodes = RepresentativeWorkTypeOption::exclusiveCodes();
             $transportTypeId = $this->input('vehicle.transport_type_id');
 
             if (empty($cityIds) && empty($governorateIds)) {
@@ -66,7 +67,7 @@ class RegisterRepresentativeRequest extends FormRequest
             }
 
             if (
-                $workTypes->contains(RepresentativeWorkType::LOCAL_DELIVERY->value)
+                $workTypes->intersect($exclusiveCodes)->isNotEmpty()
                 && $workTypes->count() > 1
             ) {
                 $validator->errors()->add(
@@ -76,7 +77,7 @@ class RegisterRepresentativeRequest extends FormRequest
             }
 
             if (
-                $workTypes->contains(RepresentativeWorkType::LOCAL_DELIVERY->value)
+                $workTypes->intersect($exclusiveCodes)->isNotEmpty()
                 && count($governorateIds) > 1
             ) {
                 $validator->errors()->add(
@@ -86,7 +87,7 @@ class RegisterRepresentativeRequest extends FormRequest
             }
 
             if (
-                $workTypes->contains(RepresentativeWorkType::LOCAL_DELIVERY->value)
+                $workTypes->intersect($exclusiveCodes)->isNotEmpty()
                 && empty($cityIds)
             ) {
                 $validator->errors()->add(

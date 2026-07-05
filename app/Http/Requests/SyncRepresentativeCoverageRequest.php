@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Enum\RepresentativeWorkType;
+use App\Models\RepresentativeWorkTypeOption;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -17,7 +17,7 @@ class SyncRepresentativeCoverageRequest extends FormRequest
     {
         return [
             'work_types' => ['nullable', 'array', 'min:1'],
-            'work_types.*' => ['required', Rule::enum(RepresentativeWorkType::class), 'distinct'],
+            'work_types.*' => ['required', Rule::in(RepresentativeWorkTypeOption::activeCodes()), 'distinct'],
             'service_governorate_ids' => ['nullable', 'array', 'min:1'],
             'service_governorate_ids.*' => ['required', 'integer', 'exists:governorates,id', 'distinct'],
             'service_city_ids' => ['nullable', 'array', 'min:1'],
