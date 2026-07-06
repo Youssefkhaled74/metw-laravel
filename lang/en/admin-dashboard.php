@@ -1182,6 +1182,7 @@ return [
     'guest' => 'Guest',
     'shipping_method' => 'Shipping Method',
     'warehouse' => 'Warehouse',
+    'warehouses' => 'Warehouses',
 
     'cancelled_items_info' => 'Items cancelled by vendors with their cancellation notes',
     'view_note' => 'View Note',

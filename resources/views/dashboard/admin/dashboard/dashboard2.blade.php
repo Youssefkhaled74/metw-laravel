@@ -8,6 +8,7 @@
         $stats = $stats ?? [];
         $dashboardCycles = $dashboardCycles ?? [];
         $cycleUiLabels = $cycleUiLabels ?? [];
+        $warehouseControl = $warehouseControl ?? [];
         $isArabic = app()->getLocale() === 'ar';
 
         $text = fn (string $english, string $arabic) => $isArabic ? $arabic : $english;
@@ -343,6 +344,97 @@
                         @endif
                     </div>
                 @endforeach
+            </div>
+        </section>
+
+        <section class="dashboard-section mb-4">
+            <div class="section-heading section-heading-inline">
+                <div>
+                    <span class="section-kicker">{{ $text('Warehouse control', 'Ø§Ù„ØªØ­ÙƒÙ… ÙÙŠ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª') }}</span>
+                    <h2>{{ $text('Warehouse Command Center', 'Ù…Ø±ÙƒØ² Ø§Ù„ØªØ­ÙƒÙ… ÙÙŠ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª') }}</h2>
+                    <p>{{ $text('Create warehouses, open the management page, and keep the main warehouse under control from one place.', 'Ø£Ù†Ø´Ø¦ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§ØªØŒ ÙˆØ§ÙØªØ­ ØµÙØ­Ø© Ø§Ù„Ø¥Ø¯Ø§Ø±Ø©ØŒ ÙˆØªØ­ÙƒÙ… ÙÙŠ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ Ù…Ù† Ù…ÙƒØ§Ù† ÙˆØ§Ø­Ø¯.') }}</p>
+                </div>
+            </div>
+
+            <div class="warehouse-control-grid">
+                <div class="warehouse-control-panel">
+                    <div class="warehouse-control-panel-top">
+                        <div>
+                            <span class="warehouse-control-eyebrow">{{ $text('Operations', 'Ø§Ù„Ø¹Ù…Ù„ÙŠØ§Øª') }}</span>
+                            <h3 class="warehouse-control-title">{{ $text('Manage the active warehouse footprint', 'Ø¥Ø¯Ø§Ø±Ø© ÙØ·Ø§Ù‚ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª Ø§Ù„Ù†Ø´Ø·Ø©') }}</h3>
+                            <p class="warehouse-control-text">{{ $text('Review the current warehouse setup, promote the main warehouse, and jump straight to create or edit flows.', 'Ø±Ø§Ø¬Ø¹ Ù…Ø¹Ø¯Ù„ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§ØªØŒ ÙˆØ±Ù‚Ù‘ Ù„Ù„Ù…Ø³ØªÙˆØ¯Ø¹ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØŒ ÙˆØ§Ù†ØªÙ‚Ù„ Ù…Ø¨Ø§Ø´Ø±Ø© Ø¥Ù„Ù‰ Ø¥Ù†Ø´Ø§Ø¡ Ø£Ùˆ ØªØ¹Ø¯ÙŠÙ„ Ù…Ø³ØªÙˆØ¯Ø¹.') }}</p>
+                        </div>
+                        <div class="warehouse-control-badge">
+                            <i class="fas fa-warehouse"></i>
+                            <span>{{ $text('Dashboard ready', 'Ø¬Ø§Ù‡Ø² ÙÙŠ Ø§Ù„Ù„ÙˆØ­Ø©') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="warehouse-control-actions">
+                        @if (!empty($warehouseControl['manage_url']))
+                            <a href="{{ $warehouseControl['manage_url'] }}" class="btn btn-dark warehouse-action-btn">
+                                <i class="fas fa-sliders-h"></i>
+                                <span>{{ $text('Manage warehouses', 'Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª') }}</span>
+                            </a>
+                        @endif
+
+                        @if (!empty($warehouseControl['create_url']))
+                            <a href="{{ $warehouseControl['create_url'] }}" class="btn btn-primary warehouse-action-btn">
+                                <i class="fas fa-plus"></i>
+                                <span>{{ $text('Add warehouse', 'Ø¥Ø¶Ø§ÙØ© Ù…Ø³ØªÙˆØ¯Ø¹') }}</span>
+                            </a>
+                        @endif
+
+                        @if (!empty($warehouseControl['focus_url']))
+                            <a href="{{ $warehouseControl['focus_url'] }}" class="btn btn-outline-primary warehouse-action-btn">
+                                <i class="fas fa-pen"></i>
+                                <span>{{ $text('Edit main warehouse', 'ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ') }}</span>
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="warehouse-control-stack">
+                    <div class="warehouse-mini-card warehouse-mini-card-primary">
+                        <span>{{ $text('Total warehouses', 'Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª') }}</span>
+                        <strong>{{ $safeNumber($warehouseControl['total'] ?? 0) }}</strong>
+                    </div>
+                    <div class="warehouse-mini-card warehouse-mini-card-success">
+                        <span>{{ $text('Main warehouses', 'Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©') }}</span>
+                        <strong>{{ $safeNumber($warehouseControl['main'] ?? 0) }}</strong>
+                    </div>
+                    <div class="warehouse-mini-card warehouse-mini-card-warning">
+                        <span>{{ $text('Profiles pending review', 'Ø§Ù„Ù…Ù„ÙØ§Øª ÙÙŠ Ø§Ù†ØªØ¸Ø§Ø± Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©') }}</span>
+                        <strong>{{ $safeNumber($warehouseControl['pending_profiles'] ?? 0) }}</strong>
+                    </div>
+                    <div class="warehouse-mini-card warehouse-mini-card-info">
+                        <span>{{ $text('Profiles approved', 'Ø§Ù„Ù…Ù„ÙØ§Øª Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø©') }}</span>
+                        <strong>{{ $safeNumber($warehouseControl['approved_profiles'] ?? 0) }}</strong>
+                    </div>
+                </div>
+
+                <div class="warehouse-control-focus">
+                    <div class="warehouse-control-focus-header">
+                        <span class="warehouse-control-eyebrow">{{ $text('Current focus', 'Ø§Ù„ØªØ±ÙƒÙŠØ² Ø§Ù„Ø­Ø§Ù„ÙŠ') }}</span>
+                        <span class="warehouse-control-status">{{ !empty($warehouseControl['focus_name']) ? $text('Main warehouse', 'Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ') : $text('No main warehouse yet', 'Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ù…Ø³ØªÙˆØ¯Ø¹ Ø±Ø¦ÙŠØ³ÙŠ Ø¨Ø¹Ø¯') }}</span>
+                    </div>
+                    @if (!empty($warehouseControl['focus_name']))
+                        <h3 class="warehouse-control-focus-title">{{ $warehouseControl['focus_name'] }}</h3>
+                        <p class="warehouse-control-focus-text">{{ $warehouseControl['focus_location'] ?? $text('Location is not set yet.', 'Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…ÙˆÙ‚Ø¹ Ù…Ø­Ø¯Ø¯Ø© Ø¨Ø¹Ø¯.') }}</p>
+                        @if (!empty($warehouseControl['focus_url']))
+                            <a href="{{ $warehouseControl['focus_url'] }}" class="btn btn-light warehouse-focus-btn">
+                                <i class="fas fa-location-arrow"></i>
+                                <span>{{ $text('Open warehouse profile', 'Ø§ÙØªØ­ Ù…Ù„Ù Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹') }}</span>
+                            </a>
+                        @endif
+                    @else
+                        <div class="empty-state-card warehouse-control-empty">
+                            <i class="fas fa-warehouse"></i>
+                            <strong>{{ $text('No main warehouse is configured.', 'Ù„Ù… ÙŠØªÙ… ØªØ¹ÙŠÙŠÙ† Ù…Ø³ØªÙˆØ¯Ø¹ Ø±Ø¦ÙŠØ³ÙŠ Ø¨Ø¹Ø¯.') }}</strong>
+                            <span>{{ $text('Create a warehouse and mark it as main to keep order and shipment flows centered.', 'Ø£Ù†Ø´Ø¦ Ù…Ø³ØªÙˆØ¯Ø¹Ø§Ù‹ ÙˆØ§Ø¬Ø¹Ù„Ù‡ Ø±Ø¦ÙŠØ³ÙŠØ§Ù‹ Ù„ØªÙ†Ø¸ÙŠÙ… Ù…Ø³Ø§Ø± Ø§Ù„Ø·Ù„Ø¨Ø§Øª ÙˆØ§Ù„Ø´Ø­Ù†.') }}</span>
+                        </div>
+                    @endif
+                </div>
             </div>
         </section>
 
@@ -961,6 +1053,186 @@
             color: var(--metw-primary);
         }
 
+        .warehouse-control-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(250px, 0.85fr) minmax(0, 1.1fr);
+            gap: 1rem;
+        }
+
+        .warehouse-control-panel,
+        .warehouse-control-focus,
+        .warehouse-mini-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 22px;
+            background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .warehouse-control-panel {
+            padding: 1.1rem;
+        }
+
+        .warehouse-control-panel-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .warehouse-control-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.72rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--metw-primary);
+            margin-bottom: 0.45rem;
+        }
+
+        .warehouse-control-title {
+            margin: 0 0 0.45rem;
+            font-size: 1.15rem;
+            font-weight: 950;
+            color: var(--metw-text);
+        }
+
+        .warehouse-control-text {
+            margin: 0;
+            color: var(--metw-muted);
+            line-height: 1.6;
+        }
+
+        .warehouse-control-badge {
+            min-width: 132px;
+            border-radius: 18px;
+            padding: 0.8rem 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.35rem;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(14, 165, 233, 0.12));
+            color: var(--metw-primary);
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .warehouse-control-badge i {
+            font-size: 1.2rem;
+        }
+
+        .warehouse-control-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .warehouse-action-btn,
+        .warehouse-focus-btn {
+            min-height: 46px;
+            border-radius: 16px;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .warehouse-action-btn span,
+        .warehouse-focus-btn span {
+            white-space: nowrap;
+        }
+
+        .warehouse-control-stack {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.85rem;
+        }
+
+        .warehouse-mini-card {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .warehouse-mini-card span {
+            color: var(--metw-muted);
+            font-size: 0.78rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .warehouse-mini-card strong {
+            color: var(--metw-text);
+            font-size: 1.8rem;
+            font-weight: 950;
+            line-height: 1;
+        }
+
+        .warehouse-mini-card-primary {
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.08), #ffffff 70%);
+        }
+
+        .warehouse-mini-card-success {
+            background: linear-gradient(180deg, rgba(22, 163, 74, 0.08), #ffffff 70%);
+        }
+
+        .warehouse-mini-card-warning {
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.09), #ffffff 70%);
+        }
+
+        .warehouse-mini-card-info {
+            background: linear-gradient(180deg, rgba(8, 145, 178, 0.08), #ffffff 70%);
+        }
+
+        .warehouse-control-focus {
+            padding: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .warehouse-control-focus-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .warehouse-control-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.38rem 0.75rem;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 0.74rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .warehouse-control-focus-title {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 950;
+            color: var(--metw-text);
+        }
+
+        .warehouse-control-focus-text {
+            margin: 0;
+            color: var(--metw-muted);
+            line-height: 1.65;
+        }
+
+        .warehouse-control-empty {
+            margin-top: 0.1rem;
+        }
+
         .dashboard-cycle-section {
             scroll-margin-top: 110px;
         }
@@ -1123,6 +1395,8 @@
         :dir(rtl) .compact-stat-card,
         :dir(rtl) .operation-card,
         :dir(rtl) .quick-link-card,
+        :dir(rtl) .warehouse-control-panel,
+        :dir(rtl) .warehouse-control-focus,
         :dir(rtl) .cycle-card,
         :dir(rtl) .cycle-latest {
             direction: rtl;
@@ -1137,6 +1411,12 @@
         :dir(rtl) .quick-link-arrow {
             right: auto;
             left: 1rem;
+        }
+
+        :dir(rtl) .warehouse-control-badge,
+        :dir(rtl) .warehouse-control-status {
+            text-transform: none;
+            letter-spacing: 0;
         }
 
         :dir(rtl) .cycle-card-footer-end {
@@ -1166,6 +1446,19 @@
             .section-heading,
             .cycle-section-header {
                 flex-direction: column;
+            }
+
+            .warehouse-control-grid,
+            .warehouse-control-stack {
+                grid-template-columns: 1fr;
+            }
+
+            .warehouse-control-panel-top {
+                flex-direction: column;
+            }
+
+            .warehouse-control-badge {
+                width: 100%;
             }
 
             .dashboard-hero-summary {

@@ -17,9 +17,9 @@ class Warehouse extends Model
         'name',
         'phone',
         'country_id',
+        'governorate_id',
         'state_id',
         'city_id',
-        'zone_id',
         'street_name',
         'building',
         'floor',
@@ -40,6 +40,11 @@ class Warehouse extends Model
         return $this->belongsTo(Country::class);
     }
 
+    public function governorate()
+    {
+        return $this->belongsTo(Governorate::class);
+    }
+
     // المحافظة
     public function state()
     {
@@ -50,12 +55,6 @@ class Warehouse extends Model
     public function city()
     {
         return $this->belongsTo(City::class);
-    }
-
-    // المنطقة (Zone)
-    public function zone()
-    {
-        return $this->belongsTo(Zone::class);
     }
 
     // لو عايز تربطه بالأوردرات فيما بعد
@@ -98,8 +97,7 @@ class Warehouse extends Model
             $this->floor ? 'Floor ' . $this->floor : null,
             $this->landmark,
 
-            // هنا بقى نختار الاسم بناءً على اللغة الحالية
-            $this->zone ? ($locale === 'ar' ? $this->zone->name_ar : $this->zone->name_en) : null,
+            $this->governorate ? $this->governorate->name : null,
             $this->city ? ($locale === 'ar' ? $this->city->name_ar : $this->city->name_en) : null,
             $this->state ? ($locale === 'ar' ? $this->state->name_ar : $this->state->name_en) : null,
             $this->country ? ($locale === 'ar' ? $this->country->name_ar : $this->country->name_en) : null,

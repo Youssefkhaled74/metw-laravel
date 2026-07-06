@@ -14,7 +14,7 @@
     <!-- Arabic font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=El+Messiri:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -104,7 +104,7 @@
                 radial-gradient(circle at top left, rgba(123, 0, 168, 0.10), transparent 34rem),
                 radial-gradient(circle at top right, rgba(255, 112, 67, 0.09), transparent 30rem),
                 linear-gradient(180deg, #FFFFFF 0%, var(--metw-bg) 100%);
-            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
         }
@@ -248,21 +248,42 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.13);
         }
 
-        .sidebar-brand > .d-flex {
+        .sidebar-brand-link {
             min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: inherit;
         }
 
-        .sidebar-brand .fa-crown {
-            width: 38px;
-            height: 38px;
+        .sidebar-brand-link:hover {
+            color: inherit;
+        }
+
+        .sidebar-brand-logo {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            flex: 0 0 38px;
+            overflow: hidden;
             border-radius: 16px;
-            color: #FFFFFF;
-            background: rgba(255, 255, 255, 0.13);
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.14);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+        }
+
+        .sidebar-brand-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sidebar-brand-copy {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
         }
 
         .sidebar-brand .brand-text {
@@ -273,6 +294,14 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        .brand-subtext {
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
         .sidebar-toggle {
@@ -502,7 +531,7 @@
             padding-inline: 0;
         }
 
-        body.sidebar-collapsed .sidebar-brand .brand-text,
+        body.sidebar-collapsed .sidebar-brand-copy,
         body.sidebar-collapsed .sidebar .link-text {
             display: none;
             width: 0;
@@ -511,8 +540,8 @@
             visibility: hidden;
         }
 
-        body.sidebar-collapsed .sidebar-brand .fa-crown {
-            display: none;
+        body.sidebar-collapsed .sidebar-brand-link {
+            justify-content: center;
         }
 
         body.sidebar-collapsed .sidebar-toggle {
@@ -1398,6 +1427,509 @@
             }
         }
 
+
+        /* =========================================================
+           MetwGo Admin Shell - Professional UX Upgrade
+           Added by UI/UX phase cleanup
+        ========================================================= */
+
+        :root {
+            --sidebar-width: 272px;
+            --sidebar-collapsed-width: 78px;
+
+            --metw-orange: #ff6b35;
+            --metw-orange-dark: #ea5523;
+            --metw-orange-soft: #fff3ed;
+
+            --metw-purple: #6f2dbd;
+            --metw-purple-dark: #4b1688;
+            --metw-purple-deep: #21142f;
+            --metw-purple-soft: #f4edff;
+
+            --metw-bg: #f6f5f8;
+            --metw-bg-2: #fbfafc;
+            --metw-surface: #ffffff;
+            --metw-surface-soft: #f8f7fa;
+
+            --metw-text: #2c2235;
+            --metw-heading: #17111f;
+            --metw-muted: #746b7c;
+            --metw-border: #ebe6f0;
+
+            --metw-gradient-primary: linear-gradient(135deg, #ff6b35 0%, #6f2dbd 100%);
+            --metw-gradient-admin: linear-gradient(180deg, #21142f 0%, #32164f 52%, #4b1688 100%);
+
+            --metw-radius-sm: 10px;
+            --metw-radius-md: 14px;
+            --metw-radius-lg: 18px;
+            --metw-radius-xl: 24px;
+
+            --metw-shadow-xs: 0 2px 8px rgba(26, 18, 35, .04);
+            --metw-shadow-sm: 0 8px 24px rgba(26, 18, 35, .06);
+            --metw-shadow-md: 0 18px 45px rgba(26, 18, 35, .10);
+            --metw-shadow-focus: 0 0 0 .22rem rgba(111, 45, 189, .11);
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(111, 45, 189, .08), transparent 32rem),
+                radial-gradient(circle at top right, rgba(255, 107, 53, .08), transparent 30rem),
+                linear-gradient(180deg, #fff 0%, var(--metw-bg) 100%) !important;
+            color: var(--metw-text);
+        }
+
+        .main-content {
+            padding: 1rem 1.25rem 1.5rem !important;
+        }
+
+        @media (min-width: 1200px) {
+            .main-content {
+                padding-inline: 1.5rem !important;
+            }
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            padding: .9rem .75rem !important;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(255, 107, 53, .18), transparent 12rem),
+                radial-gradient(circle at 100% 30%, rgba(255, 255, 255, .08), transparent 18rem),
+                var(--metw-gradient-admin) !important;
+            border-inline-end: 1px solid rgba(255, 255, 255, .09);
+            box-shadow: 12px 0 32px rgba(24, 14, 38, .22);
+        }
+
+        .sidebar-brand {
+            min-height: 62px;
+            padding: .55rem .55rem .95rem !important;
+            margin-bottom: .35rem;
+        }
+
+        .sidebar-brand-link {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            color: inherit;
+        }
+
+        .sidebar-brand-link:hover {
+            color: inherit;
+        }
+
+        .sidebar-brand-logo {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, .12);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10);
+        }
+
+        .sidebar-brand-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sidebar-brand-copy {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: .08rem;
+        }
+
+        .sidebar-brand .brand-text {
+            font-size: .98rem;
+            font-weight: 900;
+            letter-spacing: -.01em;
+        }
+
+        .brand-subtext {
+            color: rgba(255, 255, 255, .72);
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .sidebar-toggle {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+        }
+
+        .sidebar-menu {
+            padding-inline-end: .15rem;
+        }
+
+        .sidebar .nav.flex-column {
+            gap: .22rem;
+        }
+
+        .sidebar .nav-link {
+            min-height: 43px;
+            padding: .48rem .55rem;
+            border-radius: 14px;
+            gap: .65rem;
+            color: rgba(255, 255, 255, .76);
+            font-size: .88rem;
+            font-weight: 750;
+        }
+
+        .sidebar .nav-link i:not(.chevron) {
+            width: 32px;
+            height: 32px;
+            flex-basis: 32px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .085);
+            color: rgba(255, 255, 255, .86);
+        }
+
+        .sidebar .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, .105);
+            transform: translateX(2px);
+        }
+
+        html[dir="rtl"] .sidebar .nav-link:hover {
+            transform: translateX(-2px);
+        }
+
+        .sidebar .nav-link.active {
+            color: var(--metw-purple-dark) !important;
+            background: #fff;
+            box-shadow: 0 12px 26px rgba(14, 8, 22, .24);
+        }
+
+        .sidebar .nav-link.active i:not(.chevron) {
+            background: var(--metw-gradient-primary);
+            color: #fff;
+        }
+
+        #settingsSubmenu {
+            margin-top: .4rem;
+            border-radius: 16px;
+            background: rgba(14, 8, 22, .24);
+            border: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        #settingsSubmenu.collapse.show {
+            padding: .35rem;
+        }
+
+        #settingsSubmenu .nav-link {
+            min-height: 36px;
+            padding: .38rem .5rem;
+            border-radius: 12px;
+            font-size: .8rem;
+        }
+
+        #settingsSubmenu .nav-link i:not(.chevron) {
+            width: 27px;
+            height: 27px;
+            flex-basis: 27px;
+            border-radius: 10px;
+        }
+
+        body.sidebar-collapsed .sidebar {
+            width: var(--sidebar-collapsed-width);
+            padding-inline: .65rem !important;
+        }
+
+        body.sidebar-collapsed .main-content {
+            margin-inline-start: var(--sidebar-collapsed-width);
+        }
+
+        body.sidebar-collapsed .sidebar-brand-copy {
+            display: none;
+        }
+
+        body.sidebar-collapsed .sidebar-brand-link {
+            justify-content: center;
+        }
+
+        body.sidebar-collapsed .sidebar .nav-link {
+            width: 46px;
+            min-height: 46px;
+            border-radius: 16px;
+        }
+
+        body.sidebar-collapsed .sidebar .nav-link i:not(.chevron) {
+            width: 36px !important;
+            height: 36px;
+            flex-basis: 36px;
+        }
+
+        .page-header-wrapper {
+            top: .85rem;
+            margin-bottom: 1rem;
+            border-radius: 22px;
+            border: 1px solid rgba(235, 230, 240, .9);
+            background: rgba(255, 255, 255, .88);
+            box-shadow: 0 10px 28px rgba(26, 18, 35, .07);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .topbar-shell {
+            min-height: 72px;
+            padding: .85rem 1rem !important;
+            border-radius: 22px !important;
+            background:
+                radial-gradient(circle at 100% 0%, rgba(255, 107, 53, .08), transparent 13rem),
+                radial-gradient(circle at 0% 0%, rgba(111, 45, 189, .08), transparent 13rem),
+                rgba(255, 255, 255, .94) !important;
+        }
+
+        .page-title-wrapper h1 {
+            font-size: clamp(1.18rem, 1.45vw, 1.55rem);
+            font-weight: 900;
+            letter-spacing: -.03em;
+        }
+
+        .page-title-wrapper h1::after {
+            width: 48px;
+            height: 3px;
+            margin-top: .48rem;
+            background: var(--metw-gradient-primary);
+        }
+
+        .topbar-control {
+            min-height: 40px;
+            border-radius: 14px !important;
+            border-color: var(--metw-border) !important;
+            background: #fff !important;
+            box-shadow: var(--metw-shadow-xs);
+        }
+
+        #languageDropdown {
+            min-width: 122px;
+            min-height: 40px;
+            font-size: .84rem;
+        }
+
+        #notificationDropdown {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px !important;
+        }
+
+        .page-actions-group {
+            gap: .45rem;
+        }
+
+        .page-actions-group .btn {
+            min-height: 40px;
+            border-radius: 14px !important;
+            font-size: .86rem;
+        }
+
+        .card {
+            border-radius: 18px !important;
+            border-color: var(--metw-border) !important;
+            box-shadow: var(--metw-shadow-sm) !important;
+            transition: box-shadow .18s ease, border-color .18s ease;
+        }
+
+        .card:hover {
+            transform: none !important;
+            border-color: rgba(111, 45, 189, .16) !important;
+            box-shadow: var(--metw-shadow-md) !important;
+        }
+
+        .card-header {
+            padding: .95rem 1.05rem !important;
+            background: linear-gradient(180deg, #fff 0%, #fbfafc 100%) !important;
+        }
+
+        .card-body {
+            padding: 1.05rem !important;
+        }
+
+        .btn {
+            border-radius: 13px !important;
+            font-weight: 850 !important;
+            letter-spacing: 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--metw-orange) 0%, var(--metw-orange-dark) 100%) !important;
+            box-shadow: 0 10px 22px rgba(255, 107, 53, .20) !important;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 14px 28px rgba(255, 107, 53, .26) !important;
+        }
+
+        .btn-outline-secondary,
+        .btn-light {
+            background: #fff !important;
+            border-color: var(--metw-border) !important;
+            color: var(--metw-text) !important;
+        }
+
+        .btn-outline-secondary:hover,
+        .btn-light:hover {
+            background: var(--metw-purple-soft) !important;
+            border-color: rgba(111, 45, 189, .18) !important;
+            color: var(--metw-purple) !important;
+        }
+
+        .form-label {
+            color: var(--metw-heading);
+            font-size: .84rem;
+            font-weight: 850;
+            margin-bottom: .42rem;
+        }
+
+        .form-control,
+        .form-select {
+            min-height: 43px;
+            border-radius: 13px !important;
+            background-color: #fff !important;
+            border-color: var(--metw-border) !important;
+            font-size: .9rem;
+            font-weight: 650;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: rgba(111, 45, 189, .34) !important;
+            box-shadow: var(--metw-shadow-focus) !important;
+        }
+
+        .table thead th {
+            padding: .82rem .95rem;
+            background: #fbfafc !important;
+            color: var(--metw-muted);
+            font-size: .72rem;
+            font-weight: 900;
+            letter-spacing: .045em;
+        }
+
+        .table tbody td {
+            padding: .9rem .95rem;
+            border-color: #f0ebf5 !important;
+            color: #3b3145;
+        }
+
+        .table tbody tr:hover {
+            background: #fffaf8 !important;
+        }
+
+        .badge {
+            font-weight: 850;
+            border-radius: 999px;
+        }
+
+        .alert {
+            border-radius: 16px !important;
+            box-shadow: var(--metw-shadow-sm);
+        }
+
+        .dropdown-menu {
+            border-radius: 16px !important;
+            border-color: var(--metw-border) !important;
+            box-shadow: 0 18px 42px rgba(26, 18, 35, .14) !important;
+        }
+
+        .dropdown-item {
+            border-radius: 12px;
+            font-weight: 750;
+        }
+
+        .main-content.is-loading {
+            opacity: .72;
+            pointer-events: none;
+            cursor: wait;
+        }
+
+        .main-content.is-loading::after {
+            content: '';
+            position: fixed;
+            inset-block-start: 86px;
+            inset-inline-end: 1.5rem;
+            width: 34px;
+            height: 34px;
+            z-index: 3000;
+            border-radius: 999px;
+            border: 3px solid rgba(111, 45, 189, .14);
+            border-top-color: var(--metw-purple);
+            animation: metwSpin .75s linear infinite;
+        }
+
+        @keyframes metwSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .main-content {
+                padding: .75rem !important;
+            }
+
+            .page-header-wrapper {
+                top: .5rem;
+                border-radius: 18px;
+            }
+
+            .topbar-shell {
+                min-height: auto;
+                padding: .75rem !important;
+                border-radius: 18px !important;
+            }
+
+            .page-actions-wrapper {
+                align-items: center !important;
+            }
+
+            .page-actions-group {
+                width: 100%;
+            }
+
+            .sidebar {
+                max-width: 88vw;
+                box-shadow: 18px 0 46px rgba(24, 14, 38, .34);
+            }
+
+            html[dir="rtl"] .sidebar {
+                box-shadow: -18px 0 46px rgba(24, 14, 38, .34);
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .main-content {
+                padding: .55rem !important;
+            }
+
+            .page-title-wrapper h1 {
+                font-size: 1.08rem;
+            }
+
+            .page-actions-group .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+
+            .card {
+                border-radius: 16px !important;
+            }
+
+            .table {
+                font-size: .84rem;
+            }
+        }
+
     </style>
 </head>
 
@@ -1406,10 +1938,15 @@
         <nav class="sidebar" id="adminSidebar">
             <div class="sidebar-inner">
                 <div class="sidebar-brand">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fas fa-crown"></i>
-                        <span class="brand-text">{{ __('admin-dashboard.admin_panel') }}</span>
-                    </div>
+                    <a href="{{ route('admin.dashboard') }}" class="sidebar-brand-link">
+                        <span class="sidebar-brand-logo">
+                            <img src="{{ asset('images/flags/logo.png') }}" alt="{{ config('app.name') }} logo">
+                        </span>
+                        <span class="sidebar-brand-copy">
+                            <span class="brand-text">{{ __('admin-dashboard.admin_panel') }}</span>
+                            <small class="brand-subtext">Control Center</small>
+                        </span>
+                    </a>
                     <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="{{ __('Toggle sidebar') }}">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -1589,18 +2126,25 @@
                                             <span class="link-text">{{ __('admin-dashboard.countries') }}</span>
                                         </a>
                                     </li> --}}
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('admin.settings.states.*') ? 'active' : '' }}"
-                                           href="{{ route('admin.settings.states.index') }}">
-                                            <i class="fas fa-globe"></i>
-                                            <span class="link-text">{{ __('admin-dashboard.states') }}</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('admin.settings.cities.*') ? 'active' : '' }}"
-                                           href="{{ route('admin.settings.cities.index') }}">
-                                            <i class="fas fa-city"></i>
-                                            <span class="link-text">{{ __('admin-dashboard.cities') }}</span>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.settings.states.*') ? 'active' : '' }}"
+                                   href="{{ route('admin.settings.states.index') }}">
+                                    <i class="fas fa-globe"></i>
+                                    <span class="link-text">{{ __('admin-dashboard.states') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.settings.warehouses.*') ? 'active' : '' }}"
+                                   href="{{ route('admin.settings.warehouses.index') }}">
+                                    <i class="fas fa-warehouse"></i>
+                                    <span class="link-text">{{ __('admin-dashboard.warehouses') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.settings.cities.*') ? 'active' : '' }}"
+                                   href="{{ route('admin.settings.cities.index') }}">
+                                    <i class="fas fa-city"></i>
+                                    <span class="link-text">{{ __('admin-dashboard.cities') }}</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
@@ -1635,7 +2179,7 @@
                                         <a class="nav-link {{ request()->routeIs('admin.settings.representative-work-types.*') ? 'active' : '' }}"
                                            href="{{ route('admin.settings.representative-work-types.index') }}">
                                             <i class="fas fa-briefcase"></i>
-                                            <span class="link-text">{{ app()->getLocale() === 'ar' ? 'Ø£Ù†ÙˆØ§Ø¹ Ø¹Ù…Ù„ Ø§Ù„Ù…Ø¯Ù†Ø¨' : 'Representative Work Types' }}</span>
+                                            <span class="link-text">{{ app()->getLocale() === 'ar' ? 'أنواع عمل المندوب' : 'Representative Work Types' }}</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
@@ -1821,6 +2365,7 @@
                             </li>
                         @endif
                         @if (
+                            $employee->can('admin.settings.warehouses.index') ||
                             $employee->can('admin.settings.banners.index') ||
                             $employee->can('admin.settings.brands.index') ||
                             $employee->can('admin.settings.categories.index') ||
@@ -1840,7 +2385,7 @@
                                         <a class="nav-link {{ request()->routeIs('admin.settings.warehouses.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.warehouses.index') }}">
                                                     <i class="fas fa-warehouse"></i>
-                                                    <span class="link-text">Warehouses</span>
+                                                    <span class="link-text">{{ __('admin-dashboard.warehouses') }}</span>
                                         </a>
                                     </li>
                                     @endif
@@ -1966,7 +2511,7 @@
                                             <a class="nav-link {{ request()->routeIs('admin.settings.representative-work-types.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.representative-work-types.index') }}">
                                                     <i class="fas fa-briefcase"></i>
-                                                    <span class="link-text">{{ app()->getLocale() === 'ar' ? 'Ø£Ù†ÙˆØ§Ø¹ Ø¹Ù…Ù„ Ø§Ù„Ù…Ø¯Ù†Ø¨' : 'Representative Work Types' }}</span>
+                                                    <span class="link-text">{{ app()->getLocale() === 'ar' ? 'أنواع عمل المندوب' : 'Representative Work Types' }}</span>
                                             </a>
                                         </li>
                                     @endif
@@ -2747,8 +3292,7 @@ function loadContentViaAjax(url, event, options = {}) {
     // Show loading state
     const mainContent = document.getElementById('mainContent');
     if (mainContent) {
-        mainContent.style.opacity = '0.6';
-        mainContent.style.pointerEvents = 'none';
+        mainContent.classList.add('is-loading');
     }
 
     fetch(url, {
@@ -2766,15 +3310,13 @@ function loadContentViaAjax(url, event, options = {}) {
 
         // Restore opacity
         setTimeout(() => {
-            mainContent.style.opacity = '1';
-            mainContent.style.pointerEvents = 'auto';
+            mainContent.classList.remove('is-loading');
         }, 100);
     })
     .catch(error => {
         console.error('AJAX Load Error:', error);
         // Fallback to regular navigation
-        mainContent.style.opacity = '1';
-        mainContent.style.pointerEvents = 'auto';
+        mainContent.classList.remove('is-loading');
         window.location.href = url;
     });
 }
@@ -2953,8 +3495,7 @@ document.addEventListener('DOMContentLoaded', function () {
         saveSidebarScrollPosition();
 
         const formData = new FormData(form);
-        mainContent.style.opacity = '0.6';
-        mainContent.style.pointerEvents = 'none';
+        mainContent.classList.add('is-loading');
 
         fetch(action, {
             method: (form.getAttribute('method') || 'POST').toUpperCase(),

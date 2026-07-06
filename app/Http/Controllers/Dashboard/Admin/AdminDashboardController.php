@@ -18,6 +18,7 @@ use App\Models\ShipmentRequest;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Models\VendorBusinessProfile;
+use App\Models\Warehouse;
 use App\Models\WarehouseBusinessProfile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -73,6 +74,8 @@ class AdminDashboardController extends Controller
             'total_vendors' => Vendor::count(),
             'total_shipment_companies' => ShipmentCompany::count(),
             'total_products' => Product::count(),
+            'total_warehouses' => Warehouse::count(),
+            'main_warehouses' => Warehouse::where('is_main', true)->count(),
             'total_shipment_orders' => Order::count(),
             'total_ecommerce_orders' => EcommerceOrder::count(),
             'pending_shipment_orders' => Order::where('status', 'pending')->count(),
@@ -128,6 +131,11 @@ class AdminDashboardController extends Controller
         $latestPendingEcommerceOrder = EcommerceOrder::where('status', 'pending')->latest()->first();
         $latestPendingReturnRequest = ReturnRequest::where('status', ReturnStatus::REQUESTED->value)->latest()->first();
         $latestPickupReturnRequest = ReturnRequest::where('status', ReturnStatus::PICKUP->value)->latest()->first();
+        $warehouseFocus = Warehouse::with(['country', 'state', 'city', 'zone'])
+            ->where('is_main', true)
+            ->latest()
+            ->first()
+            ?? Warehouse::with(['country', 'state', 'city', 'zone'])->latest()->first();
 
         $cycleUiLabels = [
             'needs_approval' => __('admin-dashboard.needs_approval'),
@@ -139,6 +147,20 @@ class AdminDashboardController extends Controller
             'rejected' => __('admin-dashboard.rejected'),
             'view_all' => __('admin-dashboard.view_all'),
             'no_complaints_source' => __('admin-dashboard.no_complaints_source'),
+        ];
+
+        $warehouseControl = [
+            'title' => __('admin-dashboard.warehouses'),
+            'subtitle' => __('admin-dashboard.warehouses'),
+            'manage_url' => route('admin.settings.warehouses.index'),
+            'create_url' => route('admin.settings.warehouses.create'),
+            'focus_name' => $warehouseFocus?->name,
+            'focus_location' => $warehouseFocus?->full_address,
+            'focus_url' => $warehouseFocus ? route('admin.settings.warehouses.edit', $warehouseFocus->id) : null,
+            'total' => $stats['total_warehouses'],
+            'main' => $stats['main_warehouses'],
+            'pending_profiles' => $stats['pending_warehouse_approvals'],
+            'approved_profiles' => $stats['approved_warehouses'],
         ];
 
         $dashboardCycles = [
@@ -311,7 +333,8 @@ class AdminDashboardController extends Controller
         return view('dashboard.admin.dashboard.dashboard2', compact(
             'stats',
             'dashboardCycles',
-            'cycleUiLabels'
+            'cycleUiLabels',
+            'warehouseControl'
         ));
     }
 

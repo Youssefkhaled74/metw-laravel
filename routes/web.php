@@ -422,7 +422,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::patch('/{warehouse}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'toggleStatus'])->name('toggle-status');
             });
             Route::get('/get-states/{country}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getStates'])->name('get-states');
-            Route::get('/get-cities/{state}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getCities'])->name('get-cities');
+            Route::get('/get-cities/{governorate}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getCities'])->name('get-cities');
             Route::get('/get-zones/{city}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getZones'])->name('get-zones');
         });
 

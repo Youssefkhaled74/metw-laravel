@@ -1233,6 +1233,7 @@ return [
     'cancelled_at' => 'تاريخ الإلغاء',
     'guest' => 'زائر',
     'warehouse' => 'مستودع',
+    'warehouses' => 'المستودعات',
     'shipping_method' => 'طريقة الشحن',
     'cancelled_items_info' => 'العناصر التي تم إلغاؤها من قبل البائعين مع ملاحظات الإلغاء الخاصة بهم',
     'view_note' => 'عرض الملاحظة',

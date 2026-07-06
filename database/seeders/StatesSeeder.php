@@ -10,13 +10,32 @@ class StatesSeeder extends Seeder
 {
     public function run()
     {
-        // تأكد من وجود مصر أولاً
-        $country = Country::firstOrCreate(
-            ['name_en' => 'Egypt'],
-            ['name_ar' => 'مصر', 'is_active' => 1]
-        );
+        $country = Country::withoutGlobalScopes()
+            ->where(function ($query) {
+                $query->where('name_en', 'Egypt')
+                    ->orWhere('name_ar', 'مصر')
+                    ->orWhere('phone_code', '+20');
+            })
+            ->first();
 
-        // المحافظات المصرية الـ 27
+        if (! $country) {
+            $country = Country::withoutGlobalScopes()->create([
+                'name_en' => 'Egypt',
+                'name_ar' => 'مصر',
+                'is_active' => true,
+                'phone_code' => '+20',
+            ]);
+        } else {
+            $country->update([
+                'name_en' => 'Egypt',
+                'name_ar' => 'مصر',
+                'is_active' => true,
+                'phone_code' => '+20',
+            ]);
+        }
+
+        $country->restore();
+
         $states = [
             ['name_en' => 'Cairo', 'name_ar' => 'القاهرة'],
             ['name_en' => 'Giza', 'name_ar' => 'الجيزة'],
@@ -47,17 +66,18 @@ class StatesSeeder extends Seeder
             ['name_en' => 'South Sinai', 'name_ar' => 'جنوب سيناء'],
         ];
 
-        foreach ($states as $st) {
-            State::updateOrCreate(
+        foreach ($states as $stateData) {
+            $state = State::withoutGlobalScopes()->updateOrCreate(
                 [
-                    'name_en' => $st['name_en'],
-                    'country_id' => $country->id,
+                    'name_en' => $stateData['name_en'],
                 ],
                 [
-                    'name_ar' => $st['name_ar'],
-                    'is_active' => 1,
+                    'name_ar' => $stateData['name_ar'],
+                    'country_id' => $country->id,
+                    'is_active' => true,
                 ]
             );
+            $state->restore();
         }
     }
 }

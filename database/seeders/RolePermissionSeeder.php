@@ -54,8 +54,10 @@ class RolePermissionSeeder extends Seeder
         // Admin gets subset (no settings or employee management)
         $adminPermissions = Permission::where('guard_name', 'employee')
             ->where(function ($q) {
-                $q->where('name', 'not like', 'admin.settings.%')
-                  ->where('name', 'not like', 'admin.employees.%');
+                $q->where(function ($settingsQuery) {
+                    $settingsQuery->where('name', 'not like', 'admin.settings.%')
+                        ->orWhere('name', 'like', 'admin.settings.warehouses.%');
+                })->where('name', 'not like', 'admin.employees.%');
             })
             ->get();
         $admin->syncPermissions($adminPermissions);
