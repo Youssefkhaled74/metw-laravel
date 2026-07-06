@@ -118,21 +118,18 @@ class User extends Authenticatable
             return null;
         }
 
-        // تحديد اللغة الحالية
-        $lang = app()->getLocale();
-
-        $parts = [
-            optional($address->country)->{"name_{$lang}"} ?? '',
-            optional($address->state)->{"name_{$lang}"} ?? '',
-            optional($address->city)->{"name_{$lang}"} ?? '',
-            optional($address->zone)->{"name_{$lang}"} ?? '',
-            $address->street_name,
-            __('messages.building') . ' ' . $address->building,
-            __('messages.floor') . ' ' . $address->floor,
-            $address->landmark ? __('messages.landmark') . ': ' . $address->landmark : null,
-        ];
-
-        return implode(' - ', array_filter($parts));
+        return implode('، ', array_filter([
+            'محافظة: ' . ($address->governorate?->name_ar ?? $address->state?->name_ar ?? $address->governorate?->name ?? ''),
+            'مدينة: ' . ($address->city?->name_ar ?? $address->city?->name_en ?? $address->city?->name ?? ''),
+            $address->district_or_village_name ? 'حي/قرية: ' . $address->district_or_village_name : null,
+            $address->street_name ? 'شارع: ' . $address->street_name : null,
+            $address->branch_from_street ? 'من شارع: ' . $address->branch_from_street : null,
+            $address->building_number ? 'عمارة: ' . $address->building_number : null,
+            $address->floor_number ? 'دور: ' . $address->floor_number : null,
+            $address->building_name ? 'اسم العمارة: ' . $address->building_name : null,
+            $address->nearby_landmark ? 'بالقرب من: ' . $address->nearby_landmark : null,
+            $address->address_description ? 'وصف العنوان: ' . $address->address_description : null,
+        ]));
     }
 
     public function wallet()

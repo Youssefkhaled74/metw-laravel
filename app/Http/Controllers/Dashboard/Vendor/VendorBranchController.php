@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Dashboard\Vendor;
 
 use App\Http\Controllers\Controller;
 use App\Models\VendorBranch;
-use App\Models\State;
+use App\Models\Governorate;
 use App\Models\City;
-use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -28,17 +27,17 @@ class VendorBranchController extends Controller
         $sortDir = $validated['sort_dir'] ?? 'desc';
 
         $branchesQuery = VendorBranch::where('vendor_id', auth('vendor')->id())
-            ->with(['state', 'city', 'zone']);
+            ->with(['governorate', 'city']);
 
         if (!empty($validated['search'])) {
             $search = trim($validated['search']);
             $branchesQuery->where(function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('street_main', 'like', "%{$search}%")
-                    ->orWhere('street_sub', 'like', "%{$search}%")
+                    ->orWhere('street_name', 'like', "%{$search}%")
+                    ->orWhere('branch_from_street', 'like', "%{$search}%")
                     ->orWhere('building', 'like', "%{$search}%")
                     ->orWhere('id', is_numeric($search) ? (int) $search : 0)
-                    ->orWhereHas('state', function ($stateQuery) use ($search) {
+                    ->orWhereHas('governorate', function ($stateQuery) use ($search) {
                         $stateQuery->where('name_en', 'like', "%{$search}%")
                             ->orWhere('name_ar', 'like', "%{$search}%");
                     })
@@ -66,9 +65,9 @@ class VendorBranchController extends Controller
      */
     public function create()
     {
-        $states = State::active()->get();
+        $governorates = Governorate::active()->orderBy('name_ar')->get();
 
-        return view('dashboard.vendor.branches.create', compact('states'));
+        return view('dashboard.vendor.branches.create', compact('governorates'));
     }
 
     /**
@@ -78,14 +77,17 @@ class VendorBranchController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'state_id' => 'required|exists:states,id',
+            'governorate_id' => 'required|exists:governorates,id',
             'city_id' => 'required|exists:cities,id',
-            'zone_id' => 'required|exists:zones,id',
-            'street_main' => 'required|string|max:255',
-            'street_sub' => 'nullable|string|max:255',
-            'building' => 'required|string|max:50',
+            'district_or_village_name' => 'required|string|max:255',
+            'district_or_village_type' => 'required|in:district,village',
+            'street_name' => 'required|string|max:255',
+            'branch_from_street' => 'nullable|string|max:255',
+            'building_number' => 'required|integer|min:0',
             'building_name' => 'nullable|string|max:255',
-            'floor' => 'nullable|string|max:50',
+            'floor_number' => 'nullable|integer|min:0',
+            'nearby_landmark' => 'nullable|string|max:255',
+            'address_description' => 'nullable|string|max:1000',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'status' => 'nullable|boolean',
@@ -130,11 +132,10 @@ class VendorBranchController extends Controller
             abort(403);
         }
 
-        $states = State::active()->get();
-        $cities = City::where('state_id', $branch->state_id)->active()->get();
-        $zones = Zone::where('city_id', $branch->city_id)->active()->get();
+        $governorates = Governorate::active()->orderBy('name_ar')->get();
+        $cities = City::where('governorate_id', $branch->governorate_id)->active()->get();
 
-        return view('dashboard.vendor.branches.edit', compact('branch', 'states', 'cities', 'zones'));
+        return view('dashboard.vendor.branches.edit', compact('branch', 'governorates', 'cities'));
     }
 
     /**
@@ -149,14 +150,17 @@ class VendorBranchController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'state_id' => 'required|exists:states,id',
+            'governorate_id' => 'required|exists:governorates,id',
             'city_id' => 'required|exists:cities,id',
-            'zone_id' => 'required|exists:zones,id',
-            'street_main' => 'required|string|max:255',
-            'street_sub' => 'nullable|string|max:255',
-            'building' => 'required|string|max:50',
+            'district_or_village_name' => 'required|string|max:255',
+            'district_or_village_type' => 'required|in:district,village',
+            'street_name' => 'required|string|max:255',
+            'branch_from_street' => 'nullable|string|max:255',
+            'building_number' => 'required|integer|min:0',
             'building_name' => 'nullable|string|max:255',
-            'floor' => 'nullable|string|max:50',
+            'floor_number' => 'nullable|integer|min:0',
+            'nearby_landmark' => 'nullable|string|max:255',
+            'address_description' => 'nullable|string|max:1000',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'status' => 'nullable|boolean',
@@ -198,22 +202,10 @@ class VendorBranchController extends Controller
      */
     public function getCities($state_id)
     {
-        $cities = City::where('state_id', $state_id)
+        $cities = City::where('governorate_id', $state_id)
             ->active()
-            ->get(['id', 'name_en', 'name_ar']);
+            ->get(['id', 'name_en', 'name_ar', 'governorate_id']);
 
         return response()->json($cities);
-    }
-
-    /**
-     * API: Get zones by city
-     */
-    public function getZones($city_id)
-    {
-        $zones = Zone::where('city_id', $city_id)
-            ->active()
-            ->get(['id', 'name_en', 'name_ar']);
-
-        return response()->json($zones);
     }
 }

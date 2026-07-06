@@ -251,7 +251,9 @@ Route::prefix('v1/ecommerce')->middleware('auth:sanctum')->group(function () {
     Route::prefix('countries')->group(function () {
         Route::get('/', [UserAddressController::class, 'country'])->withoutMiddleware('auth:sanctum');
     });
+    Route::get('governorates', [UserAddressController::class, 'governorates'])->withoutMiddleware('auth:sanctum');
     Route::get('states', [UserAddressController::class, 'state']);
+    Route::get('governorates/{governorateId}/cities', [UserAddressController::class, 'city'])->whereNumber('governorateId');
     Route::get('states/{stateId}/cities', [UserAddressController::class, 'city'])->whereNumber('stateId');
     Route::get('cities/{cityId}/zones', [UserAddressController::class, 'zone'])->whereNumber('cityId');
 

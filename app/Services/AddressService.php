@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enum\AddressLocalityType;
 use App\Enum\AddressType;
 use App\Models\Address;
 use App\Models\City;
@@ -102,10 +103,20 @@ class AddressService
             'postal_code',
             'address_line_1',
             'address_line_2',
+            'generated_address_number',
+            'address_name',
+            'district_or_village_name',
+            'district_or_village_type',
             'street_name',
+            'branch_from_street',
+            'building_number',
             'building',
+            'floor_number',
             'floor',
+            'building_name',
+            'nearby_landmark',
             'landmark',
+            'address_description',
             'latitude',
             'longitude',
             'is_primary',
@@ -116,6 +127,7 @@ class AddressService
         $payload = $this->normalizeType($payload, $address);
         $payload = $this->normalizeLocation($payload, $address);
         $this->validateType($payload['type'] ?? null);
+        $this->validateLocalityType($payload['district_or_village_type'] ?? null);
         $this->validateCityBelongsToGovernorate(
             $payload['city_id'] ?? null,
             $payload['governorate_id'] ?? null
@@ -173,6 +185,19 @@ class AddressService
         if (! in_array($type, AddressType::values(), true)) {
             throw ValidationException::withMessages([
                 'type' => ['The selected address type is invalid.'],
+            ]);
+        }
+    }
+
+    protected function validateLocalityType(?string $type): void
+    {
+        if ($type === null) {
+            return;
+        }
+
+        if (! in_array($type, AddressLocalityType::values(), true)) {
+            throw ValidationException::withMessages([
+                'district_or_village_type' => ['The selected locality type is invalid.'],
             ]);
         }
     }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Dashboard\Admin\Settings;
 use App\Enum\BusinessProfileStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Warehouse;
-use App\Models\Country;
 use App\Models\Governorate;
 use App\Models\City;
 use App\Models\WarehouseBusinessProfile;
@@ -20,7 +19,16 @@ class WarehouseController extends Controller
         if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.warehouses.index')) {
             return view('dashboard.admin.no-permission');
         }
-        $warehouses = Warehouse::with(['country', 'governorate', 'city', 'businessProfile'])
+        $validated = request()->validate([
+            'profile_status' => ['nullable', 'in:all,incomplete,pending_review,approved,rejected'],
+        ]);
+
+        $warehouses = Warehouse::with(['governorate', 'city', 'businessProfile'])
+            ->when(!empty($validated['profile_status']) && $validated['profile_status'] !== 'all', function ($query) use ($validated) {
+                $query->whereHas('businessProfile', function ($profileQuery) use ($validated) {
+                    $profileQuery->where('status', $validated['profile_status']);
+                });
+            })
             ->latest()
             ->paginate(10);
 
@@ -31,7 +39,7 @@ class WarehouseController extends Controller
             'approved_profiles' => WarehouseBusinessProfile::where('status', BusinessProfileStatus::APPROVED)->count(),
         ];
 
-        $mainWarehouse = Warehouse::with(['country', 'governorate', 'city'])
+        $mainWarehouse = Warehouse::with(['governorate', 'city'])
             ->where('is_main', true)
             ->latest()
             ->first();
@@ -44,8 +52,8 @@ class WarehouseController extends Controller
         if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.warehouses.create')) {
             return view('dashboard.admin.no-permission');
         }
-        $countries = Country::active()->get();
-        return view('dashboard.admin.settings.warehouses.create', compact('countries'));
+        $governorates = Governorate::active()->orderBy('name_ar')->get();
+        return view('dashboard.admin.settings.warehouses.create', compact('governorates'));
     }
 
     public function store(Request $request)
@@ -56,13 +64,20 @@ class WarehouseController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'country_id' => 'required|exists:countries,id',
             'governorate_id' => 'required|exists:governorates,id',
             'city_id' => 'required|exists:cities,id',
+            'district_or_village_name' => 'required|string|max:255',
+            'district_or_village_type' => 'required|in:district,village',
             'street_name' => 'nullable|string|max:255',
+            'branch_from_street' => 'nullable|string|max:255',
+            'building_number' => 'nullable|integer|min:0',
             'building' => 'nullable|string|max:255',
+            'floor_number' => 'nullable|integer|min:0',
             'floor' => 'nullable|string|max:255',
+            'building_name' => 'nullable|string|max:255',
+            'nearby_landmark' => 'nullable|string|max:255',
             'landmark' => 'nullable|string|max:255',
+            'address_description' => 'nullable|string|max:1000',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'is_main' => 'boolean',
@@ -86,14 +101,13 @@ class WarehouseController extends Controller
         if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.warehouses.edit')) {
             return view('dashboard.admin.no-permission');
         }
-        $countries = Country::active()->get();
         $governorates = Governorate::active()->orderBy('name_ar')->get();
         $cities = City::active()
             ->where('governorate_id', $warehouse->governorate_id)
             ->orderBy(app()->getLocale() === 'ar' ? 'name_ar' : 'name_en')
             ->get();
 
-        return view('dashboard.admin.settings.warehouses.edit', compact('warehouse', 'countries', 'governorates', 'cities'));
+        return view('dashboard.admin.settings.warehouses.edit', compact('warehouse', 'governorates', 'cities'));
     }
 
     public function update(Request $request, Warehouse $warehouse)
@@ -104,13 +118,20 @@ class WarehouseController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'country_id' => 'required|exists:countries,id',
             'governorate_id' => 'required|exists:governorates,id',
             'city_id' => 'required|exists:cities,id',
+            'district_or_village_name' => 'required|string|max:255',
+            'district_or_village_type' => 'required|in:district,village',
             'street_name' => 'nullable|string|max:255',
+            'branch_from_street' => 'nullable|string|max:255',
+            'building_number' => 'nullable|integer|min:0',
             'building' => 'nullable|string|max:255',
+            'floor_number' => 'nullable|integer|min:0',
             'floor' => 'nullable|string|max:255',
+            'building_name' => 'nullable|string|max:255',
+            'nearby_landmark' => 'nullable|string|max:255',
             'landmark' => 'nullable|string|max:255',
+            'address_description' => 'nullable|string|max:1000',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'is_main' => 'boolean',

@@ -25,10 +25,20 @@ class Address extends Model
         'postal_code',
         'address_line_1',
         'address_line_2',
+        'generated_address_number',
+        'address_name',
+        'district_or_village_name',
+        'district_or_village_type',
         'street_name',
+        'branch_from_street',
+        'building_number',
         'building',
+        'floor_number',
         'floor',
+        'building_name',
+        'nearby_landmark',
         'landmark',
+        'address_description',
         'latitude',
         'longitude',
         'is_primary',
@@ -72,5 +82,21 @@ class Address extends Model
     public function zone()
     {
         return $this->belongsTo(Zone::class);
+    }
+
+    public function getFullAddressAttribute(): string
+    {
+        return implode('، ', array_filter([
+            'محافظة: ' . ($this->governorate?->name_ar ?? $this->governorate?->name ?? ''),
+            'مدينة: ' . ($this->city?->name_ar ?? $this->city?->name_en ?? $this->city?->name ?? ''),
+            $this->district_or_village_name ? 'حي/قرية: ' . $this->district_or_village_name : null,
+            $this->street_name ? 'شارع: ' . $this->street_name : null,
+            $this->branch_from_street ? 'من شارع: ' . $this->branch_from_street : null,
+            $this->building_number ? 'عمارة: ' . $this->building_number : null,
+            $this->floor_number ? 'دور: ' . $this->floor_number : null,
+            $this->building_name ? 'اسم العمارة: ' . $this->building_name : null,
+            $this->nearby_landmark ? 'بالقرب من: ' . $this->nearby_landmark : null,
+            $this->address_description ? 'وصف العنوان: ' . $this->address_description : null,
+        ]));
     }
 }

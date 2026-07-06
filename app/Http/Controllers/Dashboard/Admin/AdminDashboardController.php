@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Dashboard\Admin;
 
 use App\Enum\BusinessProfileStatus;
 use App\Enum\PaymentStatus;
+use App\Enum\OrderStatus;
 use App\Enum\ReturnStatus;
 use App\Enum\ShipmentRequestStatus;
+use App\Enum\RepresentativeStatus;
 use App\Http\Controllers\Controller;
 use App\Models\EcommerceOrder;
 use App\Models\Order;
@@ -24,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Route;
 
 
 class AdminDashboardController extends Controller
@@ -35,307 +38,246 @@ class AdminDashboardController extends Controller
 
     public function index()
     {
-
         if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.dashboard')) {
             return view('dashboard.admin.no-permission');
         }
-        // dd(Auth::guard('employee')->user()->can('admin.dashboard'));
+        $route = fn (string $name, array $parameters = []) => Route::has($name) ? route($name, $parameters) : null;
+        $count = fn (string $modelClass, ?callable $callback = null): int => $this->countFor($modelClass, $callback);
 
-        $safeCount = function ($model, $column = null, $value = null) {
-            try {
-                $table = (new $model)->getTable();
-                if (!Schema::hasTable($table)) {
-                    return 0;
-                }
-                $query = $model::query();
-                if ($column && $value !== null) {
-                    $query = $query->where($column, $value);
-                }
-                return $query->count();
-            } catch (\Exception $e) {
+        $summaryItems = [
+            $count(User::class, fn ($query) => $query->whereNull('email_verified_at')),
+            $count(VendorBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::PENDING_REVIEW->value)),
+            $count(WarehouseBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::PENDING_REVIEW->value)),
+            $count(ShipmentCompany::class, fn ($query) => $query->withoutGlobalScope('active')->where('is_active', false)),
+            $count(Representative::class, fn ($query) => $query->where('status', RepresentativeStatus::PENDING_REVIEW->value)),
+            $count(User::class, fn ($query) => $query->onlyTrashed()),
+            $count(Vendor::class, fn ($query) => $query->withTrashed()->where(function ($subQuery) {
+                $subQuery->where('is_active', false)->orWhereNotNull('deleted_at');
+            })),
+            $count(WarehouseBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::REJECTED->value)),
+            $count(Representative::class, fn ($query) => $query->whereIn('status', [RepresentativeStatus::SUSPENDED->value, RepresentativeStatus::REJECTED->value])),
+            $count(EcommerceOrder::class, fn ($query) => $query->where('payment_status', PaymentStatus::PENDING->value)),
+            $count(EcommerceOrder::class, fn ($query) => $query->where('status', OrderStatus::CANCELLED->value)),
+            $count(ReturnRequest::class, fn ($query) => $query->where('status', ReturnStatus::APPROVED->value)),
+            0,
+            0,
+            0,
+            $count(ReturnRequest::class, fn ($query) => $query->where('refund_type', 'wallet')->where('status', ReturnStatus::REFUNDED->value)),
+            $count(EcommerceOrder::class, fn ($query) => $query->where('status', OrderStatus::PENDING->value)),
+            0,
+            $count(ReturnRequest::class, fn ($query) => $query->where('status', ReturnStatus::REQUESTED->value)),
+            $count(ShipmentRequest::class, fn ($query) => $query->where('status', ShipmentRequestStatus::SUBMITTED->value)),
+            $count(Order::class, fn ($query) => $query->where('status', OrderStatus::PENDING->value)),
+            0,
+            0,
+            0,
+            0,
+        ];
+
+        $sections = [
+            [
+                'title' => 'حسابات جديدة تحتاج موافقة',
+                'items' => [
+                    [
+                        'label' => 'حسابات المستخدمين غير الموثقة',
+                        'count' => $summaryItems[0],
+                        'note' => 'تحتاج مراجعة بيانات الدخول والتوثيق قبل الاعتماد.',
+                        'url' => $route('admin.users', ['verification_status' => 'unverified']),
+                    ],
+                    [
+                        'label' => 'حسابات الموردين قيد المراجعة',
+                        'count' => $summaryItems[1],
+                        'note' => 'ملفات النشاط التجاري بانتظار اعتماد الإدارة.',
+                        'url' => $route('admin.vendors', ['profile_status' => 'pending_review']),
+                    ],
+                    [
+                        'label' => 'حسابات المستودعات قيد المراجعة',
+                        'count' => $summaryItems[2],
+                        'note' => 'الملفات التجارية للمستودعات تحتاج موافقة.',
+                        'url' => $route('admin.settings.warehouses.index', ['profile_status' => 'pending_review']),
+                    ],
+                    [
+                        'label' => 'حسابات شركات الشحن غير المفعلة',
+                        'count' => $summaryItems[3],
+                        'note' => 'يمكن مراجعتها وتفعيلها من صفحة الشركات.',
+                        'url' => $route('admin.shipment-companies', ['status' => 'inactive']),
+                    ],
+                    [
+                        'label' => 'حسابات المناديب قيد المراجعة',
+                        'count' => $summaryItems[4],
+                        'note' => 'اختر المناديب بانتظار الاعتماد أو الرفض.',
+                        'url' => $route('admin.representatives.index', ['status' => 'pending_review']),
+                    ],
+                ],
+            ],
+            [
+                'title' => 'حسابات موقوفة أو ملغية',
+                'items' => [
+                    [
+                        'label' => 'المستخدمون المحذوفون',
+                        'count' => $summaryItems[5],
+                        'note' => 'الحسابات الملغية أو المحذوفة من النظام.',
+                        'url' => $route('admin.users'),
+                    ],
+                    [
+                        'label' => 'الموردون الموقوفون أو المحذوفون',
+                        'count' => $summaryItems[6],
+                        'note' => 'يشمل الحسابات غير النشطة والمرفوعة من النظام.',
+                        'url' => $route('admin.vendors', ['status' => 'inactive']),
+                    ],
+                    [
+                        'label' => 'المستودعات الملغية',
+                        'count' => $summaryItems[7],
+                        'note' => 'تعتمد هذه القيمة على حالة ملف الاعتماد للمستودع.',
+                        'url' => $route('admin.settings.warehouses.index', ['profile_status' => 'rejected']),
+                    ],
+                    [
+                        'label' => 'المناديب الموقوفون أو المرفوضون',
+                        'count' => $summaryItems[8],
+                        'note' => 'يمكن مراجعة الحالة من صفحة المناديب.',
+                        'url' => $route('admin.representatives.index'),
+                    ],
+                ],
+            ],
+            [
+                'title' => 'موافقات الأدمن',
+                'items' => [
+                    [
+                        'label' => 'طلبات الدفع المعلقة',
+                        'count' => $summaryItems[9],
+                        'note' => 'طلبات تحتاج اعتماد الدفع قبل المتابعة.',
+                        'url' => $route('admin.ecommerce-orders', ['payment_status' => 'pending']),
+                    ],
+                    [
+                        'label' => 'طلبات الإلغاء المعتمدة',
+                        'count' => $summaryItems[10],
+                        'note' => 'الطلبات التي تم إلغاؤها واعتماد الإلغاء لها.',
+                        'url' => $route('admin.ecommerce-orders', ['status' => 'cancelled']),
+                    ],
+                    [
+                        'label' => 'طلبات الإرجاع المعتمدة',
+                        'count' => $summaryItems[11],
+                        'note' => 'طلبات الإرجاع التي تمت الموافقة عليها.',
+                        'url' => $route('admin.return-requests', ['status' => 'approved']),
+                    ],
+                    [
+                        'label' => 'شكاوى إلغاء المشتريات',
+                        'count' => $summaryItems[12],
+                        'note' => 'TODO: نموذج الشكاوى غير موجود في هذا المستودع.',
+                        'url' => null,
+                    ],
+                    [
+                        'label' => 'شكاوى إلغاء الشحن',
+                        'count' => $summaryItems[13],
+                        'note' => 'TODO: نموذج الشكاوى غير موجود في هذا المستودع.',
+                        'url' => null,
+                    ],
+                    [
+                        'label' => 'شكاوى المرتجعات',
+                        'count' => $summaryItems[14],
+                        'note' => 'TODO: نموذج الشكاوى غير موجود في هذا المستودع.',
+                        'url' => null,
+                    ],
+                    [
+                        'label' => 'طلبات استرداد المحفظة',
+                        'count' => $summaryItems[15],
+                        'note' => 'طلبات استرداد Metwzon عبر المحفظة.',
+                        'url' => $route('admin.return-requests', ['status' => 'refunded', 'refund_type' => 'wallet']),
+                    ],
+                ],
+            ],
+            [
+                'title' => 'طلبات معلقة أو غير مكتملة',
+                'items' => [
+                    [
+                        'label' => 'طلبات الشراء المعلقة',
+                        'count' => $summaryItems[16],
+                        'note' => 'الطلبات التي لم تُعتمد بعد داخل المتجر الإلكتروني.',
+                        'url' => $route('admin.ecommerce-orders', ['status' => 'pending']),
+                    ],
+                    [
+                        'label' => 'طلبات الإلغاء المعلقة',
+                        'count' => $summaryItems[17],
+                        'note' => 'TODO: لا يوجد مسار مستقل لهذه الطلبات في المستودع الحالي.',
+                        'url' => null,
+                    ],
+                    [
+                        'label' => 'طلبات الإرجاع المعلقة',
+                        'count' => $summaryItems[18],
+                        'note' => 'طلبات الإرجاع الجديدة بانتظار أول إجراء.',
+                        'url' => $route('admin.return-requests', ['status' => 'requested']),
+                    ],
+                    [
+                        'label' => 'طلبات الشحن المعلقة',
+                        'count' => $summaryItems[19],
+                        'note' => 'طلبات الشحن التي تم إرسالها ولم تُعالج بعد.',
+                        'url' => $route('admin.shipment-requests.index', ['status' => 'submitted']),
+                    ],
+                    [
+                        'label' => 'طلبات التوصيل المعلقة',
+                        'count' => $summaryItems[20],
+                        'note' => 'طلبات التوصيل داخل مسار الشحن العادي.',
+                        'url' => $route('admin.shipment-orders', ['status' => 'pending']),
+                    ],
+                ],
+            ],
+            [
+                'title' => 'شكاوى معلقة أو غير مغلقة',
+                'items' => [
+                    [
+                        'label' => 'شكاوى المستخدمين',
+                        'count' => $summaryItems[21],
+                        'note' => 'TODO: لا يوجد نموذج شكاوى مستخدمين في المستودع الحالي.',
+                        'url' => null,
+                    ],
+                    [
+                        'label' => 'شكاوى الموردين',
+                        'count' => $summaryItems[22],
+                        'note' => 'TODO: لا يوجد نموذج شكاوى موردين في المستودع الحالي.',
+                        'url' => null,
+                    ],
+                    [
+                        'label' => 'شكاوى المستودعات',
+                        'count' => $summaryItems[23],
+                        'note' => 'TODO: لا يوجد نموذج شكاوى مستودعات في المستودع الحالي.',
+                        'url' => null,
+                    ],
+                    [
+                        'label' => 'شكاوى المناديب',
+                        'count' => $summaryItems[24],
+                        'note' => 'TODO: لا يوجد نموذج شكاوى مناديب في المستودع الحالي.',
+                        'url' => null,
+                    ],
+                ],
+            ],
+        ];
+
+        $totalUrgentItems = collect($sections)->pluck('items')->flatten(1)->sum('count');
+
+        return view('dashboard.admin.urgent-tasks', compact('sections', 'totalUrgentItems'));
+    }
+
+    private function countFor(string $modelClass, ?callable $callback = null): int
+    {
+        try {
+            if (! class_exists($modelClass)) {
                 return 0;
             }
-        };
 
-        $statusLabel = function ($status) {
-            if ($status === null || $status === '') {
-                return '';
+            $model = new $modelClass();
+            if (! Schema::hasTable($model->getTable())) {
+                return 0;
             }
 
-            $statusKey = strtolower((string) $status);
+            $query = $modelClass::query();
+            if ($callback) {
+                $callback($query);
+            }
 
-            return app()->getLocale() === 'ar'
-                ? __('admin-dashboard.' . $statusKey)
-                : ucfirst($statusKey);
-        };
-
-        $stats = [
-            'total_users' => User::count(),
-            'total_vendors' => Vendor::count(),
-            'total_shipment_companies' => ShipmentCompany::count(),
-            'total_products' => Product::count(),
-            'total_warehouses' => Warehouse::count(),
-            'main_warehouses' => Warehouse::where('is_main', true)->count(),
-            'total_shipment_orders' => Order::count(),
-            'total_ecommerce_orders' => EcommerceOrder::count(),
-            'pending_shipment_orders' => Order::where('status', 'pending')->count(),
-            'pending_ecommerce_orders' => EcommerceOrder::where('status', 'pending')->count(),
-
-            // Phase 2 - Shipment Requests
-            'total_shipment_requests' => $safeCount(ShipmentRequest::class),
-            'pending_shipment_requests' => $safeCount(ShipmentRequest::class, 'status', ShipmentRequestStatus::SUBMITTED),
-            // Assigned, completed, and cancelled statuses do not exist on ShipmentRequest yet.
-            // ShipmentRequestStatus enum only has DRAFT and SUBMITTED.
-            // 'assigned_shipment_requests' => ShipmentRequest::where(...)->count(),
-            // 'completed_shipment_requests' => ShipmentRequest::where(...)->count(),
-            // 'cancelled_shipment_requests' => ShipmentRequest::where(...)->count(),
-
-            // Phase 2 - Vendor Business Profiles
-            'pending_vendor_approvals' => $safeCount(VendorBusinessProfile::class, 'status', BusinessProfileStatus::PENDING_REVIEW),
-            'approved_vendors' => $safeCount(VendorBusinessProfile::class, 'status', BusinessProfileStatus::APPROVED),
-
-            // Phase 2 - Warehouse Business Profiles
-            'pending_warehouse_approvals' => $safeCount(WarehouseBusinessProfile::class, 'status', BusinessProfileStatus::PENDING_REVIEW),
-            'approved_warehouses' => $safeCount(WarehouseBusinessProfile::class, 'status', BusinessProfileStatus::APPROVED),
-
-            // Phase 2 - Active Shipment Companies (without global scope to query raw)
-            'active_shipment_companies' => ShipmentCompany::withoutGlobalScope('active')->where('is_active', true)->count(),
-
-            // Phase 2 - Active Representatives
-            'active_representatives' => $safeCount(Representative::class, 'is_active', true),
-        ];
-
-        $latestUnverifiedUser = User::whereNull('email_verified_at')->latest()->first();
-        $latestVerifiedUser = User::whereNotNull('email_verified_at')->latest('email_verified_at')->first();
-        $latestRejectedUser = User::onlyTrashed()->latest('deleted_at')->first();
-
-        $latestPendingVendor = Vendor::withoutGlobalScope('active')->where('is_active', false)->latest()->first();
-        $latestActiveVendor = Vendor::active()->latest()->first();
-        $latestRejectedVendor = Vendor::onlyTrashed()->latest('deleted_at')->first();
-
-        $latestPendingShipmentCompany = ShipmentCompany::withoutGlobalScope('active')->where('is_active', false)->latest()->first();
-        $latestActiveShipmentCompany = ShipmentCompany::active()->latest()->first();
-        $latestRejectedShipmentCompany = ShipmentCompany::onlyTrashed()->latest('deleted_at')->first();
-
-        $latestPendingPaymentOrder = EcommerceOrder::where('payment_status', PaymentStatus::PENDING->value)
-            ->latest()
-            ->first();
-        $latestCancelledEcommerceOrder = EcommerceOrder::where('status', 'cancelled')->latest()->first();
-        $latestApprovedReturnRequest = ReturnRequest::where('status', ReturnStatus::APPROVED->value)->latest()->first();
-        $latestWalletRefundRequest = ReturnRequest::where('refund_type', 'wallet')
-            ->where('status', ReturnStatus::REFUNDED->value)
-            ->latest()
-            ->first();
-
-        $latestPendingShipmentOrder = Order::where('status', 'pending')->latest()->first();
-        $latestPendingEcommerceOrder = EcommerceOrder::where('status', 'pending')->latest()->first();
-        $latestPendingReturnRequest = ReturnRequest::where('status', ReturnStatus::REQUESTED->value)->latest()->first();
-        $latestPickupReturnRequest = ReturnRequest::where('status', ReturnStatus::PICKUP->value)->latest()->first();
-        $warehouseFocus = Warehouse::with(['country', 'state', 'city', 'zone'])
-            ->where('is_main', true)
-            ->latest()
-            ->first()
-            ?? Warehouse::with(['country', 'state', 'city', 'zone'])->latest()->first();
-
-        $cycleUiLabels = [
-            'needs_approval' => __('admin-dashboard.needs_approval'),
-            'latest_item' => __('admin-dashboard.latest_item'),
-            'latest_trusted' => __('admin-dashboard.latest_trusted'),
-            'latest_rejected' => __('admin-dashboard.latest_rejected'),
-            'trust_level' => __('admin-dashboard.trust_level'),
-            'trusted' => __('admin-dashboard.trusted'),
-            'rejected' => __('admin-dashboard.rejected'),
-            'view_all' => __('admin-dashboard.view_all'),
-            'no_complaints_source' => __('admin-dashboard.no_complaints_source'),
-        ];
-
-        $warehouseControl = [
-            'title' => __('admin-dashboard.warehouses'),
-            'subtitle' => __('admin-dashboard.warehouses'),
-            'manage_url' => route('admin.settings.warehouses.index'),
-            'create_url' => route('admin.settings.warehouses.create'),
-            'focus_name' => $warehouseFocus?->name,
-            'focus_location' => $warehouseFocus?->full_address,
-            'focus_url' => $warehouseFocus ? route('admin.settings.warehouses.edit', $warehouseFocus->id) : null,
-            'total' => $stats['total_warehouses'],
-            'main' => $stats['main_warehouses'],
-            'pending_profiles' => $stats['pending_warehouse_approvals'],
-            'approved_profiles' => $stats['approved_warehouses'],
-        ];
-
-        $dashboardCycles = [
-            'approvals' => [
-                'title' => __('admin-dashboard.accounts_need_approval'),
-                'subtitle' => __('admin-dashboard.new_accounts_cycle'),
-                'cards' => [
-                    // [
-                    //     'title' => __('admin-dashboard.user_accounts'),
-                    //     'count' => User::whereNull('email_verified_at')->count(),
-                    //     'latest_title' => $latestUnverifiedUser?->username ?? __('admin-dashboard.not_available'),
-                    //     'latest_meta' => $latestUnverifiedUser?->email ?? '',
-                    //     'latest_status' => __('admin-dashboard.needs_approval'),
-                    //     'latest_url' => $latestUnverifiedUser ? route('admin.users.show', $latestUnverifiedUser->id) : null,
-                    //     'view_all_url' => route('admin.users'),
-                    // ],
-                    [
-                        'title' => __('admin-dashboard.vendor_accounts'),
-                        'count' => Vendor::withoutGlobalScope('active')->where('is_active', false)->count(),
-                        'latest_title' => $latestPendingVendor?->name ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestPendingVendor?->email ?? '',
-                        'latest_status' => __('admin-dashboard.needs_approval'),
-                        'latest_url' => $latestPendingVendor ? route('admin.vendors.show', $latestPendingVendor->id) : null,
-                        'view_all_url' => route('admin.vendors'),
-                    ],
-                    [
-                        'title' => __('admin-dashboard.shipment_company_accounts'),
-                        'count' => ShipmentCompany::withoutGlobalScope('active')->where('is_active', false)->count(),
-                        'latest_title' => $latestPendingShipmentCompany?->name ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestPendingShipmentCompany?->email ?? '',
-                        'latest_status' => __('admin-dashboard.needs_approval'),
-                        'latest_url' => $latestPendingShipmentCompany ? route('admin.shipment-companies.show', $latestPendingShipmentCompany->id) : null,
-                        'view_all_url' => route('admin.shipment-companies'),
-                    ],
-                ],
-            ],
-            'trust' => [
-                'title' => __('admin-dashboard.trusted_or_rejected_accounts'),
-                'subtitle' => __('admin-dashboard.trust_cycle'),
-                'cards' => [
-                    [
-                        'title' => __('admin-dashboard.users'),
-                        'trusted_count' => User::whereNotNull('email_verified_at')->count(),
-                        'rejected_count' => User::onlyTrashed()->count(),
-                        'trusted_title' => $latestVerifiedUser?->username ?? __('admin-dashboard.not_available'),
-                        'trusted_meta' => $latestVerifiedUser?->email ?? '',
-                        'trusted_url' => $latestVerifiedUser ? route('admin.users.show', $latestVerifiedUser->id) : null,
-                        'rejected_title' => $latestRejectedUser?->username ?? __('admin-dashboard.not_available'),
-                        'rejected_meta' => $latestRejectedUser?->email ?? '',
-                        'rejected_url' => $latestRejectedUser ? route('admin.users.show', $latestRejectedUser->id) : null,
-                        'view_all_url' => route('admin.users'),
-                    ],
-                    [
-                        'title' => __('admin-dashboard.vendors'),
-                        'trusted_count' => Vendor::active()->count(),
-                        'rejected_count' => Vendor::onlyTrashed()->count(),
-                        'trusted_title' => $latestActiveVendor?->name ?? __('admin-dashboard.not_available'),
-                        'trusted_meta' => $latestActiveVendor?->email ?? '',
-                        'trusted_url' => $latestActiveVendor ? route('admin.vendors.show', $latestActiveVendor->id) : null,
-                        'rejected_title' => $latestRejectedVendor?->name ?? __('admin-dashboard.not_available'),
-                        'rejected_meta' => $latestRejectedVendor?->email ?? '',
-                        'rejected_url' => $latestRejectedVendor ? route('admin.vendors.show', $latestRejectedVendor->id) : null,
-                        'view_all_url' => route('admin.vendors'),
-                    ],
-                    [
-                        'title' => __('admin-dashboard.shipment_companies'),
-                        'trusted_count' => ShipmentCompany::active()->count(),
-                        'rejected_count' => ShipmentCompany::onlyTrashed()->count(),
-                        'trusted_title' => $latestActiveShipmentCompany?->name ?? __('admin-dashboard.not_available'),
-                        'trusted_meta' => $latestActiveShipmentCompany?->email ?? '',
-                        'trusted_url' => $latestActiveShipmentCompany ? route('admin.shipment-companies.show', $latestActiveShipmentCompany->id) : null,
-                        'rejected_title' => $latestRejectedShipmentCompany?->name ?? __('admin-dashboard.not_available'),
-                        'rejected_meta' => $latestRejectedShipmentCompany?->email ?? '',
-                        'rejected_url' => $latestRejectedShipmentCompany ? route('admin.shipment-companies.show', $latestRejectedShipmentCompany->id) : null,
-                        'view_all_url' => route('admin.shipment-companies'),
-                    ],
-                ],
-            ],
-            'adminApprovals' => [
-                'title' => __('admin-dashboard.admin_approvals'),
-                'subtitle' => __('admin-dashboard.admin_approval_cycle'),
-                'cards' => [
-                    [
-                        'title' => __('admin-dashboard.pending_payments'),
-                        'count' => EcommerceOrder::where('payment_status', PaymentStatus::PENDING->value)->count(),
-                        'latest_title' => $latestPendingPaymentOrder?->order_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestPendingPaymentOrder ? $statusLabel($latestPendingPaymentOrder->status) : '',
-                        'latest_status' => __('admin-dashboard.needs_review'),
-                        'latest_url' => $latestPendingPaymentOrder ? route('admin.ecommerce-orders.show', $latestPendingPaymentOrder->id) : null,
-                        'view_all_url' => route('admin.ecommerce-orders'),
-                    ],
-                    [
-                        'title' => __('admin-dashboard.approved_cancellations'),
-                        'count' => EcommerceOrder::where('status', 'cancelled')->count(),
-                        'latest_title' => $latestCancelledEcommerceOrder?->order_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestCancelledEcommerceOrder ? $statusLabel($latestCancelledEcommerceOrder->status) : '',
-                        'latest_status' => __('admin-dashboard.approved'),
-                        'latest_url' => $latestCancelledEcommerceOrder ? route('admin.ecommerce-orders.show', $latestCancelledEcommerceOrder->id) : null,
-                        'view_all_url' => route('admin.ecommerce-orders'),
-                    ],
-                    [
-                        'title' => __('admin-dashboard.approved_returns'),
-                        'count' => ReturnRequest::where('status', ReturnStatus::APPROVED->value)->count(),
-                        'latest_title' => $latestApprovedReturnRequest?->return_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestApprovedReturnRequest?->order?->order_number ?? '',
-                        'latest_status' => __('admin-dashboard.approved'),
-                        'latest_url' => $latestApprovedReturnRequest ? route('admin.return-requests.show', $latestApprovedReturnRequest->id) : null,
-                        'view_all_url' => route('admin.return-requests'),
-                    ],
-                    [
-                        'title' => __('admin-dashboard.wallet_refund_requests'),
-                        'count' => ReturnRequest::where('refund_type', 'wallet')->where('status', ReturnStatus::REFUNDED->value)->count(),
-                        'latest_title' => $latestWalletRefundRequest?->return_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestWalletRefundRequest?->order?->order_number ?? '',
-                        'latest_status' => __('admin-dashboard.refunded'),
-                        'latest_url' => $latestWalletRefundRequest ? route('admin.return-requests.show', $latestWalletRefundRequest->id) : null,
-                        'view_all_url' => route('admin.return-requests'),
-                    ],
-                ],
-            ],
-            'pending' => [
-                'title' => __('admin-dashboard.pending_or_incomplete_orders'),
-                'subtitle' => __('admin-dashboard.pending_cycle'),
-                'cards' => [
-                    [
-                        'title' => __('admin-dashboard.pending_shipment_orders'),
-                        'count' => Order::where('status', 'pending')->count(),
-                        'latest_title' => $latestPendingShipmentOrder?->order_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestPendingShipmentOrder ? $statusLabel($latestPendingShipmentOrder->status->name) : '',
-                        'latest_status' => __('admin-dashboard.pending'),
-                        'latest_url' => $latestPendingShipmentOrder ? route('admin.shipment-orders.show', $latestPendingShipmentOrder->id) : null,
-                        'view_all_url' => route('admin.shipment-orders'),
-                    ],
-                    [
-                        'title' => __('admin-dashboard.pending_ecommerce_orders'),
-                        'count' => EcommerceOrder::where('status', 'pending')->count(),
-                        'latest_title' => $latestPendingEcommerceOrder?->order_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestPendingEcommerceOrder ? $statusLabel($latestPendingEcommerceOrder->status) : '',
-                        'latest_status' => __('admin-dashboard.pending'),
-                        'latest_url' => $latestPendingEcommerceOrder ? route('admin.ecommerce-orders.show', $latestPendingEcommerceOrder->id) : null,
-                        'view_all_url' => route('admin.ecommerce-orders'),
-                    ],
-                    [
-                        'title' => __('admin-dashboard.pending_return_requests'),
-                        'count' => ReturnRequest::where('status', ReturnStatus::REQUESTED->value)->count(),
-                        'latest_title' => $latestPendingReturnRequest?->return_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestPendingReturnRequest?->order?->order_number ?? '',
-                        'latest_status' => __('admin-dashboard.pending'),
-                        'latest_url' => $latestPendingReturnRequest ? route('admin.return-requests.show', $latestPendingReturnRequest->id) : null,
-                        'view_all_url' => route('admin.return-requests'),
-                    ],
-                    [
-                        'title' => __('admin-dashboard.processing_return_requests'),
-                        'count' => ReturnRequest::where('status', ReturnStatus::PICKUP->value)->count(),
-                        'latest_title' => $latestPickupReturnRequest?->return_number ?? __('admin-dashboard.not_available'),
-                        'latest_meta' => $latestPickupReturnRequest?->order?->order_number ?? '',
-                        'latest_status' => __('admin-dashboard.in_progress'),
-                        'latest_url' => $latestPickupReturnRequest ? route('admin.return-requests.show', $latestPickupReturnRequest->id) : null,
-                        'view_all_url' => route('admin.return-requests'),
-                    ],
-                ],
-            ],
-            'complaints' => [
-                'title' => __('admin-dashboard.pending_or_incomplete_complaints'),
-                'subtitle' => __('admin-dashboard.no_complaints_source'),
-                'cards' => [],
-            ],
-        ];
-
-        return view('dashboard.admin.dashboard.dashboard2', compact(
-            'stats',
-            'dashboardCycles',
-            'cycleUiLabels',
-            'warehouseControl'
-        ));
+            return (int) $query->count();
+        } catch (\Throwable $throwable) {
+            return 0;
+        }
     }
 
     public function monthlyRevenue()

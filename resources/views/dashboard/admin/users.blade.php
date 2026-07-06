@@ -177,6 +177,24 @@
                         </div>
                     </div>
 
+                    <div class="col-12 col-lg-5">
+                        <label class="usr-label" for="verificationStatus">
+                            {{ $text('Verification status', 'حالة التوثيق') }}
+                        </label>
+
+                        <select id="verificationStatus" name="verification_status" class="form-select usr-control">
+                            <option value="all" @selected(request('verification_status', 'all') === 'all')>
+                                {{ $text('All', 'الكل') }}
+                            </option>
+                            <option value="verified" @selected(request('verification_status') === 'verified')>
+                                {{ $text('Verified', 'موثق') }}
+                            </option>
+                            <option value="unverified" @selected(request('verification_status') === 'unverified')>
+                                {{ $text('Unverified', 'غير موثق') }}
+                            </option>
+                        </select>
+                    </div>
+
                     <input type="hidden" name="sort_by" value="{{ request('sort_by', 'created_at') }}">
                     <input type="hidden" name="sort_dir" value="{{ request('sort_dir', 'desc') }}">
 

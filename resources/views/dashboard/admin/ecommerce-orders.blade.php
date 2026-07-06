@@ -50,6 +50,17 @@
                 </div>
 
                 <div class="col-lg-4">
+                    <select id="paymentStatusFilter" name="payment_status" class="form-select form-select-sm filter-select-modern">
+                        <option value="all">{{ app()->getLocale() === 'ar' ? 'كل حالات الدفع' : 'All payment statuses' }}</option>
+                        @foreach($paymentStatuses as $paymentStatus)
+                            <option value="{{ $paymentStatus }}" {{ request('payment_status', 'all') === $paymentStatus ? 'selected' : '' }}>
+                                {{ __('admin-dashboard.' . $paymentStatus) !== 'admin-dashboard.' . $paymentStatus ? __('admin-dashboard.' . $paymentStatus) : ucfirst(str_replace('_', ' ', $paymentStatus)) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-lg-4">
                     <select id="shipmentFilter" name="shipment_company_id" class="form-select form-select-sm filter-select-modern">
                         <option value="all">{{ app()->getLocale() === 'ar' ? 'كل شركات الشحن' : 'All shipping companies' }}</option>
                         @foreach($shipmentCompanies as $company)

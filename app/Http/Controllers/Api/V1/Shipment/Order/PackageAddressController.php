@@ -12,7 +12,7 @@ class PackageAddressController extends Controller
     public function index(Request $request)
     {
         $addresses = PackageAddress::where('user_id', $request->user()->id)
-            ->with(['city', 'state', 'country', 'zone'])
+            ->with(['city', 'state', 'governorate', 'country', 'zone'])
             ->orderBy('id', 'desc')
             ->get()
             ->unique(function ($item) {
@@ -34,7 +34,7 @@ class PackageAddressController extends Controller
     {
         $address = PackageAddress::where('id', $id)
             ->where('user_id', $request->user()->id)
-            ->with(['city', 'state', 'country', 'zone'])
+            ->with(['city', 'state', 'governorate', 'country', 'zone'])
             ->first();
 
         if (!$address) {

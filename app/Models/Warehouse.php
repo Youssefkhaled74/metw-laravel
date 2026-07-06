@@ -10,9 +10,6 @@ class Warehouse extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * الأعمدة المسموح بملئها
-     */
     protected $fillable = [
         'name',
         'phone',
@@ -20,21 +17,24 @@ class Warehouse extends Model
         'governorate_id',
         'state_id',
         'city_id',
+        'district_or_village_name',
+        'district_or_village_type',
         'street_name',
+        'branch_from_street',
+        'building_number',
         'building',
+        'floor_number',
         'floor',
+        'building_name',
+        'nearby_landmark',
         'landmark',
+        'address_description',
         'address_type',
         'latitude',
         'longitude',
         'is_main',
     ];
 
-    /**
-     * العلاقات (Relationships)
-     */
-
-    // الدولة
     public function country()
     {
         return $this->belongsTo(Country::class);
@@ -45,19 +45,16 @@ class Warehouse extends Model
         return $this->belongsTo(Governorate::class);
     }
 
-    // المحافظة
     public function state()
     {
         return $this->belongsTo(State::class);
     }
 
-    // المدينة
     public function city()
     {
         return $this->belongsTo(City::class);
     }
 
-    // لو عايز تربطه بالأوردرات فيما بعد
     public function orders()
     {
         return $this->hasMany(Order::class);
@@ -83,26 +80,19 @@ class Warehouse extends Model
         return $this->hasOne(WarehouseBusinessProfile::class);
     }
 
-    /**
-     * Accessors / Mutators (اختياري)
-     * لو عايز تنسّق الاسم أو العنوان قبل العرض
-     */
     public function getFullAddressAttribute(): string
     {
-        $locale = app()->getLocale();
-
-        $parts = array_filter([
-            $this->street_name,
-            $this->building,
-            $this->floor ? 'Floor ' . $this->floor : null,
-            $this->landmark,
-
-            $this->governorate ? $this->governorate->name : null,
-            $this->city ? ($locale === 'ar' ? $this->city->name_ar : $this->city->name_en) : null,
-            $this->state ? ($locale === 'ar' ? $this->state->name_ar : $this->state->name_en) : null,
-            $this->country ? ($locale === 'ar' ? $this->country->name_ar : $this->country->name_en) : null,
-        ]);
-
-        return implode(', ', $parts);
+        return implode('، ', array_filter([
+            'محافظة: ' . ($this->governorate?->name_ar ?? $this->governorate?->name ?? ''),
+            'مدينة: ' . ($this->city?->name_ar ?? $this->city?->name_en ?? $this->city?->name ?? ''),
+            $this->district_or_village_name ? 'حي/قرية: ' . $this->district_or_village_name : null,
+            $this->street_name ? 'شارع: ' . $this->street_name : null,
+            $this->branch_from_street ? 'من شارع: ' . $this->branch_from_street : null,
+            $this->building_number ? 'عمارة: ' . $this->building_number : null,
+            $this->floor_number ? 'دور: ' . $this->floor_number : null,
+            $this->building_name ? 'اسم العمارة: ' . $this->building_name : null,
+            $this->nearby_landmark ? 'بالقرب من: ' . $this->nearby_landmark : null,
+            $this->address_description ? 'وصف العنوان: ' . $this->address_description : null,
+        ]));
     }
 }

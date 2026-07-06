@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Enum\PaymentStatus;
 use App\Models\EcommerceOrder;
 use App\Models\OrderPaymentRecord;
 use App\Models\ShipmentCompany;
@@ -34,6 +35,7 @@ class EcommerceController extends Controller
             $validated = $request->validate([
                 'search' => ['nullable', 'string', 'max:100'],
                 'status' => ['nullable', 'string'],
+                'payment_status' => ['nullable', 'string'],
                 'shipment_company_id' => ['nullable', 'string'],
                 'sort_by' => ['nullable', 'in:created_at,order_number,total_amount'],
                 'sort_dir' => ['nullable', 'in:asc,desc'],
@@ -67,6 +69,10 @@ class EcommerceController extends Controller
                 $ordersQuery->where('status', $validated['status']);
             }
 
+            if (!empty($validated['payment_status']) && $validated['payment_status'] !== 'all') {
+                $ordersQuery->where('payment_status', $validated['payment_status']);
+            }
+
             if (!empty($validated['shipment_company_id']) && $validated['shipment_company_id'] !== 'all') {
                 if ($validated['shipment_company_id'] === 'none') {
                     $ordersQuery->where(function ($query) {
@@ -92,8 +98,9 @@ class EcommerceController extends Controller
                 ->appends($request->query());
 
             $shipmentCompanies = ShipmentCompany::orderBy('name')->get(['id', 'name']);
+            $paymentStatuses = array_map(fn (PaymentStatus $status) => $status->value, PaymentStatus::cases());
 
-            return view('dashboard.admin.ecommerce-orders', compact('orders', 'shipmentCompanies', 'statuses', 'sortBy', 'sortDir'));
+            return view('dashboard.admin.ecommerce-orders', compact('orders', 'shipmentCompanies', 'statuses', 'paymentStatuses', 'sortBy', 'sortDir'));
         } catch (\Throwable $e) {
             return redirect()->back()->with('error', app()->getLocale() === 'ar' ? 'حدث خطأ غير متوقع' : 'Unexpected error occurred');
         }

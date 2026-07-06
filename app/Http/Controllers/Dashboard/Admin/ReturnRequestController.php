@@ -33,6 +33,7 @@ class ReturnRequestController extends Controller
             $validated = $request->validate([
                 'search' => ['nullable', 'string', 'max:100'],
                 'status' => ['nullable', 'string'],
+                'refund_type' => ['nullable', 'string'],
                 'sort_by' => ['nullable', 'in:return_number,order_number,created_at'],
                 'sort_dir' => ['nullable', 'in:asc,desc'],
             ]);
@@ -62,6 +63,10 @@ class ReturnRequestController extends Controller
 
             if (!empty($validated['status']) && $validated['status'] !== 'all') {
                 $returnRequestsQuery->where('status', $validated['status']);
+            }
+
+            if (!empty($validated['refund_type']) && $validated['refund_type'] !== 'all') {
+                $returnRequestsQuery->where('refund_type', $validated['refund_type']);
             }
 
             if ($sortBy === 'order_number') {

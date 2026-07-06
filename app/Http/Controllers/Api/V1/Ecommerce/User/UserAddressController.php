@@ -6,13 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserAddressRequest;
 use App\Http\Requests\UpdateUserAddressRequest;
 use App\Http\Resources\CityResource;
-use App\Http\Resources\CountryResource;
+use App\Http\Resources\GovernorateResource;
 use App\Http\Resources\StateResource;
 use App\Http\Resources\UserAddressResource;
 use App\Http\Resources\ZoneResource;
 use App\Models\City;
-use App\Models\Country;
 use App\Models\ShipmentLocation;
+use App\Models\Governorate;
 use App\Models\State;
 use App\Models\UserAddress;
 use App\Models\Zone;
@@ -23,7 +23,7 @@ class UserAddressController extends Controller
     public function index()
     {
         try {
-            $userAddresses = UserAddress::with('city', 'country', 'state', 'zone')
+            $userAddresses = UserAddress::with('city', 'country', 'state', 'zone', 'governorate')
                 ->where('user_id', auth()->user()->id)->get();
             return responseJson(true, trans('messages.User addresses fetched successfully'), UserAddressResource::collection($userAddresses));
         } catch (\Throwable $th) {
@@ -36,6 +36,7 @@ class UserAddressController extends Controller
         try {
             $validatedData = $request->validated();
             $validatedData['user_id'] = auth()->id();
+            $validatedData = $this->normalizeAddressData($validatedData);
 
             $userId = auth()->id();
             $hasAddresses = UserAddress::where('user_id', $userId)->exists();
@@ -79,7 +80,7 @@ class UserAddressController extends Controller
     public function show($userAddressId)
     {
         try {
-            $userAddress = UserAddress::with('city')->where('user_id', auth()->user()->id)->findOrFail($userAddressId);
+            $userAddress = UserAddress::with('city', 'governorate')->where('user_id', auth()->user()->id)->findOrFail($userAddressId);
             return responseJson(true, trans('messages.User address fetched successfully'), new UserAddressResource($userAddress));
         } catch (\Throwable $th) {
             return responseJson(false, trans('messages.User address not found'), $th->getMessage(), 500);
@@ -91,6 +92,7 @@ class UserAddressController extends Controller
         try {
             $validatedData = $request->validated();
             $userId = auth()->id();
+            $validatedData = $this->normalizeAddressData($validatedData, true);
 
             $userAddress = UserAddress::where('user_id', $userId)->findOrFail($userAddressId);
 
@@ -139,42 +141,27 @@ class UserAddressController extends Controller
     public function country()
     {
         try {
-            $countries = Country::active()->get();
-            return responseJson(true, trans('messages.Countries fetched successfully'), CountryResource::collection($countries));
+            $governorates = Governorate::active()->orderBy('name_ar')->get();
+            return responseJson(true, trans('messages.Governorates fetched successfully'), GovernorateResource::collection($governorates));
         } catch (\Throwable $th) {
-            return responseJson(false, trans('messages.Countries not found'), $th->getMessage(), 500);
+            return responseJson(false, trans('messages.Governorates not found'), $th->getMessage(), 500);
         }
     }
 
     public function state(Request $request)
     {
         try {
-            $isShipment = filter_var($request->query('is_shipment'), FILTER_VALIDATE_BOOLEAN);
-
-            $query = State::active()->with('cities.zones');
-
-            if ($isShipment) {
-                $stateIds = ShipmentLocation::active()
-                    ->whereHas('shipmentCompany')
-                    ->pluck('state')
-                    ->flatten()
-                    ->unique()
-                    ->values();
-
-                $query->whereIn('id', $stateIds);
-            }
-
-            $states = $query->get();
+            $governorates = Governorate::active()->orderBy('name_ar')->get();
 
             return responseJson(
                 true,
-                trans('messages.States fetched successfully'),
-                StateResource::collection($states)
+                trans('messages.Governorates fetched successfully'),
+                GovernorateResource::collection($governorates)
             );
         } catch (\Throwable $th) {
             return responseJson(
                 false,
-                trans('messages.States not found'),
+                trans('messages.Governorates not found'),
                 $th->getMessage(),
                 500
             );
@@ -186,22 +173,9 @@ class UserAddressController extends Controller
     public function city(Request $request, $stateId)
     {
         try {
-            $isShipment = filter_var($request->query('is_shipment'), FILTER_VALIDATE_BOOLEAN);
-
             $query = City::active()
-                ->where('state_id', $stateId)
+                ->where('governorate_id', $stateId)
                 ->with('zones');
-
-            if ($isShipment) {
-                $cityIds = ShipmentLocation::active()
-                    ->whereJsonContains('state', (string) $stateId)
-                    ->pluck('city')
-                    ->flatten()
-                    ->unique()
-                    ->values();
-
-                $query->whereIn('id', $cityIds);
-            }
 
             $cities = $query->get();
 
@@ -224,22 +198,8 @@ class UserAddressController extends Controller
     public function zone(Request $request, $cityId)
     {
         try {
-            $isShipment = filter_var($request->query('is_shipment'), FILTER_VALIDATE_BOOLEAN);
-
             $query = Zone::active()
                 ->where('city_id', $cityId);
-
-            if ($isShipment) {
-                $zoneIds = ShipmentLocation::active()
-                    ->whereHas('shipmentCompany')
-                    ->whereJsonContains('city', (string) $cityId)
-                    ->pluck('zone')
-                    ->flatten()
-                    ->unique()
-                    ->values();
-
-                $query->whereIn('id', $zoneIds);
-            }
 
             $zones = $query->get();
 
@@ -256,6 +216,48 @@ class UserAddressController extends Controller
                 500
             );
         }
+    }
+
+    public function governorates()
+    {
+        return $this->country();
+    }
+
+    protected function normalizeAddressData(array $data, bool $isUpdate = false): array
+    {
+        if (! array_key_exists('governorate_id', $data) || blank($data['governorate_id'] ?? null)) {
+            if (! empty($data['city_id'])) {
+                $city = City::withoutGlobalScopes()->find($data['city_id']);
+                if ($city) {
+                    $data['governorate_id'] = $city->governorate_id;
+                    $data['state_id'] = $data['state_id'] ?? $city->state_id;
+                }
+            } elseif (array_key_exists('state_id', $data)) {
+                $data['governorate_id'] = $data['state_id'];
+            }
+        }
+
+        if (! array_key_exists('address_name', $data) || blank($data['address_name'] ?? null)) {
+            $data['address_name'] = $data['address_name'] ?? ($data['district_or_village_name'] ?? 'العنوان');
+        }
+
+        if (array_key_exists('building', $data) && ! array_key_exists('building_number', $data)) {
+            $data['building_number'] = is_numeric($data['building']) ? (int) $data['building'] : $data['building'];
+        }
+
+        if (array_key_exists('floor', $data) && ! array_key_exists('floor_number', $data)) {
+            $data['floor_number'] = is_numeric($data['floor']) ? (int) $data['floor'] : $data['floor'];
+        }
+
+        if (! array_key_exists('nearby_landmark', $data) && array_key_exists('landmark', $data)) {
+            $data['nearby_landmark'] = $data['landmark'];
+        }
+
+        if (! array_key_exists('district_or_village_name', $data)) {
+            $data['district_or_village_name'] = $data['district_or_village_name'] ?? null;
+        }
+
+        return $data;
     }
 
 

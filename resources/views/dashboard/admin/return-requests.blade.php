@@ -49,6 +49,18 @@
                     </select>
                 </div>
 
+                <div class="col-lg-3">
+                    <select id="refundTypeFilter" name="refund_type" class="form-select form-select-sm filter-select-modern">
+                        <option value="all">{{ app()->getLocale() === 'ar' ? 'كل أنواع الاسترداد' : 'All refund types' }}</option>
+                        <option value="wallet" {{ request('refund_type') === 'wallet' ? 'selected' : '' }}>
+                            {{ app()->getLocale() === 'ar' ? 'محفظة' : 'Wallet' }}
+                        </option>
+                        <option value="cash" {{ request('refund_type') === 'cash' ? 'selected' : '' }}>
+                            {{ app()->getLocale() === 'ar' ? 'نقدًا' : 'Cash' }}
+                        </option>
+                    </select>
+                </div>
+
                 <input type="hidden" name="sort_by" value="{{ request('sort_by', 'created_at') }}">
                 <input type="hidden" name="sort_dir" value="{{ request('sort_dir', 'desc') }}">
 

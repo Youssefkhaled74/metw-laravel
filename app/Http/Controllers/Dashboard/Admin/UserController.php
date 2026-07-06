@@ -28,6 +28,7 @@ class UserController extends Controller
 
             $validated = request()->validate([
                 'search' => ['nullable', 'string', 'max:100'],
+                'verification_status' => ['nullable', 'in:all,verified,unverified'],
                 'sort_by' => ['nullable', 'in:user_number,username,created_at'],
                 'sort_dir' => ['nullable', 'in:asc,desc'],
             ]);
@@ -47,6 +48,14 @@ class UserController extends Controller
                         ->orWhere('email', 'like', "%{$search}%")
                         ->orWhere('phone', 'like', "%{$search}%");
                 });
+            }
+
+            if (!empty($validated['verification_status']) && $validated['verification_status'] !== 'all') {
+                if ($validated['verification_status'] === 'verified') {
+                    $usersQuery->whereNotNull('email_verified_at');
+                } else {
+                    $usersQuery->whereNull('email_verified_at');
+                }
             }
 
             $users = $usersQuery

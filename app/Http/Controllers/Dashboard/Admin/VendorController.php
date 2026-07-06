@@ -32,6 +32,7 @@ class VendorController extends Controller
             $validated = $request->validate([
                 'search' => ['nullable', 'string', 'max:100'],
                 'status' => ['nullable', 'in:all,active,inactive'],
+                'profile_status' => ['nullable', 'in:all,incomplete,pending_review,approved,rejected'],
                 'sort_by' => ['nullable', 'in:id,created_at,orders,products'],
                 'sort_dir' => ['nullable', 'in:asc,desc'],
             ]);
@@ -54,6 +55,12 @@ class VendorController extends Controller
 
             if (!empty($validated['status']) && $validated['status'] !== 'all') {
                 $vendorsQuery->where('is_active', $validated['status'] === 'active');
+            }
+
+            if (!empty($validated['profile_status']) && $validated['profile_status'] !== 'all') {
+                $vendorsQuery->whereHas('businessProfile', function ($profileQuery) use ($validated) {
+                    $profileQuery->where('status', $validated['profile_status']);
+                });
             }
 
             if ($sortBy === 'orders') {
