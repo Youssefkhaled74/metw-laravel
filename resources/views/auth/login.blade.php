@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول - Metw</title>
+    <title>تسجيل الدخول - MetwLogistic</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
@@ -102,7 +102,7 @@
         <div class="login-header">
             <i class="fas fa-{{ $type === 'admin' ? 'shield-halved' : 'truck-fast' }} brand-icon"></i>
             <h3 class="fw-bold mb-1">تسجيل الدخول</h3>
-            <p class="mb-0 opacity-90">Metw - {{ ucfirst($type) }}</p>
+            <p class="mb-0 opacity-90">MetwLogistic - {{ ucfirst($type) }}</p>
         </div>
 
         <div class="card-body">

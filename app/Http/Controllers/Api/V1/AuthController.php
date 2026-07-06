@@ -328,7 +328,7 @@ class AuthController extends Controller
             $code = app(OtpService::class)->createAndReturnCode($user, OtpPurpose::EMAIL_VERIFICATION);
 
             $body = '<p>Use the code below to verify your email address:</p><br><strong>Code: ' . e($code) . '</strong>';
-            SendEmail::dispatch($user->email, 'Verify Your Email', $body, 'Lasco');
+            SendEmail::dispatch($user->email, 'Verify Your Email', $body, config('app.name'));
 
             return responseJson(true, trans('messages.auth.otp_sent'));
         } catch (\Throwable $th) {
@@ -352,7 +352,7 @@ class AuthController extends Controller
             $code = app(OtpService::class)->createAndReturnCode($user, OtpPurpose::EMAIL_VERIFICATION);
 
             $body = '<p>Use the code below to verify your email address:</p><br><strong>Code: ' . e($code) . '</strong>';
-            SendEmail::dispatch($user->email, 'Verify Your Email', $body, 'Lasco');
+            SendEmail::dispatch($user->email, 'Verify Your Email', $body, config('app.name'));
 
             return responseJson(true, trans('messages.auth.otp_sent'));
         } catch (\Throwable $th) {

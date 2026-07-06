@@ -14,7 +14,7 @@ class VendorSeeder extends Seeder
         $vendors = [
             [
                 'name'           => 'Demo Vendor 1',
-                'email'          => 'vendor1@lasco.test',
+                'email'          => 'vendor1@metwlogistic.test',
                 'phone'          => '201000000100',
                 'password'       => Hash::make('Vendor1234'),
                 'address'        => 'Cairo, Egypt',
@@ -27,7 +27,7 @@ class VendorSeeder extends Seeder
             ],
             [
                 'name'           => 'TechMart Egypt',
-                'email'          => 'vendor2@lasco.test',
+                'email'          => 'vendor2@metwlogistic.test',
                 'phone'          => '201000000200',
                 'password'       => Hash::make('Vendor1234'),
                 'address'        => 'Nasr City, Cairo',
@@ -40,7 +40,7 @@ class VendorSeeder extends Seeder
             ],
             [
                 'name'           => 'Fashion Hub',
-                'email'          => 'vendor3@lasco.test',
+                'email'          => 'vendor3@metwlogistic.test',
                 'phone'          => '201000000300',
                 'password'       => Hash::make('Vendor1234'),
                 'address'        => 'Mohandessin, Giza',

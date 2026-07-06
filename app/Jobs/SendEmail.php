@@ -20,7 +20,7 @@ class SendEmail implements ShouldQueue
         public string $to,
         public string $subject,
         public string $htmlBody,
-        public string $fromName = 'Lasco'
+        public string $fromName = 'MetwLogistic'
     ) {}
 
     public function handle(EmailService $emailService): void

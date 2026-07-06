@@ -21,7 +21,7 @@ class VendorBranchSeeder extends Seeder
         }
 
         $branches = [
-            'vendor1@lasco.test' => [
+            'vendor1@metwlogistic.test' => [
                 [
                     'name'     => 'Main Branch - Cairo',
                     'state_id' => fn() => State::where('name_en', 'Cairo')->value('id'),
@@ -41,7 +41,7 @@ class VendorBranchSeeder extends Seeder
                     'status'   => true,
                 ],
             ],
-            'vendor2@lasco.test' => [
+            'vendor2@metwlogistic.test' => [
                 [
                     'name'     => 'TechMart HQ - Nasr City',
                     'state_id' => fn() => State::where('name_en', 'Cairo')->value('id'),
@@ -52,7 +52,7 @@ class VendorBranchSeeder extends Seeder
                     'status'   => true,
                 ],
             ],
-            'vendor3@lasco.test' => [
+            'vendor3@metwlogistic.test' => [
                 [
                     'name'     => 'Fashion Hub - Mohandessin',
                     'state_id' => fn() => State::where('name_en', 'Giza')->value('id'),

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vendor Login</title>
+    <title>تسجيل دخول المورد - {{ config('app.name') }}</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -55,7 +55,7 @@
     <div class="card auth-card">
         <div class="auth-header">
             <i class="fas fa-store"></i>
-            <h4 class="mt-2">Vendor Login</h4>
+            <h4 class="mt-2">تسجيل دخول المورد</h4>
         </div>
             @if(session('success'))
                 <div class="alert alert-success text-center">
@@ -69,7 +69,7 @@
                 {{-- Email --}}
                 <div class="mb-3">
                     <label for="email" class="form-label">
-                        <i class="fas fa-envelope"></i> Email
+                        <i class="fas fa-envelope"></i> البريد الإلكتروني
                     </label>
                     <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
                         name="email" value="{{ old('email') }}" required autofocus>
@@ -81,7 +81,7 @@
                 {{-- Password --}}
                 <div class="mb-3">
                     <label for="password" class="form-label">
-                        <i class="fas fa-lock"></i> Password
+                        <i class="fas fa-lock"></i> كلمة المرور
                     </label>
                     <input type="password" class="form-control @error('password') is-invalid @enderror" id="password"
                         name="password" required>
@@ -93,18 +93,18 @@
                 {{-- Remember Me --}}
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                    <label class="form-check-label" for="remember">Remember Me</label>
+                    <label class="form-check-label" for="remember">تذكرني</label>
                 </div>
 
                 {{-- Submit --}}
                 <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-sign-in-alt"></i> Login
+                    <i class="fas fa-sign-in-alt"></i> دخول
                 </button>
             </form>
                 <div class="text-center mt-3">
-                        <p class="mb-1">Don't have an account?</p>
+                        <p class="mb-1">ليس لديك حساب؟</p>
                         <a href="{{ route($type . '.register') }}" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-user-plus me-2"></i> Create Account
+                        <i class="fas fa-user-plus me-2"></i> إنشاء حساب
                     </a>
                 </div>
         </div>

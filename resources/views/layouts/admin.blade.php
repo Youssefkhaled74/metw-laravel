@@ -2081,7 +2081,14 @@
                                         <a class="nav-link {{ request()->routeIs('admin.settings.banners.*') ? 'active' : '' }}"
                                            href="{{ route('admin.settings.banners.index') }}">
                                             <i class="fas fa-images"></i>
-                                            <span class="link-text">{{ __('admin-dashboard.banners') }}</span>
+                                            <span class="link-text">صور الموقع</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.settings.website-videos.*') ? 'active' : '' }}"
+                                           href="{{ route('admin.settings.website-videos.index') }}">
+                                            <i class="fas fa-video"></i>
+                                            <span class="link-text">فيديوهات الموقع</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
@@ -2200,7 +2207,7 @@
                                         <a class="nav-link {{ request()->routeIs('admin.settings.pages.*') ? 'active' : '' }}"
                                            href="{{ route('admin.settings.pages.index') }}">
                                             <i class="fas fa-file-alt"></i>
-                                            <span class="link-text">{{ __('admin-dashboard.settings_pages') }}</span>
+                                            <span class="link-text">محتوى الموقع</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
@@ -2415,13 +2422,20 @@
                                         <a class="nav-link {{ request()->routeIs('admin.settings.banners.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.banners.index') }}">
                                                     <i class="fas fa-images"></i>
-                                                    <span class="link-text">{{ __('admin-dashboard.banners') }}</span>
+                                                    <span class="link-text">صور الموقع</span>
                                             </a>
                                         </li>
                                     @endif
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.settings.website-videos.*') ? 'active' : '' }}"
+                                           href="{{ route('admin.settings.website-videos.index') }}">
+                                            <i class="fas fa-video"></i>
+                                            <span class="link-text">فيديوهات الموقع</span>
+                                        </a>
+                                    </li>
                                     @if($employee->can('admin.settings.contact-admins.index'))
-                                        <li class="nav-item">
-                                            <a class="nav-link {{ request()->routeIs('admin.settings.contact-admins.*') ? 'active' : '' }}"
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.settings.contact-admins.*') ? 'active' : '' }}"
                                                href="{{ route('admin.settings.contact-admins.index') }}">
                                                 <i class="fas fa-address-card"></i>
                                                 <span class="link-text">{{ __('admin-dashboard.contact_admin') }}</span>
@@ -2548,7 +2562,7 @@
                                             <a class="nav-link {{ request()->routeIs('admin.settings.pages.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.pages.index') }}">
                                                     <i class="fas fa-file-alt"></i>
-                                                    <span class="link-text">{{ __('admin-dashboard.settings_pages') }}</span>
+                                                    <span class="link-text">محتوى الموقع</span>
                                             </a>
                                         </li>
                                     @endif

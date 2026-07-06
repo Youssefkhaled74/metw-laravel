@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\Admin\ShipmentRequestController;
 use App\Http\Controllers\Dashboard\Admin\Settings\ConfigController;
 use App\Http\Controllers\Dashboard\Admin\Settings\GovernorateController;
 use App\Http\Controllers\Dashboard\Admin\Settings\RepresentativeWorkTypeController;
+use App\Http\Controllers\Dashboard\Admin\Settings\WebsiteVideoController;
 use App\Http\Controllers\Dashboard\Admin\Settings\TransportTypeController;
 use App\Http\Controllers\Dashboard\Admin\ShipmentController;
 use App\Http\Controllers\Dashboard\Admin\RoleController;
@@ -34,8 +35,8 @@ use App\Http\Controllers\WebsiteController;
 Route::get('/', [WebsiteController::class, 'home'])->name('website.home');
 Route::get('/about', [WebsiteController::class, 'about'])->name('website.about');
 Route::get('/policies', [WebsiteController::class, 'policies'])->name('website.policies');
-Route::get('/terms', [WebsiteController::class, 'policies'])->name('website.terms');
-Route::get('/privacy', [WebsiteController::class, 'policies'])->name('website.privacy');
+Route::get('/terms', [WebsiteController::class, 'terms'])->name('website.terms');
+Route::get('/privacy', [WebsiteController::class, 'privacy'])->name('website.privacy');
 
 // Language switcher
 Route::get('/lang/{locale}', function (Request $request, string $locale) {
@@ -216,6 +217,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('/banners/{banner}', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'update'])->name('banners.update');
             Route::delete('/banners/{banner}', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'destroy'])->name('banners.destroy');
             Route::patch('/banners/{banner}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'toggleStatus'])->name('banners.toggle-status');
+
+            Route::get('/website-videos', [WebsiteVideoController::class, 'index'])->name('website-videos.index');
+            Route::get('/website-videos/create', [WebsiteVideoController::class, 'create'])->name('website-videos.create');
+            Route::post('/website-videos', [WebsiteVideoController::class, 'store'])->name('website-videos.store');
+            Route::get('/website-videos/{websiteVideo}/edit', [WebsiteVideoController::class, 'edit'])->name('website-videos.edit');
+            Route::patch('/website-videos/{websiteVideo}', [WebsiteVideoController::class, 'update'])->name('website-videos.update');
+            Route::delete('/website-videos/{websiteVideo}', [WebsiteVideoController::class, 'destroy'])->name('website-videos.destroy');
+            Route::patch('/website-videos/{websiteVideo}/toggle-status', [WebsiteVideoController::class, 'toggleStatus'])->name('website-videos.toggle-status');
 
             // Contact Admin Management
             Route::get('/contact-admins', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'index'])->name('contact-admins.index');

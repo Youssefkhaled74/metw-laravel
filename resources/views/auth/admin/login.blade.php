@@ -525,14 +525,14 @@
                         <div class="admin-auth-logo-wrap">
                             <img
                                 src="{{ asset('images/flags/logo.png') }}"
-                                alt="{{ config('app.name', 'MetwGo') }} Logo"
+                                alt="{{ config('app.name', 'MetwLogistic') }} Logo"
                                 class="admin-auth-logo"
                             >
                         </div>
 
                         <div class="admin-auth-brand-text">
                             <span>Admin Panel</span>
-                            <strong>{{ config('app.name', 'MetwGo') }}</strong>
+                            <strong>{{ config('app.name', 'MetwLogistic') }}</strong>
                         </div>
                     </div>
 

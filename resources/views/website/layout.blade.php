@@ -203,6 +203,7 @@
 
         <div class="nav-actions">
             <a class="btn btn-ghost" href="{{ route('vendor.login') }}">دخول البائع</a>
+            <a class="btn btn-ghost" href="{{ route('shipment.login') }}">دخول مستودع الشحن</a>
             <a class="btn btn-primary" href="{{ route('admin.login') }}">دخول الأدمن</a>
         </div>
     </div>

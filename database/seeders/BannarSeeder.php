@@ -12,17 +12,17 @@ class BannarSeeder extends Seeder
         $banners = [
             [
                 'image'     => 'banners/home-hero-1.jpg',
-                'link'      => 'https://lasco.test',
+                'link'      => 'https://metwlogistic.test',
                 'is_active' => true,
             ],
             [
                 'image'     => 'banners/home-hero-2.jpg',
-                'link'      => 'https://lasco.test/offers',
+                'link'      => 'https://metwlogistic.test/offers',
                 'is_active' => true,
             ],
             [
                 'image'     => 'banners/category-fashion.jpg',
-                'link'      => 'https://lasco.test/categories/fashion',
+                'link'      => 'https://metwlogistic.test/categories/fashion',
                 'is_active' => true,
             ],
         ];
@@ -35,5 +35,4 @@ class BannarSeeder extends Seeder
         }
     }
 }
-
 

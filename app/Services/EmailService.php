@@ -14,7 +14,7 @@ class EmailService
                 'to' => $to,
                 'subject' => $subject,
                 'body' => $htmlBody,
-                'from_name' => 'Lasco',
+                'from_name' => config('app.name', 'MetwLogistic'),
             ];
 
             $response = Http::retry(3, 200)->timeout(10)

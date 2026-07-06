@@ -202,7 +202,7 @@
         <div class="dashboard-hero mb-4">
             <div class="dashboard-hero-content">
                 <div>
-                    <span class="dashboard-eyebrow">{{ $text('Metw Admin Control Center', 'مركز تحكم MetwGo') }}</span>
+                    <span class="dashboard-eyebrow">{{ $text('Metw Admin Control Center', 'مركز تحكم ميتولوجيستيك') }}</span>
                     <h1 class="dashboard-title">{{ $label('admin-dashboard.dashboard_overview', $text('Dashboard Overview', 'نظرة عامة على لوحة التحكم')) }}</h1>
                     <p class="dashboard-subtitle mb-0">
                         {{ $text('Understand what needs action, what is moving, and what belongs to the new Phase 2 business flow.', 'اعرف ما يحتاج إلى إجراء، وما يتحرك، وما يخص مسار الأعمال الجديد في المرحلة الثانية.') }}

@@ -10,9 +10,9 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            ['key' => 'app_name', 'value' => 'Lasco Market'],
-            ['key' => 'app_name_ar', 'value' => 'لاسكو ماركت'],
-            ['key' => 'app_email', 'value' => 'info@lasco.test'],
+            ['key' => 'app_name', 'value' => 'MetwLogistic'],
+            ['key' => 'app_name_ar', 'value' => 'ميتولوجيستيك'],
+            ['key' => 'app_email', 'value' => 'info@metwlogistic.test'],
             ['key' => 'app_phone', 'value' => '+201000000000'],
             ['key' => 'app_address', 'value' => 'Cairo, Egypt'],
             ['key' => 'currency', 'value' => 'EGP'],

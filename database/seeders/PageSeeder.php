@@ -12,17 +12,17 @@ class PageSeeder extends Seeder
     {
         $pages = [
             [
-                'title'     => 'About Lasco',
-                'slug'      => Str::slug('About Lasco'),
+                'title'     => 'About MetwLogistic',
+                'slug'      => Str::slug('About MetwLogistic'),
                 'type'      => 'static',
-                'content'   => 'Lasco is a shipment and ecommerce platform providing fast and reliable delivery.',
+                'content'   => 'MetwLogistic is a shipment and ecommerce platform providing fast and reliable delivery.',
                 'is_active' => true,
             ],
             [
                 'title'     => 'Terms and Conditions',
                 'slug'      => Str::slug('Terms and Conditions'),
                 'type'      => 'static',
-                'content'   => 'These are the general terms and conditions for using Lasco services.',
+                'content'   => 'These are the general terms and conditions for using MetwLogistic services.',
                 'is_active' => true,
             ],
             [
@@ -42,5 +42,4 @@ class PageSeeder extends Seeder
         }
     }
 }
-
 

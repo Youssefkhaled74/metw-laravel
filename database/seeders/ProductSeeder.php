@@ -22,7 +22,7 @@ class ProductSeeder extends Seeder
 
         // Ensure we have at least one vendor to own the products
         $vendor = Vendor::firstOrCreate(
-            ['email' => 'vendor1@lasco.test'],
+            ['email' => 'vendor1@metwlogistic.test'],
             [
                 'name'           => 'Demo Vendor 1',
                 'phone'          => '201000000100',
@@ -169,5 +169,4 @@ class ProductSeeder extends Seeder
         }
     }
 }
-
 

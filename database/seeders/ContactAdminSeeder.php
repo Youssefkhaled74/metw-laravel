@@ -11,10 +11,10 @@ class ContactAdminSeeder extends Seeder
     {
         $contacts = [
             ['name' => 'Phone', 'value' => '+201000000000', 'is_active' => true],
-            ['name' => 'Email', 'value' => 'info@lasco.test', 'is_active' => true],
+            ['name' => 'Email', 'value' => 'info@metwlogistic.test', 'is_active' => true],
             ['name' => 'WhatsApp', 'value' => '+201000000000', 'is_active' => true],
-            ['name' => 'Facebook', 'value' => 'https://facebook.com/lasco', 'is_active' => true],
-            ['name' => 'Instagram', 'value' => 'https://instagram.com/lasco', 'is_active' => true],
+            ['name' => 'Facebook', 'value' => 'https://facebook.com/metwlogistic', 'is_active' => true],
+            ['name' => 'Instagram', 'value' => 'https://instagram.com/metwlogistic', 'is_active' => true],
             ['name' => 'Address', 'value' => 'Cairo, Egypt', 'is_active' => true],
         ];
 
