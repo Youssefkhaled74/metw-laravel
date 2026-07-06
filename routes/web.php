@@ -16,6 +16,7 @@ use App\Http\Controllers\Dashboard\Admin\PermissionController;
 use App\Http\Controllers\Dashboard\ShipmentCompany\ShipmentCompanyNotificationController;
 use App\Http\Controllers\Dashboard\Vendor\VendorBranchController;
 use App\Http\Controllers\Dashboard\Vendor\VendorNotificationController;
+use App\Http\Controllers\Auth\PolicyAcceptanceController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\WebsiteController;
@@ -496,8 +497,13 @@ Route::prefix('shipment')->name('shipment.')->group(function () {
     Route::post('/register', [\App\Http\Controllers\Auth\ShipmentAuthController::class, 'register']);
     Route::post('/logout', [\App\Http\Controllers\Auth\ShipmentAuthController::class, 'logout'])->name('logout');
 
+    Route::middleware('shipment')->group(function () {
+        Route::get('/policy-acceptance', [PolicyAcceptanceController::class, 'showShipment'])->name('policy-acceptance.show');
+        Route::post('/policy-acceptance', [PolicyAcceptanceController::class, 'acceptShipment'])->name('policy-acceptance.accept');
+    });
+
     // Shipment Company Dashboard Routes
-    Route::middleware('auth:shipment')->group(function () {
+    Route::middleware(['shipment', 'ensure.warehouse.policy.accepted'])->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Dashboard\ShipmentCompanyDashboardController::class, 'dashboard'])->name('dashboard');
 
         // Locations Management
@@ -606,9 +612,14 @@ Route::prefix('vendor')->name('vendor.')->group(function () {
     Route::get('/register', [\App\Http\Controllers\Auth\VendorAuthController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [\App\Http\Controllers\Auth\VendorAuthController::class, 'register']);
 
+    Route::middleware('vendor')->group(function () {
+        Route::get('/policy-acceptance', [PolicyAcceptanceController::class, 'showVendor'])->name('policy-acceptance.show');
+        Route::post('/policy-acceptance', [PolicyAcceptanceController::class, 'acceptVendor'])->name('policy-acceptance.accept');
+    });
+
 
     // Vendor Dashboard Routes
-    Route::middleware('vendor')->group(function () {
+    Route::middleware(['vendor', 'ensure.vendor.policy.accepted'])->group(function () {
         // Dashboard
         Route::get('/dashboard', [\App\Http\Controllers\Dashboard\Vendor\DashboardController::class, 'index'])->name('dashboard');
         Route::get('/reports', [\App\Http\Controllers\Dashboard\Vendor\DashboardController::class, 'reports'])->name('reports');

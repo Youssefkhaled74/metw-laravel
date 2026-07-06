@@ -142,6 +142,11 @@ class ShipmentCompany extends Authenticatable
         return $this->morphMany(MediaFile::class, 'mediable');
     }
 
+    public function policyAcceptance()
+    {
+        return $this->morphOne(PolicyAcceptance::class, 'accountable');
+    }
+
     protected static function booted()
     {
         static::assignPrefixedNumberOnCreate('company_number', 'SHC');

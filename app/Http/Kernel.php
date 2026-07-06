@@ -70,5 +70,7 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'shipment' => \App\Http\Middleware\ShipmentCompanyMiddleware::class,
         'vendor' => \App\Http\Middleware\VendorMiddleware::class,
+        'ensure.vendor.policy.accepted' => \App\Http\Middleware\EnsureVendorPolicyAccepted::class,
+        'ensure.warehouse.policy.accepted' => \App\Http\Middleware\EnsureWarehousePolicyAccepted::class,
     ];
 }
