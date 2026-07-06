@@ -2,9 +2,19 @@
 return [
     'return_request_approved_title' => 'تمت الموافقة على طلب الإرجاع',
     'return_request_rejected_title' => 'تم رفض طلب الإرجاع',
+    'return_request_cancelled_title' => 'تم إلغاء طلب الإرجاع',
+    'cancellation_request_approved_title' => 'تمت الموافقة على طلب الإلغاء',
+    'cancellation_request_rejected_title' => 'تم رفض طلب الإلغاء',
+    'cancellation_request_cancelled_title' => 'تم إلغاء طلب الإلغاء',
+    'complaint_submitted_title' => 'تم استلام الشكوى',
 
     'return_request_approved_body' => 'تمت الموافقة على طلب الإرجاع الخاص بالمنتج :product بنجاح.',
     'return_request_rejected_body' => 'تم رفض طلب الإرجاع الخاص بالمنتج :product.',
+    'return_request_cancelled_body' => 'تم إلغاء طلب الإرجاع الخاص بالمنتج :product.',
+    'cancellation_request_approved_body' => 'تمت الموافقة على طلب الإلغاء الخاص بالمنتج :product بنجاح.',
+    'cancellation_request_rejected_body' => 'تم رفض طلب الإلغاء الخاص بالمنتج :product.',
+    'cancellation_request_cancelled_body' => 'تم إلغاء طلب الإلغاء الخاص بالمنتج :product.',
+    'complaint_submitted_body' => 'تم تسجيل شكواك رقم :complaint_number وسيتم مراجعتها قريبًا.',
 
     'order_accepted_title' => 'تم قبول الطلب',
     'order_accepted_body'  => 'تم قبول طلبك رقم :order_number.',

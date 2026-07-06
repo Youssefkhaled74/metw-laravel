@@ -20,6 +20,7 @@ class ReturnRequestResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'request_type' => $this->request_type?->value ?? $this->request_type,
             'order_number' => $this->order->order_number ?? null,
             'total_amount' => $this->refund_amount ?? $subtotal,
             'phone' => $this->pickup_phone ?? $this->order->phone,

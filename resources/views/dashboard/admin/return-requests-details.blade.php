@@ -80,6 +80,20 @@
                             <td><strong>{{ __('admin-dashboard.request_reason') }}:</strong></td>
                             <td>{{ $returnRequest->reason ?? __('admin-dashboard.not_available') }}</td>
                         </tr>
+                        <tr>
+                            <td><strong>نوع الطلب:</strong></td>
+                            <td>
+                                @php
+                                    $requestTypeValue = $returnRequest->request_type?->value ?? $returnRequest->request_type;
+                                    $requestTypeLabel = match ($requestTypeValue) {
+                                        'return' => 'طلب إرجاع',
+                                        'cancellation' => 'طلب إلغاء',
+                                        default => $requestTypeValue ?? __('admin-dashboard.not_available'),
+                                    };
+                                @endphp
+                                {{ $requestTypeLabel }}
+                            </td>
+                        </tr>
                     </table>
                 </div>
             </div>
@@ -192,6 +206,16 @@
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="refund_amount" class="form-label">مبلغ الاسترداد النهائي</label>
+                            <input type="number" step="0.01" min="0" name="refund_amount" id="refund_amount" class="form-control" value="{{ old('refund_amount', $returnRequest->refund_amount) }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">ملاحظات الأدمن</label>
+                            <textarea name="notes" id="notes" rows="4" class="form-control">{{ old('notes', $returnRequest->notes) }}</textarea>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">

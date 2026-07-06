@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\V1\Ecommerce\CityController;
 use App\Http\Controllers\Api\V1\Ecommerce\Order\EcommerceCartController;
 use App\Http\Controllers\Api\V1\Ecommerce\User\UserAddressController;
 use App\Http\Controllers\Api\V1\Ecommerce\Order\EcommerceOrderController;
+use App\Http\Controllers\Api\V1\Ecommerce\Order\ComplaintController;
 use App\Http\Controllers\Api\V1\Ecommerce\Product\FavouriteController as ProductFavouriteController;
 use App\Http\Controllers\Api\V1\Ecommerce\Product\ProductReviewController;
 use App\Http\Controllers\Api\V1\PageController;
@@ -341,6 +342,19 @@ Route::prefix('v1/ecommerce')->middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [ReturnRequestController::class, 'show']);
         Route::put('/{id}', [ReturnRequestController::class, 'update']);
         Route::post('/{id}/cancel', [ReturnRequestController::class, 'cancel']);
+    });
+    Route::prefix('cancellation-requests')->group(function () {
+        Route::get('/', [ReturnRequestController::class, 'index']);
+        Route::post('/', [ReturnRequestController::class, 'storeCancellation']);
+        Route::get('/order/{orderId}', [ReturnRequestController::class, 'getOrderForCancellation']);
+        Route::get('/{id}', [ReturnRequestController::class, 'show']);
+        Route::put('/{id}', [ReturnRequestController::class, 'update']);
+        Route::post('/{id}/cancel', [ReturnRequestController::class, 'cancelCancellation']);
+    });
+    Route::prefix('complaints')->group(function () {
+        Route::get('/', [ComplaintController::class, 'index']);
+        Route::post('/', [ComplaintController::class, 'store']);
+        Route::get('/{id}', [ComplaintController::class, 'show']);
     });
     Route::post('/return-cash-back', [ReturnRequestController::class, 'cashBack']);
 

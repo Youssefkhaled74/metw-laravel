@@ -175,6 +175,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/return-requests/{id}/status', [\App\Http\Controllers\Dashboard\Admin\ReturnRequestController::class, 'updateOrderStatus'])->name('return-requests.update-status');
         Route::patch('/return-requests/{id}/reason', [\App\Http\Controllers\Dashboard\Admin\ReturnRequestController::class, 'updateOrderReason'])->name('return-requests.update-reason');
 
+        // Complaints
+        Route::prefix('complaints')->name('complaints.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Dashboard\Admin\ComplaintController::class, 'index'])->name('index');
+            Route::get('/{complaint}', [\App\Http\Controllers\Dashboard\Admin\ComplaintController::class, 'show'])->name('show');
+            Route::patch('/{complaint}/status', [\App\Http\Controllers\Dashboard\Admin\ComplaintController::class, 'updateStatus'])->name('update-status');
+        });
+
         // Employee Management
         Route::get('/employees', [\App\Http\Controllers\Dashboard\Admin\EmployeeController::class, 'index'])->name('employees.index');
         Route::get('/employees/create', [\App\Http\Controllers\Dashboard\Admin\EmployeeController::class, 'create'])->name('employees.create');

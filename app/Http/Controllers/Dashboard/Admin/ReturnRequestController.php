@@ -7,6 +7,7 @@ use App\Enum\ReturnStatus;
 use App\Http\Controllers\Controller;
 use App\Models\ReturnRequest;
 use App\Models\ShipmentCompany;
+use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +35,7 @@ class ReturnRequestController extends Controller
                 'search' => ['nullable', 'string', 'max:100'],
                 'status' => ['nullable', 'string'],
                 'refund_type' => ['nullable', 'string'],
+                'request_type' => ['nullable', 'string', 'in:return,cancellation'],
                 'sort_by' => ['nullable', 'in:return_number,order_number,created_at'],
                 'sort_dir' => ['nullable', 'in:asc,desc'],
             ]);
@@ -67,6 +69,10 @@ class ReturnRequestController extends Controller
 
             if (!empty($validated['refund_type']) && $validated['refund_type'] !== 'all') {
                 $returnRequestsQuery->where('refund_type', $validated['refund_type']);
+            }
+
+            if (!empty($validated['request_type']) && $validated['request_type'] !== 'all') {
+                $returnRequestsQuery->where('request_type', $validated['request_type']);
             }
 
             if ($sortBy === 'order_number') {
@@ -120,13 +126,34 @@ class ReturnRequestController extends Controller
         }
         $request->validate([
             'status' => ['required', new Enum(ReturnStatus::class)],
+            'refund_amount' => ['nullable', 'numeric', 'min:0'],
+            'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $returnRequest = ReturnRequest::findOrFail($id);
 
+        $nextStatus = $request->input('status');
+        $shouldFinalize = in_array($nextStatus, [ReturnStatus::REFUNDED->value, ReturnStatus::COMPLETED->value], true);
+        $shouldCreditWallet = $shouldFinalize && $returnRequest->refund_type === 'wallet' && !$returnRequest->refunded_at;
+        $finalRefundAmount = $request->filled('refund_amount')
+            ? (float) $request->input('refund_amount')
+            : (float) ($returnRequest->refund_amount ?? 0);
+
         $returnRequest->update([
-            'status' => $request->input('status'),
+            'status' => $nextStatus,
+            'refund_amount' => $finalRefundAmount > 0 ? $finalRefundAmount : $returnRequest->refund_amount,
+            'notes' => $request->input('notes', $returnRequest->notes),
+            'refunded_at' => $shouldFinalize ? now() : $returnRequest->refunded_at,
         ]);
+
+        if ($shouldCreditWallet) {
+            $user = $returnRequest->order?->user;
+            if ($user) {
+                /** @var Wallet|null $wallet */
+                $wallet = $user->wallet ?: $user->wallet()->create(['balance' => 0]);
+                $wallet->increment('balance', $finalRefundAmount);
+            }
+        }
 
         return redirect()->back()->with('success', 'Return request status updated successfully.');
     }

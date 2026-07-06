@@ -8,11 +8,13 @@ use App\Models\EcommerceOrderItem;
 use App\Enum\ReturnStatus;
 use App\Enum\ReturnReason;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCancellationRequest;
 use App\Http\Requests\StoreReturnRequestRequest;
 use App\Http\Resources\ReturnRequestResource;
 use App\Models\ReturnCashBack;
 use App\Models\ShipmentCommission;
 use App\Models\VendorCommission;
+use App\Enum\RequestType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -59,7 +61,12 @@ class ReturnRequestController extends Controller
 
     public function store(StoreReturnRequestRequest $request)
     {
-        $validatedData = $request->validated();
+        return $this->persistRequest($request->validated());
+    }
+
+    private function persistRequest(array $validatedData)
+    {
+        $requestType = $validatedData['request_type'] ?? RequestType::RETURN->value;
 
         $order = EcommerceOrder::where('id', $validatedData['order_id'])
             ->where('user_id', Auth::id())
@@ -70,8 +77,12 @@ class ReturnRequestController extends Controller
             return responseJson(false, __('messages.order_not_found'), null, 404);
         }
 
-        if ($order->status !== 'delivered') {
+        if ($requestType === RequestType::RETURN->value && $order->status !== 'delivered') {
             return responseJson(false, __('messages.order_must_be_delivered_before_return'), null, 400);
+        }
+
+        if ($requestType === RequestType::CANCELLATION->value && in_array($order->status, ['delivered', 'returned'], true)) {
+            return responseJson(false, __('messages.order_cannot_be_cancelled_after_delivery'), null, 400);
         }
 
         // التحقق من كل عنصر قبل الإرجاع
@@ -104,9 +115,10 @@ class ReturnRequestController extends Controller
                 'user_id' => Auth::id(),
                 'ecommerce_order_id' => $order->id,
                 'return_number' => (new ReturnRequest)->generateReturnNumber(),
+                'request_type' => $requestType,
                 'status' => ReturnStatus::REQUESTED,
                 'reason' => $validatedData['reason'] ?? '',
-                'cancel_reason_ids' => $validatedData['cancel_reason_ids'],
+                'cancel_reason_ids' => $validatedData['cancel_reason_ids'] ?? [],
                 'other_reason' => $validatedData['other_reason'] ?? null,
                 'notes' => $validatedData['notes'] ?? null,
                 'pickup_address_id' => $order->user_address_id,
@@ -218,6 +230,35 @@ class ReturnRequestController extends Controller
         }
     }
 
+    public function getOrderForCancellation($orderId)
+    {
+        $order = EcommerceOrder::where('id', $orderId)
+            ->where('user_id', Auth::id())
+            ->with(['items.product', 'items.variant', 'userAddress', 'returnRequests'])
+            ->first();
+
+        if (!$order) {
+            return responseJson(false, __('messages.order_not_found'), null, 404);
+        }
+
+        if (in_array($order->status, ['delivered', 'returned'], true)) {
+            return responseJson(false, __('messages.order_cannot_be_cancelled_after_delivery'), null, 400);
+        }
+
+        $cancellableItems = $order->items;
+
+        return responseJson(true, __('messages.order_details_retrieved_successfully'), [
+            'order' => $order,
+            'cancellable_items' => $cancellableItems,
+            'return_reasons' => ReturnReason::cases()
+        ]);
+    }
+
+    public function storeCancellation(StoreCancellationRequest $request)
+    {
+        return $this->persistRequest($request->validated());
+    }
+
     public function show($id)
     {
         $returnRequest = ReturnRequest::where('id', $id)
@@ -262,10 +303,14 @@ class ReturnRequestController extends Controller
             );
 
             // ✅ map status → notification key
+            $prefix = $returnRequest->request_type?->value === RequestType::CANCELLATION->value
+                ? 'cancellation_request'
+                : 'return_request';
+
             $statusToKey = [
-                'approved'  => 'return_approved',
-                'rejected'  => 'return_rejected',
-                'cancelled' => 'return_cancelled',
+                'approved'  => "{$prefix}_approved",
+                'rejected'  => "{$prefix}_rejected",
+                'cancelled' => "{$prefix}_cancelled",
                 'refunded'  => 'return_refunded',
             ];
 
@@ -322,7 +367,7 @@ class ReturnRequestController extends Controller
             return responseJson(false, __('messages.return_request_cannot_be_cancelled'), null, 400);
         }
 
-        $returnRequest->update(['status' => ReturnStatus::REJECTED]);
+        $returnRequest->update(['status' => ReturnStatus::CANCELLED]);
 
         return responseJson(true, __('messages.return_request_cancelled_successfully'));
     }
@@ -362,6 +407,11 @@ class ReturnRequestController extends Controller
         ]);
 
         return responseJson(true, 'Cashback submitted successfully', $cashback);
+    }
+
+    public function cancelCancellation($id)
+    {
+        return $this->cancel($id);
     }
 
 }

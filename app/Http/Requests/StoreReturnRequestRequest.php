@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enum\ReturnReason;
+use App\Enum\RequestType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,10 +26,12 @@ class StoreReturnRequestRequest extends FormRequest
     {
         return [
             'order_id' => 'required|exists:ecommerce_orders,id',
+            'request_type' => ['sometimes', 'string', Rule::in(array_column(RequestType::cases(), 'value'))],
             'refund_type' => 'nullable|in:wallet,cash',
-            'reason' => 'required|string',
+            'reason' => ['required', 'string', Rule::in(array_column(ReturnReason::cases(), 'value'))],
+            'other_reason' => ['nullable', 'string', 'max:500', Rule::requiredIf(fn () => request('reason') === ReturnReason::OTHER->value)],
 
-            'cancel_reason_ids' => 'required|array|min:1',
+            'cancel_reason_ids' => 'nullable|array',
             'cancel_reason_ids.*' => [
                 'integer',
                 Rule::exists('cancel_reasons', 'id')->where('is_active', true),

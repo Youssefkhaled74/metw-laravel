@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Dashboard\Admin;
 
 use App\Enum\BusinessProfileStatus;
+use App\Enum\ComplaintStatus;
+use App\Enum\ComplaintType;
 use App\Enum\PaymentStatus;
 use App\Enum\OrderStatus;
 use App\Enum\ReturnStatus;
@@ -16,6 +18,7 @@ use App\Models\Product;
 use App\Models\Representative;
 use App\Models\ShipmentCompany;
 use App\Models\Employee;
+use App\Models\Complaint;
 use App\Models\ShipmentRequest;
 use App\Models\User;
 use App\Models\Vendor;
@@ -59,19 +62,19 @@ class AdminDashboardController extends Controller
             $count(EcommerceOrder::class, fn ($query) => $query->where('payment_status', PaymentStatus::PENDING->value)),
             $count(EcommerceOrder::class, fn ($query) => $query->where('status', OrderStatus::CANCELLED->value)),
             $count(ReturnRequest::class, fn ($query) => $query->where('status', ReturnStatus::APPROVED->value)),
-            0,
-            0,
-            0,
+            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::PURCHASE_CANCELLATION->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
+            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::SHIPPING_CANCELLATION->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
+            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::RETURN->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
             $count(ReturnRequest::class, fn ($query) => $query->where('refund_type', 'wallet')->where('status', ReturnStatus::REFUNDED->value)),
             $count(EcommerceOrder::class, fn ($query) => $query->where('status', OrderStatus::PENDING->value)),
-            0,
+            $count(ReturnRequest::class, fn ($query) => $query->cancellations()->where('status', ReturnStatus::REQUESTED->value)),
             $count(ReturnRequest::class, fn ($query) => $query->where('status', ReturnStatus::REQUESTED->value)),
             $count(ShipmentRequest::class, fn ($query) => $query->where('status', ShipmentRequestStatus::SUBMITTED->value)),
             $count(Order::class, fn ($query) => $query->where('status', OrderStatus::PENDING->value)),
-            0,
-            0,
-            0,
-            0,
+            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::USER->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
+            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::VENDOR->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
+            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::WAREHOUSE->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
+            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::REPRESENTATIVE->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
         ];
 
         $sections = [
@@ -163,20 +166,20 @@ class AdminDashboardController extends Controller
                     [
                         'label' => 'شكاوى إلغاء المشتريات',
                         'count' => $summaryItems[12],
-                        'note' => 'TODO: نموذج الشكاوى غير موجود في هذا المستودع.',
-                        'url' => null,
+                        'note' => 'الشكاوى الخاصة بإلغاء طلبات الشراء بحاجة لمتابعة.',
+                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::PURCHASE_CANCELLATION->value, 'status' => ComplaintStatus::PENDING->value]),
                     ],
                     [
                         'label' => 'شكاوى إلغاء الشحن',
                         'count' => $summaryItems[13],
-                        'note' => 'TODO: نموذج الشكاوى غير موجود في هذا المستودع.',
-                        'url' => null,
+                        'note' => 'الشكاوى الخاصة بإلغاء طلبات الشحن بحاجة لمتابعة.',
+                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::SHIPPING_CANCELLATION->value, 'status' => ComplaintStatus::PENDING->value]),
                     ],
                     [
                         'label' => 'شكاوى المرتجعات',
                         'count' => $summaryItems[14],
-                        'note' => 'TODO: نموذج الشكاوى غير موجود في هذا المستودع.',
-                        'url' => null,
+                        'note' => 'شكاوى المرتجعات المفتوحة أو قيد المراجعة.',
+                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::RETURN->value, 'status' => ComplaintStatus::PENDING->value]),
                     ],
                     [
                         'label' => 'طلبات استرداد المحفظة',
@@ -198,8 +201,8 @@ class AdminDashboardController extends Controller
                     [
                         'label' => 'طلبات الإلغاء المعلقة',
                         'count' => $summaryItems[17],
-                        'note' => 'TODO: لا يوجد مسار مستقل لهذه الطلبات في المستودع الحالي.',
-                        'url' => null,
+                        'note' => 'طلبات الإلغاء الجديدة بانتظار أول إجراء.',
+                        'url' => $route('admin.return-requests', ['request_type' => 'cancellation', 'status' => 'requested']),
                     ],
                     [
                         'label' => 'طلبات الإرجاع المعلقة',
@@ -227,26 +230,26 @@ class AdminDashboardController extends Controller
                     [
                         'label' => 'شكاوى المستخدمين',
                         'count' => $summaryItems[21],
-                        'note' => 'TODO: لا يوجد نموذج شكاوى مستخدمين في المستودع الحالي.',
-                        'url' => null,
+                        'note' => 'الشكاوى العامة للمستخدمين قيد المتابعة.',
+                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::USER->value, 'status' => ComplaintStatus::PENDING->value]),
                     ],
                     [
                         'label' => 'شكاوى الموردين',
                         'count' => $summaryItems[22],
-                        'note' => 'TODO: لا يوجد نموذج شكاوى موردين في المستودع الحالي.',
-                        'url' => null,
+                        'note' => 'الشكاوى العامة للموردين قيد المتابعة.',
+                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::VENDOR->value, 'status' => ComplaintStatus::PENDING->value]),
                     ],
                     [
                         'label' => 'شكاوى المستودعات',
                         'count' => $summaryItems[23],
-                        'note' => 'TODO: لا يوجد نموذج شكاوى مستودعات في المستودع الحالي.',
-                        'url' => null,
+                        'note' => 'الشكاوى العامة للمستودعات قيد المتابعة.',
+                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::WAREHOUSE->value, 'status' => ComplaintStatus::PENDING->value]),
                     ],
                     [
                         'label' => 'شكاوى المناديب',
                         'count' => $summaryItems[24],
-                        'note' => 'TODO: لا يوجد نموذج شكاوى مناديب في المستودع الحالي.',
-                        'url' => null,
+                        'note' => 'الشكاوى العامة للمناديب قيد المتابعة.',
+                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::REPRESENTATIVE->value, 'status' => ComplaintStatus::PENDING->value]),
                     ],
                 ],
             ],

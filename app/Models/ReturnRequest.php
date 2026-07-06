@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enum\ReturnStatus;
 use App\Enum\ReturnReason;
+use App\Enum\RequestType;
 use App\Models\Concerns\GeneratesPrefixedNumber;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ class ReturnRequest extends Model
         'user_id',
         'ecommerce_order_id',
         'return_number',
+        'request_type',
         'status',
         'reason',
         'other_reason',
@@ -42,6 +44,7 @@ class ReturnRequest extends Model
 
     protected $casts = [
         'status' => ReturnStatus::class,
+        'request_type' => RequestType::class,
         // 'reason' => ReturnReason::class,
         'pickup_date' => 'date',
         'refunded_at' => 'datetime',
@@ -65,6 +68,16 @@ class ReturnRequest extends Model
     public function items()
     {
         return $this->hasMany(ReturnRequestItem::class);
+    }
+
+    public function scopeReturns($query)
+    {
+        return $query->where('request_type', RequestType::RETURN->value);
+    }
+
+    public function scopeCancellations($query)
+    {
+        return $query->where('request_type', RequestType::CANCELLATION->value);
     }
 
     // public function generateReturnNumber(): string
@@ -110,6 +123,11 @@ class ReturnRequest extends Model
     public function cashBack()
     {
         return $this->hasOne(ReturnCashBack::class, 'return_id');
+    }
+
+    public function complaints()
+    {
+        return $this->morphMany(Complaint::class, 'complaintable');
     }
 
 }
