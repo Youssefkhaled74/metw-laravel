@@ -23,7 +23,10 @@ class RepresentativeWorkTypeFactory extends Factory
             'representative_id' => Representative::factory(),
             'work_type' => ! empty($codes)
                 ? fake()->randomElement($codes)
-                : fake()->randomElement(array_column(RepresentativeWorkTypeEnum::cases(), 'value')),
+                : fake()->randomElement(array_map(
+                    fn (RepresentativeWorkTypeEnum $case) => $case->value,
+                    RepresentativeWorkTypeEnum::cases()
+                )),
         ];
     }
 }

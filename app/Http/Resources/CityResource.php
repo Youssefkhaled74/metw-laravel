@@ -19,6 +19,7 @@ class CityResource extends JsonResource
             'id'=>$this->id,
             'name'=>$locale === 'ar' ? $this->name_ar : $this->name_en,
             'state_id'=>$this->state_id,
+            'governorate_id' => $this->governorate_id,
             // 'zones'=>ZoneResource::collection($this->whenLoaded('zones'))
         ];
     }

@@ -16,7 +16,7 @@ class RepresentativeWorkTypeOptionsSeeder extends Seeder
                 'name_ar' => 'توصيل محلي',
                 'description' => 'Delivery inside the same governorate or city network.',
                 'sort_order' => 1,
-                'is_exclusive' => true,
+                'is_exclusive' => false,
             ],
             [
                 'code' => 'inter_governorate_shipping',
@@ -27,12 +27,12 @@ class RepresentativeWorkTypeOptionsSeeder extends Seeder
                 'is_exclusive' => false,
             ],
             [
-                'code' => 'inter_governorate_bus_driver',
-                'name_en' => 'Inter Governorate Bus Driver',
+                'code' => 'bus_driver',
+                'name_en' => 'Bus Driver',
                 'name_ar' => 'سائق أتوبيس بين المحافظات',
                 'description' => 'Transport handled by a bus driver between governorates.',
                 'sort_order' => 3,
-                'is_exclusive' => false,
+                'is_exclusive' => true,
             ],
         ];
 

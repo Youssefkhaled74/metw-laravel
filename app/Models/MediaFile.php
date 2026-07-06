@@ -14,6 +14,7 @@ class MediaFile extends Model
         'mediable_type',
         'mediable_id',
         'collection_name',
+        'document_type',
         'disk',
         'directory',
         'filename',

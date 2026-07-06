@@ -16,6 +16,7 @@ class RepresentativeMediaFileResource extends JsonResource
         return [
             'id' => $this->id,
             'collection_name' => $this->collection_name,
+            'document_type' => $this->document_type,
             'disk' => $this->disk,
             'directory' => $this->directory,
             'filename' => $this->filename,

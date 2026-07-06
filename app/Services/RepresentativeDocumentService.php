@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\MediaFile;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -16,13 +16,14 @@ class RepresentativeDocumentService
     ) {
     }
 
-    public function upload(User $user, array $data, Request $request)
+    public function upload(User $user, array $data, Request $request): Collection
     {
         $representative = $this->representativeService->getCurrentOrFail($user);
         $files = $request->file('documents', []);
         $collectionName = $data['collection_name'] ?? 'representative_documents';
         $titles = $data['titles'] ?? [];
         $metadata = $data['metadata'] ?? [];
+        $documentTypes = $data['document_types'] ?? [];
         $isPrimary = (bool) ($data['is_primary'] ?? false);
         $directory = 'storage/representatives/documents/' . $representative->id;
 
@@ -34,6 +35,7 @@ class RepresentativeDocumentService
             $collectionName,
             $titles,
             $metadata,
+            $documentTypes,
             $isPrimary,
             $directory
         ) {
@@ -46,6 +48,7 @@ class RepresentativeDocumentService
             $documents = collect();
 
             foreach ($files as $index => $file) {
+                $documentType = $documentTypes[$index] ?? null;
                 $extension = strtolower($file->getClientOriginalExtension());
                 $filename = now()->format('YmdHis') . '_' . Str::uuid() . '.' . $extension;
                 $originalName = $file->getClientOriginalName();
@@ -58,6 +61,7 @@ class RepresentativeDocumentService
 
                 $documents->push($representative->mediaFiles()->create([
                     'collection_name' => $collectionName,
+                    'document_type' => $documentType,
                     'disk' => 'public',
                     'directory' => $directory,
                     'filename' => $filename,
@@ -72,6 +76,8 @@ class RepresentativeDocumentService
                     'metadata' => $metadata,
                 ]));
             }
+
+            $this->representativeService->recalculateStatus($representative);
 
             return $documents;
         });

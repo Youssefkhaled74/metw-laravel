@@ -22,6 +22,8 @@ class RepresentativeVehicleFactory extends Factory
             'representative_id' => Representative::factory(),
             'transport_type_id' => $transportType->id,
             'registration_number' => fake()->unique()->bothify('REP-####'),
+            'registration_plate_letters' => fake()->regexify('[A-Z]{2,3}'),
+            'registration_plate_numbers' => fake()->numerify('####'),
             'license_number' => fake()->bothify('LIC-#####'),
             'brand' => fake()->company(),
             'model' => fake()->word(),

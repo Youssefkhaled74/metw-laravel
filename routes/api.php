@@ -79,10 +79,13 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
     Route::prefix('representatives')->group(function () {
         Route::post('register', [RepresentativeController::class, 'register']);
+        Route::post('complete', [RepresentativeController::class, 'complete']);
         Route::get('me', [RepresentativeController::class, 'me']);
         Route::put('me', [RepresentativeController::class, 'update']);
         Route::post('documents', [RepresentativeDocumentController::class, 'store']);
         Route::get('transport-types', [RepresentativeController::class, 'transportTypes']);
+        Route::get('governorates', [RepresentativeController::class, 'governorates']);
+        Route::get('governorates/{governorate}/cities', [RepresentativeController::class, 'cities']);
         Route::get('work-types', [RepresentativeController::class, 'workTypes']);
     });
     Route::prefix('shipment-companies')->group(function () {

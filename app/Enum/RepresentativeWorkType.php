@@ -6,5 +6,5 @@ enum RepresentativeWorkType: string
 {
     case LOCAL_DELIVERY = 'local_delivery';
     case INTER_GOVERNORATE_SHIPPING = 'inter_governorate_shipping';
-    case INTER_GOVERNORATE_BUS_DRIVER = 'inter_governorate_bus_driver';
+    case BUS_DRIVER = 'bus_driver';
 }

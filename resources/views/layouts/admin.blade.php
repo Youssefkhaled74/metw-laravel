@@ -2183,6 +2183,13 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.representatives.*') ? 'active' : '' }}"
+                                           href="{{ route('admin.representatives.index') }}">
+                                            <i class="fas fa-id-card"></i>
+                                            <span class="link-text">{{ app()->getLocale() === 'ar' ? 'المناديب' : 'Representatives' }}</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.settings.pages.*') ? 'active' : '' }}"
                                            href="{{ route('admin.settings.pages.index') }}">
                                             <i class="fas fa-file-alt"></i>
@@ -2510,11 +2517,18 @@
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.representative-work-types.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.representative-work-types.index') }}">
-                                                    <i class="fas fa-briefcase"></i>
-                                                    <span class="link-text">{{ app()->getLocale() === 'ar' ? 'أنواع عمل المندوب' : 'Representative Work Types' }}</span>
+                                            <i class="fas fa-briefcase"></i>
+                                            <span class="link-text">{{ app()->getLocale() === 'ar' ? 'أنواع عمل المندوب' : 'Representative Work Types' }}</span>
                                             </a>
                                         </li>
                                     @endif
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.representatives.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.representatives.index') }}">
+                                                <i class="fas fa-id-card"></i>
+                                                <span class="link-text">{{ app()->getLocale() === 'ar' ? 'المناديب' : 'Representatives' }}</span>
+                                        </a>
+                                    </li>
                                     @if($employee->can('admin.settings.pages.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.pages.*') ? 'active' : '' }}"

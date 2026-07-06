@@ -27,6 +27,7 @@ class MediaFileFactory extends Factory
             'mediable_type' => User::class,
             'mediable_id' => $user->id,
             'collection_name' => fake()->randomElement(['avatars', 'documents']),
+            'document_type' => fake()->optional()->randomElement(['personal_photo', 'national_id_front']),
             'disk' => 'public',
             'directory' => fake()->randomElement(['uploads/users', 'uploads/shared']),
             'filename' => fake()->uuid() . '.jpg',

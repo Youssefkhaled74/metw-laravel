@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enum\RepresentativeDocumentType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -11,9 +12,21 @@ class RepresentativeResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'account_number' => $this->account_number,
+            'account_opened_at' => $this->account_opened_at,
             'account_type' => $this->account_type?->value ?? $this->account_type,
             'status' => $this->status?->value ?? $this->status,
-            'phone' => $this->phone,
+            'first_name' => $this->first_name,
+            'father_name' => $this->father_name,
+            'last_name' => $this->last_name,
+            'full_name' => trim(collect([$this->first_name, $this->father_name, $this->last_name])->filter()->implode(' ')),
+            'main_mobile' => $this->phone,
+            'second_mobile' => $this->second_phone,
+            'email' => $this->user?->email,
+            'birth_date' => $this->birth_date,
+            'gender' => $this->gender,
+            'address' => $this->address,
+            'village_service' => $this->village_service,
             'notes' => $this->notes,
             'rejection_reason' => $this->rejection_reason,
             'submitted_at' => $this->submitted_at,
@@ -43,27 +56,23 @@ class RepresentativeResource extends JsonResource
                     ->values();
             }),
             'governorates' => $this->whenLoaded('governorates', function () {
-                return $this->governorates->map(function ($governorate) {
-                    return [
-                        'id' => $governorate->id,
-                        'governorate_number' => $governorate->governorate_number,
-                        'name_ar' => $governorate->name_ar,
-                        'name' => $governorate->name,
-                        'capital_city_id' => $governorate->capital_city_id,
-                    ];
-                })->values();
+                return $this->governorates->map(fn ($governorate) => [
+                    'id' => $governorate->id,
+                    'governorate_number' => $governorate->governorate_number,
+                    'name_ar' => $governorate->name_ar,
+                    'name' => $governorate->name,
+                    'capital_city_id' => $governorate->capital_city_id,
+                ])->values();
             }),
             'cities' => $this->whenLoaded('cities', function () {
-                return $this->cities->map(function ($city) {
-                    return [
-                        'id' => $city->id,
-                        'name_ar' => $city->name_ar,
-                        'name_en' => $city->name_en,
-                        'name' => $city->name,
-                        'governorate_id' => $city->governorate_id,
-                        'is_capital' => $city->is_capital,
-                    ];
-                })->values();
+                return $this->cities->map(fn ($city) => [
+                    'id' => $city->id,
+                    'name_ar' => $city->name_ar,
+                    'name_en' => $city->name_en,
+                    'name' => $city->name,
+                    'governorate_id' => $city->governorate_id,
+                    'is_capital' => $city->is_capital,
+                ])->values();
             }),
             'vehicle' => $this->whenLoaded('vehicle', function () {
                 if (! $this->vehicle) {
@@ -74,6 +83,8 @@ class RepresentativeResource extends JsonResource
                     'id' => $this->vehicle->id,
                     'transport_type_id' => $this->vehicle->transport_type_id,
                     'registration_number' => $this->vehicle->registration_number,
+                    'registration_plate_letters' => $this->vehicle->registration_plate_letters,
+                    'registration_plate_numbers' => $this->vehicle->registration_plate_numbers,
                     'license_number' => $this->vehicle->license_number,
                     'brand' => $this->vehicle->brand,
                     'model' => $this->vehicle->model,
@@ -89,7 +100,28 @@ class RepresentativeResource extends JsonResource
                         : null,
                 ];
             }),
-            'documents' => RepresentativeMediaFileResource::collection($this->whenLoaded('mediaFiles')),
+            'documents' => $this->whenLoaded('mediaFiles', function () {
+                return collect(RepresentativeMediaFileResource::collection($this->mediaFiles->where('collection_name', 'representative_documents'))->resolve())
+                    ->groupBy('document_type')
+                    ->map(function ($items, $documentType) {
+                        return [
+                            'document_type' => $documentType,
+                            'label' => match ($documentType) {
+                                RepresentativeDocumentType::PERSONAL_PHOTO->value => 'Personal Photo',
+                                RepresentativeDocumentType::NATIONAL_ID_FRONT->value => 'National ID Front',
+                                RepresentativeDocumentType::NATIONAL_ID_BACK->value => 'National ID Back',
+                                RepresentativeDocumentType::VEHICLE_PHOTO->value => 'Vehicle Photo',
+                                RepresentativeDocumentType::DRIVING_LICENSE_FRONT->value => 'Driving License Front',
+                                RepresentativeDocumentType::DRIVING_LICENSE_BACK->value => 'Driving License Back',
+                                RepresentativeDocumentType::VEHICLE_LICENSE_FRONT->value => 'Vehicle License Front',
+                                RepresentativeDocumentType::VEHICLE_LICENSE_BACK->value => 'Vehicle License Back',
+                                default => $documentType,
+                            },
+                            'files' => $items->values(),
+                        ];
+                    })
+                    ->values();
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Api\V1\Representative;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Representative\CompleteRepresentativeProfileRequest;
 use App\Http\Requests\Api\V1\Representative\RegisterRepresentativeRequest;
 use App\Http\Requests\Api\V1\Representative\UpdateRepresentativeProfileRequest;
 use App\Http\Resources\RepresentativeResource;
+use App\Http\Resources\CityResource;
+use App\Http\Resources\GovernorateResource;
 use App\Http\Resources\TransportTypeResource;
+use App\Models\City;
+use App\Models\Governorate;
 use App\Models\RepresentativeWorkTypeOption;
 use App\Services\RepresentativeService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -80,6 +85,28 @@ class RepresentativeController extends Controller
         }
     }
 
+    public function complete(CompleteRepresentativeProfileRequest $request)
+    {
+        try {
+            $representative = $this->representativeService->complete(
+                $request->user(),
+                $request->validated()
+            );
+
+            return responseJson(
+                true,
+                'Representative profile completed successfully',
+                ['representative' => new RepresentativeResource($representative)]
+            );
+        } catch (ModelNotFoundException $exception) {
+            return responseJson(false, 'Representative profile not found', null, 404);
+        } catch (ValidationException $exception) {
+            return responseJson(false, $exception->getMessage(), $exception->errors(), 422);
+        } catch (\Throwable $th) {
+            return responseJson(false, $th->getMessage(), null, 500);
+        }
+    }
+
     public function transportTypes()
     {
         try {
@@ -121,6 +148,44 @@ class RepresentativeController extends Controller
                 true,
                 'Work types fetched successfully',
                 ['work_types' => $workTypes]
+            );
+        } catch (\Throwable $th) {
+            return responseJson(false, $th->getMessage(), null, 500);
+        }
+    }
+
+    public function governorates()
+    {
+        try {
+            $governorates = $this->representativeService->getActiveGovernorates()
+                ->load('cities');
+
+            return responseJson(
+                true,
+                'Governorates fetched successfully',
+                [
+                    'governorates' => GovernorateResource::collection($governorates)->resolve(),
+                ]
+            );
+        } catch (\Throwable $th) {
+            return responseJson(false, $th->getMessage(), null, 500);
+        }
+    }
+
+    public function cities(Governorate $governorate)
+    {
+        try {
+            $cities = City::query()
+                ->where('governorate_id', $governorate->id)
+                ->orderBy('name_ar')
+                ->get();
+
+            return responseJson(
+                true,
+                'Cities fetched successfully',
+                [
+                    'cities' => CityResource::collection($cities)->resolve(),
+                ]
             );
         } catch (\Throwable $th) {
             return responseJson(false, $th->getMessage(), null, 500);

@@ -27,6 +27,7 @@ class RepresentativeFactory extends Factory
 
         return [
             'user_id' => $user->id,
+            'account_number' => null,
             'warehouse_id' => null,
             'account_type' => fake()->randomElement([
                 RepresentativeAccountType::FREE->value,
@@ -34,6 +35,14 @@ class RepresentativeFactory extends Factory
             ]),
             'status' => RepresentativeStatus::INCOMPLETE->value,
             'phone' => fake()->phoneNumber(),
+            'second_phone' => fake()->phoneNumber(),
+            'first_name' => fake()->firstName(),
+            'father_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'account_opened_at' => now()->toDateString(),
+            'birth_date' => fake()->optional()->date(),
+            'gender' => fake()->randomElement(['male', 'female']),
+            'address' => fake()->address(),
             'notes' => fake()->optional()->sentence(),
             'rejection_reason' => null,
             'submitted_at' => null,
@@ -41,6 +50,7 @@ class RepresentativeFactory extends Factory
             'approved_at' => null,
             'suspended_at' => null,
             'is_active' => true,
+            'village_service' => fake()->boolean(),
             'metadata' => ['source' => 'factory'],
         ];
     }

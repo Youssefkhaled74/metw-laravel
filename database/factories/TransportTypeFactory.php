@@ -22,6 +22,11 @@ class TransportTypeFactory extends Factory
             'description' => fake()->sentence(),
             'max_weight' => fake()->randomFloat(2, 5, 5000),
             'max_volume' => fake()->randomFloat(2, 1, 500),
+            'category_1_available' => true,
+            'category_2_available' => fake()->boolean(),
+            'category_3_available' => fake()->boolean(),
+            'requires_driving_license' => fake()->boolean(),
+            'requires_vehicle_license' => fake()->boolean(),
             'is_active' => true,
             'metadata' => ['source' => 'factory'],
         ];

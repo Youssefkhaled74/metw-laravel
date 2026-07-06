@@ -13,6 +13,8 @@ class RepresentativeVehicle extends Model
     protected $fillable = [
         'representative_id',
         'transport_type_id',
+        'registration_plate_letters',
+        'registration_plate_numbers',
         'registration_number',
         'license_number',
         'brand',

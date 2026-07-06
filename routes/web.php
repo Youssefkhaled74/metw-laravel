@@ -3,6 +3,7 @@
 use App\Http\Controllers\Dashboard\Admin\CommissionController;
 use App\Http\Controllers\Dashboard\Admin\NotificationController;
 use App\Http\Controllers\Dashboard\Admin\AdminDashboardController;
+use App\Http\Controllers\Dashboard\Admin\RepresentativeController;
 use App\Http\Controllers\Dashboard\Admin\ShipmentRequestController;
 use App\Http\Controllers\Dashboard\Admin\Settings\ConfigController;
 use App\Http\Controllers\Dashboard\Admin\Settings\GovernorateController;
@@ -358,6 +359,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::patch('/{representativeWorkType}', [RepresentativeWorkTypeController::class, 'update'])->name('update');
                 Route::delete('/{representativeWorkType}', [RepresentativeWorkTypeController::class, 'destroy'])->name('destroy');
                 Route::patch('/{representativeWorkType}/toggle-status', [RepresentativeWorkTypeController::class, 'toggleStatus'])->name('toggle-status');
+            });
+
+            Route::prefix('representatives')->name('representatives.')->group(function () {
+                Route::get('/', [RepresentativeController::class, 'index'])->name('index');
+                Route::get('/{representative}', [RepresentativeController::class, 'show'])->name('show');
+                Route::post('/{representative}/approve', [RepresentativeController::class, 'approve'])->name('approve');
+                Route::post('/{representative}/reject', [RepresentativeController::class, 'reject'])->name('reject');
+                Route::post('/{representative}/suspend', [RepresentativeController::class, 'suspend'])->name('suspend');
+                Route::post('/{representative}/reactivate', [RepresentativeController::class, 'reactivate'])->name('reactivate');
             });
 
             // Page Management
