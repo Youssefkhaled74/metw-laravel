@@ -17,6 +17,7 @@ use App\Http\Controllers\Dashboard\Vendor\VendorBranchController;
 use App\Http\Controllers\Dashboard\Vendor\VendorNotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use App\Http\Controllers\WebsiteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,9 +30,12 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
+Route::get('/', [WebsiteController::class, 'home'])->name('website.home');
+Route::get('/about', [WebsiteController::class, 'about'])->name('website.about');
+Route::get('/policies', [WebsiteController::class, 'policies'])->name('website.policies');
+Route::get('/terms', [WebsiteController::class, 'policies'])->name('website.terms');
+Route::get('/privacy', [WebsiteController::class, 'policies'])->name('website.privacy');
 
 // Language switcher
 Route::get('/lang/{locale}', function (Request $request, string $locale) {
