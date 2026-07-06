@@ -298,7 +298,7 @@
 
                                                     <div class="usr-user-meta">
                                                         <span class="usr-user-number">
-                                                            {{ $user->user_number ?: '#' . $user->id }}
+                                                            {{ $user->user_number ?: ('USR-' . str_pad((string) $user->id, 8, '0', STR_PAD_LEFT)) }}
                                                         </span>
 
                                                         @if($user->username)

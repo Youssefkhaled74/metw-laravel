@@ -380,7 +380,7 @@
 
                                             <div class="sr-request-info">
                                                 <div class="sr-request-no">
-                                                    {{ $shipmentRequest->request_number ?? ('#' . $shipmentRequest->id) }}
+                                                    {{ $shipmentRequest->request_number ?? ('SHR-' . str_pad((string) $shipmentRequest->id, 8, '0', STR_PAD_LEFT)) }}
                                                 </div>
 
                                                 <div class="sr-customer-name">{{ $customerName }}</div>

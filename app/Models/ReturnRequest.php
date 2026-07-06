@@ -53,7 +53,21 @@ class ReturnRequest extends Model
 
     protected static function booted()
     {
-        static::assignPrefixedNumberOnCreate('return_number', 'RET');
+        static::creating(function ($model) {
+            if (! empty($model->return_number)) {
+                return;
+            }
+
+            $requestType = $model->request_type instanceof RequestType
+                ? $model->request_type->value
+                : (string) $model->request_type;
+
+            $prefix = $requestType === RequestType::CANCELLATION->value
+                ? 'M-CAN'
+                : 'RET';
+
+            $model->return_number = static::generateSequentialNumber('return_number', $prefix);
+        });
     }
     public function user()
     {

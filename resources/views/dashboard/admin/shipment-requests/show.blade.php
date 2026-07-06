@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', app()->getLocale() === 'ar' ? 'تفاصيل طلب الشحن' : 'Shipment Request Details')
-@section('page-title', (app()->getLocale() === 'ar' ? 'تفاصيل طلب الشحن' : 'Shipment Request Details') . ' - ' . ($shipmentRequest->request_number ?? ('#' . $shipmentRequest->id)))
+@section('page-title', (app()->getLocale() === 'ar' ? 'تفاصيل طلب الشحن' : 'Shipment Request Details') . ' - ' . ($shipmentRequest->request_number ?? ('SHR-' . str_pad((string) $shipmentRequest->id, 8, '0', STR_PAD_LEFT))))
 
 @php
     use Illuminate\Support\Facades\Route;
@@ -81,7 +81,7 @@
         return preg_match('/^https?:\\/\\//i', $path) ? $path : asset($path);
     };
 
-    $requestNumber = $shipmentRequest->request_number ?? ('#' . $shipmentRequest->id);
+    $requestNumber = $shipmentRequest->request_number ?? ('SHR-' . str_pad((string) $shipmentRequest->id, 8, '0', STR_PAD_LEFT));
     $createdAt = $shipmentRequest->created_at?->format('Y-m-d H:i') ?? '--';
     $submittedAt = $shipmentRequest->submitted_at?->format('Y-m-d H:i');
 

@@ -90,7 +90,7 @@
                         <div class="whe-meta">
                             <span>
                                 <i class="fas fa-hashtag"></i>
-                                ID #{{ $warehouse->id }}
+                                {{ $text('Record ID', 'رقم السجل') }} #{{ $warehouse->warehouse_number ?? ('WAR-' . str_pad((string) $warehouse->id, 8, '0', STR_PAD_LEFT)) }}
                             </span>
 
                             <span id="heroMainStatus" class="{{ $oldMain ? 'is-main' : '' }}">

@@ -4,6 +4,10 @@
 @section('page-title', __('admin-dashboard.shipment_companies_management'))
 
 @section('page-actions')
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary me-2">
+        <i class="fas {{ app()->getLocale() === 'ar' ? 'fa-arrow-right ms-1' : 'fa-arrow-left me-1' }}"></i>
+        {{ app()->getLocale() === 'ar' ? 'العودة إلى لوحة التحكم' : 'Back to dashboard' }}
+    </a>
     <a href="{{ route('admin.shipment-companies.create') }}" class="btn btn-primary">
         <i class="fas fa-plus"></i> {{ __('admin-dashboard.add_new_company') }}
     </a>

@@ -51,7 +51,7 @@ class EcommerceOrder extends Model
 
     protected static function booted()
     {
-        static::assignPrefixedNumberOnCreate('order_number', 'ORD');
+        static::assignPrefixedNumberOnCreate('order_number', 'M-ORD');
     }
 
     public function user()

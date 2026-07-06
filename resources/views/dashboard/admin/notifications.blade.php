@@ -1,24 +1,31 @@
 @extends('layouts.admin')
 
-@section('title', 'Notifications')
-@section('page-title', 'Notifications')
+@php
+    $locale = app()->getLocale();
+    $isArabic = $locale === 'ar';
+    $text = static fn (string $en, string $ar) => $isArabic ? $ar : $en;
+@endphp
+
+@section('title', $text('Notifications', 'الإشعارات'))
+@section('page-title', $text('Notifications', 'الإشعارات'))
 
 @section('page-actions')
     <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Dashboard
+        <i class="fas {{ $isArabic ? 'fa-arrow-right ms-1' : 'fa-arrow-left me-1' }}"></i>
+        {{ $text('Back to Dashboard', 'العودة إلى لوحة التحكم') }}
     </a>
 @endsection
 
 @section('content')
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">All Notifications</h5>
+        <h5 class="mb-0">{{ $text('All Notifications', 'جميع الإشعارات') }}</h5>
 
         @if(auth('admin')->user()->unreadNotifications->count() > 0)
             <form action="{{ route('admin.notifications.readAll') }}" method="POST" class="mb-0">
                 @csrf
                 <button type="submit" class="btn btn-sm btn-outline-success">
-                    Mark All as Read
+                    {{ $text('Mark All as Read', 'تعيين الكل كمقروء') }}
                 </button>
             </form>
         @endif
@@ -34,6 +41,9 @@
                         onclick="markAsReadAndRedirect('{{ $notification->id }}', '{{ $notification->data['url'] ?? '#' }}')">
 
                         <div>
+                            <strong class="d-block text-primary mb-1">
+                                {{ $text('Notification', 'الإشعار') }} #{{ $notification->notification_number ?? 'NOT-00000000' }}
+                            </strong>
                             <strong>{{ $notification->data['title'] ?? 'Notification' }}</strong><br>
                             <small>{{ $notification->data['body'] ?? '' }}</small><br>
                             <small class="text-muted">
@@ -42,7 +52,7 @@
                         </div>
 
                         @if(!$notification->read_at)
-                            <span class="badge bg-primary">New</span>
+                            <span class="badge bg-primary">{{ $text('New', 'جديد') }}</span>
                         @endif
                     </li>
                 @endforeach
@@ -52,7 +62,7 @@
                 {{ $notifications->links('pagination::bootstrap-5') }}
             </div>
         @else
-            <p class="text-muted">No notifications found.</p>
+            <p class="text-muted">{{ $text('No notifications found.', 'لا توجد إشعارات.') }}</p>
         @endif
     </div>
 </div>

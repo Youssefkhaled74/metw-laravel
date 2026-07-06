@@ -69,6 +69,10 @@
 @endphp
 
 @section('page-actions')
+    <a href="{{ route('admin.dashboard') }}" class="btn whx-primary-action me-2">
+        <i class="fas {{ $isArabic ? 'fa-arrow-right ms-1' : 'fa-arrow-left me-1' }}"></i>
+        {{ $text('Back to dashboard', 'العودة إلى لوحة التحكم') }}
+    </a>
     <a href="{{ route('admin.settings.warehouses.create') }}" class="btn whx-primary-action">
         <i class="fas fa-plus {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
         {{ $text('Add New Warehouse', 'إضافة مخزن جديد') }}
@@ -196,6 +200,7 @@
                         <table class="table align-middle mb-0 whx-table">
                             <thead>
                                 <tr>
+                                    <th>{{ $text('Number', 'الرقم') }}</th>
                                     <th>{{ $text('Warehouse', 'المخزن') }}</th>
                                     <th>{{ $text('Contact', 'التواصل') }}</th>
                                     <th>{{ $text('Location', 'الموقع') }}</th>
@@ -226,6 +231,7 @@
                                         data-status="{{ $isMain ? 'main' : 'regular' }}"
                                         data-profile="{{ $profileToneValue }}"
                                     >
+                                        <td class="fw-semibold text-primary">{{ $warehouse->warehouse_number ?? ('WAR-' . str_pad((string) $warehouse->id, 8, '0', STR_PAD_LEFT)) }}</td>
                                         <td>
                                             <div class="whx-name-cell">
                                                 <span class="whx-avatar">
@@ -234,7 +240,7 @@
 
                                                 <div>
                                                     <strong>{{ $warehouse->name }}</strong>
-                                                    <small>ID #{{ $warehouse->id }}</small>
+                                                    <small>{{ $text('Record ID', 'رقم السجل') }} #{{ $warehouse->id }}</small>
                                                 </div>
                                             </div>
                                         </td>
@@ -359,7 +365,7 @@
 
                                     <div>
                                         <strong>{{ $warehouse->name }}</strong>
-                                        <small>ID #{{ $warehouse->id }}</small>
+                                        <small>{{ $text('Record ID', 'رقم السجل') }} #{{ $warehouse->id }}</small>
                                     </div>
                                 </div>
 

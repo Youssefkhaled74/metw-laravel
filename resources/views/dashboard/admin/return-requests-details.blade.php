@@ -1,7 +1,12 @@
 @extends('layouts.admin')
 
-@section('title', __('admin-dashboard.return_request_details'))
-@section('page-title', 'Return Request - #' . $returnRequest->id)
+@php
+    $isArabic = app()->getLocale() === 'ar';
+    $text = static fn (string $en, string $ar) => $isArabic ? $ar : $en;
+@endphp
+
+@section('title', $text('Return Request Details', 'تفاصيل طلب الإرجاع'))
+@section('page-title', $text('Return Request', 'طلب الإرجاع') . ' - ' . ($returnRequest->return_number ?? ('RET-' . str_pad((string) $returnRequest->id, 8, '0', STR_PAD_LEFT))))
 
 @section('page-actions')
     <a href="{{ route('admin.return-requests') }}" class="btn btn-secondary">
@@ -25,7 +30,7 @@
                     <table class="table table-borderless">
                         <tr>
                             <td><strong>{{ __('admin-dashboard.return_id') }}:</strong></td>
-                            <td>#{{ $returnRequest->id }}</td>
+                            <td>{{ $returnRequest->return_number ?? ('RET-' . str_pad((string) $returnRequest->id, 8, '0', STR_PAD_LEFT)) }}</td>
                         </tr>
                         <tr>
                             <td><strong>{{ __('admin-dashboard.order_number') }}:</strong></td>

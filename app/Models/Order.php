@@ -31,7 +31,7 @@ class Order extends Model
     ];
     protected static function booted()
     {
-        static::assignPrefixedNumberOnCreate('order_number', 'ORD');
+        static::assignPrefixedNumberOnCreate('order_number', 'F-ORD');
     }
     public function user()
     {

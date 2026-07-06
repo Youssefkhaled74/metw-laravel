@@ -33,7 +33,8 @@ trait GeneratesPrefixedNumber
 
             if ($last) {
                 // استخراج الرقم من الشكل: VDR-00000001
-                $numberPart = (int) substr($last, strlen($prefix) + 1);
+                preg_match('/(\d+)$/', (string) $last, $matches);
+                $numberPart = (int) ($matches[1] ?? 0);
                 $nextNumber = $numberPart + 1;
             }
 

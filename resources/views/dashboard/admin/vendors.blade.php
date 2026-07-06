@@ -93,6 +93,10 @@
 @endphp
 
 @section('page-actions')
+    <a href="{{ route('admin.dashboard') }}" class="btn vnd-add-btn me-2">
+        <i class="fas {{ $isArabic ? 'fa-arrow-right ms-1' : 'fa-arrow-left me-1' }}"></i>
+        {{ $text('Back to dashboard', 'العودة إلى لوحة التحكم') }}
+    </a>
     <a href="{{ route('admin.vendors.create') }}" class="btn vnd-add-btn">
         <i class="fas fa-plus {{ $isArabic ? 'ms-1' : 'me-1' }}"></i>
         {{ __('admin-dashboard.add_new_vendor') }}
@@ -334,7 +338,7 @@
 
                                                 <div class="vnd-vendor-meta">
                                                     <span class="vnd-vendor-number">
-                                                        {{ $vendor->vendor_number ?: '#' . $vendor->id }}
+                                                        {{ $vendor->vendor_number ?: ('VDR-' . str_pad((string) $vendor->id, 8, '0', STR_PAD_LEFT)) }}
                                                     </span>
                                                 </div>
                                             </div>

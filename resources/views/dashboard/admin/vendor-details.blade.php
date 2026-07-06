@@ -107,7 +107,7 @@
                     <div class="vds-meta-row">
                         <span class="vds-meta-pill">
                             <i class="fas fa-hashtag"></i>
-                            {{ $vendor->vendor_number ?? ('#' . $vendor->id) }}
+                            {{ $vendor->vendor_number ?? ('VDR-' . str_pad((string) $vendor->id, 8, '0', STR_PAD_LEFT)) }}
                         </span>
 
                         <span class="vds-status vds-status-{{ $statusTone }}">
@@ -201,7 +201,7 @@
 
                         <div>
                             <strong>{{ $displayName }}</strong>
-                            <small>{{ $vendor->vendor_number ?? ('#' . $vendor->id) }}</small>
+                            <small>{{ $vendor->vendor_number ?? ('VDR-' . str_pad((string) $vendor->id, 8, '0', STR_PAD_LEFT)) }}</small>
                         </div>
                     </div>
 
