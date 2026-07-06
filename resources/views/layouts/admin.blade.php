@@ -1969,6 +1969,13 @@
                                     <span class="link-text">{{ __('admin-dashboard.monthly_revenue') }}</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.urgent-tasks') ? 'active' : '' }}"
+                                href="{{ route('admin.urgent-tasks') }}">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span class="link-text">المهام العاجلة</span>
+                                </a>
+                            </li>
                             <!-- <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.shipment-orders*') ? 'active' : '' }}"
                                 href="{{ route('admin.shipment-orders') }}">
@@ -2269,6 +2276,13 @@
                                 href="{{ route('admin.dashboard.monthly-revenue') }}">
                                         <i class="fas fa-chart-line"></i>
                                         <span class="link-text">{{ __('admin-dashboard.monthly_revenue') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.urgent-tasks') ? 'active' : '' }}"
+                                href="{{ route('admin.urgent-tasks') }}">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span class="link-text">المهام العاجلة</span>
                                 </a>
                             </li>
                         @endif

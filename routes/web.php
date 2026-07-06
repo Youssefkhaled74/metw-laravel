@@ -56,6 +56,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Admin Dashboard Routes
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Dashboard\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/urgent-tasks', [\App\Http\Controllers\Dashboard\Admin\AdminDashboardController::class, 'urgentTasks'])->name('urgent-tasks');
         Route::get('/dashboard/monthly-revenue', [\App\Http\Controllers\Dashboard\Admin\AdminDashboardController::class, 'monthlyRevenue'])->name('dashboard.monthly-revenue');
 
         // Shipment Management
