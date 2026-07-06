@@ -447,6 +447,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/get-zones/{city}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getZones'])->name('get-zones');
         });
 
+        Route::prefix('representatives')->name('representatives.')->group(function () {
+            Route::get('/', [RepresentativeController::class, 'index'])->name('index');
+            Route::get('/{representative}', [RepresentativeController::class, 'show'])->name('show');
+            Route::post('/{representative}/approve', [RepresentativeController::class, 'approve'])->name('approve');
+            Route::post('/{representative}/reject', [RepresentativeController::class, 'reject'])->name('reject');
+            Route::post('/{representative}/suspend', [RepresentativeController::class, 'suspend'])->name('suspend');
+            Route::post('/{representative}/reactivate', [RepresentativeController::class, 'reactivate'])->name('reactivate');
+        });
+
         // Shipment Company Price Management
         Route::prefix('shipment-companies')->name('shipment-companies.')->group(function () {
             Route::patch('/{shipmentCompany}/update-price-per-km', [\App\Http\Controllers\Dashboard\Admin\ShipmentController::class, 'updateCompanyPricePerKm'])->name('update-price-per-km');

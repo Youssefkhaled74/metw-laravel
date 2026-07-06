@@ -48,6 +48,7 @@ class DatabaseSeeder extends Seeder
             ZonesTableSeeder::class,
             LocationSeeder::class,      // locations table
             WarehouseSeeder::class,
+            RepresentativeSeeder::class,
 
             // 3. Auth
             UserSeeder::class,
