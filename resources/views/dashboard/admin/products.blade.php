@@ -15,7 +15,7 @@
     @php($filters = $filters ?? [])
 
     <div class="card shadow-sm border-0 data-card">
-        <div class="card-header bg-white border-0 py-3">
+        <div class="card-header bg-white border-0 py-3 sticky-filter-bar">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                 <h5 class="mb-0">{{ __('admin-dashboard.all_products') }}</h5>
                 <span class="badge rounded-pill text-bg-light border text-muted px-3 py-2 rows-counter-badge">
@@ -24,7 +24,7 @@
                 </span>
             </div>
 
-            <form method="GET" action="{{ route('admin.products') }}" class="row g-2 align-items-end">
+            <form method="GET" action="{{ route('admin.products') }}" class="row g-2 align-items-end" id="admin-products-filter-form">
                 <div class="col-lg-4">
                     <div class="input-group input-group-sm search-shell">
                         <span class="input-group-text bg-white border-end-0 search-icon-shell">
@@ -196,6 +196,7 @@
                                         <div class="actions-group justify-content-center">
                                             <a href="{{ route('admin.products.show', ['product' => $product->id, 'from' => 'admin.products']) }}" class="btn btn-sm btn-primary text-white action-icon-btn" title="{{ __('admin-dashboard.product_details') }}" data-bs-toggle="tooltip" data-bs-placement="top">
                                                 <i class="fas fa-eye"></i>
+                                                <span class="ms-1">{{ __('admin-dashboard.view') }}</span>
                                             </a>
                                         </div>
                                     </td>
@@ -223,6 +224,12 @@
 
 @push('styles')
 <style>
+    .sticky-filter-bar {
+        position: sticky;
+        top: 1rem;
+        z-index: 20;
+    }
+
     .product-thumbnail {
         width: 100px;
         height: 100px;
@@ -309,6 +316,19 @@
                 sortTable(key, nextDir);
             });
         });
+
+        const mainCategoryFilter = document.getElementById('main_category_id');
+        const categoryFilter = document.getElementById('category_id');
+        const filterForm = document.getElementById('admin-products-filter-form');
+
+        if (mainCategoryFilter && filterForm) {
+            mainCategoryFilter.addEventListener('change', function () {
+                if (categoryFilter) {
+                    categoryFilter.value = '';
+                }
+                filterForm.submit();
+            });
+        }
 
     });
 </script>

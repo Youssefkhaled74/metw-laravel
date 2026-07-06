@@ -183,7 +183,7 @@
                                             @enderror
                                         </div>
 
-                                    <div class="form-section-title mt-4"><i class="fas fa-tag"></i> {{ __('vendor-dashboard.price') }} & {{ __('vendor-dashboard.category') }}</div>
+                                    <div class="form-section-title mt-4"><i class="fas fa-tag"></i> {{ __('vendor-dashboard.product_categories_section') }}</div>
                                     <div class="row mt-2">
                                         <div class="col-md-6">
                                             <div class="mb-3">
@@ -281,18 +281,14 @@
 
                                     <!-- Brand -->
                                     <div class="mb-3">
-                                        <label for="brand_id" class="form-label required-label">{{ __('vendor-dashboard.brand') }}</label>
-                                        <select class="form-select @error('brand_id') is-invalid @enderror"
-                                                id="brand_id" name="brand_id" required>
-                                            <option value="">{{ __('vendor-dashboard.select_brand') }}</option>
-                                            @foreach ($brands as $brand)
-                                                <option value="{{ $brand->id }}"
-                                                    {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
-                                                    {{ $brand->name_en ?? $brand->name_ar ?? $brand->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        @error('brand_id')
+                                        <label for="brand_name" class="form-label required-label">{{ __('vendor-dashboard.brand') }}</label>
+                                        <input type="text"
+                                               class="form-control @error('brand_name') is-invalid @enderror"
+                                               id="brand_name"
+                                               name="brand_name"
+                                               value="{{ old('brand_name') }}"
+                                               required>
+                                        @error('brand_name')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -437,22 +433,22 @@
                                     <div class="row">
                                         <!-- أبعاد الشحنة -->
                                         <div class="col-md-4 mb-3">
-                                            <label for="package_length" class="form-label">{{ __('vendor-dashboard.length_m') }}</label>
+                                            <label for="package_length" class="form-label">{{ __('vendor-dashboard.length_cm') }}</label>
                                             <input type="number" class="form-control" id="package_length" name="package_length" step="0.01" min="0">
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label for="package_width" class="form-label">{{ __('vendor-dashboard.width_m') }}</label>
+                                            <label for="package_width" class="form-label">{{ __('vendor-dashboard.width_cm') }}</label>
                                             <input type="number" class="form-control" id="package_width" name="package_width" step="0.01" min="0">
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label for="package_height" class="form-label">{{ __('vendor-dashboard.height_m') }}</label>
+                                            <label for="package_height" class="form-label">{{ __('vendor-dashboard.height_cm') }}</label>
                                             <input type="number" class="form-control" id="package_height" name="package_height" step="0.01" min="0">
                                         </div>
                                     </div>
 
                                     <div class="mb-3">
                                         <!-- وزن الشحنة -->
-                                        <label for="package_weight" class="form-label">{{ __('vendor-dashboard.shipment_weight_kg') }}</label>
+                                        <label for="package_weight" class="form-label">{{ __('vendor-dashboard.shipment_weight_grams') }}</label>
                                         <input type="number" class="form-control" id="package_weight" name="package_weight" step="0.01" min="0">
                                     </div>
 
@@ -500,46 +496,6 @@
                                     </div>
 
 
-                                    <div class="row">
-
-                                        <div class="col-md-6 mb-3">
-                                            <label for="delivery_options" class="form-label">
-                                                {{ __('vendor-dashboard.delivery_options_governorate') }}
-                                            </label>
-
-                                            <select id="delivery_options"
-                                                    name="delivery_options[]"
-                                                    class="form-select select2 @error('delivery_options') is-invalid @enderror"
-                                                    multiple>
-
-                                                @php
-                                                    // English → Arabic mapping
-                                                    $deliveryOptions = [
-                                                        'Cities' => 'المدن',
-                                                        'Villages near cities' => 'القرى القريبة من المدن',
-                                                        'Villages far from cities' => 'القرى البعيدة عن المدن',
-                                                    ];
-
-                                                    // Language detection
-                                                    $isArabic = app()->getLocale() === 'ar';
-
-                                                    // Old input (for create form)
-                                                    $selectedOptions = old('delivery_options', []);
-                                                @endphp
-
-                                                @foreach ($deliveryOptions as $en => $ar)
-                                                    <option value="{{ $en }}" {{ in_array($en, $selectedOptions) ? 'selected' : '' }}>
-                                                        {{ $isArabic ? $ar : $en }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-
-                                            @error('delivery_options')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-
-                                    </div>
                                 </div>
 
 
@@ -643,18 +599,6 @@
         @error('branch_id')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-    </div>
-
-    <div class="mb-3">
-        <label for="shipment_type" class="form-label">{{ __('vendor-dashboard.shipment_type') }}</label>
-        <select class="form-select" id="shipment_type" name="shipment_type" required>
-            <option value="">{{ __('vendor-dashboard.select_shipment_type') }}</option>
-            @foreach ($consignment_types as $consignment_type)
-                <option value="{{ $consignment_type->id }}">
-                    {{ $consignment_type->name }}
-                </option>
-            @endforeach
-        </select>
     </div>
 
     <div class="mb-3">

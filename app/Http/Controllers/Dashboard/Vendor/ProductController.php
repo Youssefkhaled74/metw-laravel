@@ -104,7 +104,12 @@ class ProductController extends Controller
 
         $brands = Brand::withoutGlobalScope('active')->orderBy('name_en')->get(['id', 'name_en', 'name_ar']);
         $mainCategories = MainCategory::withoutGlobalScope('active')->get(['id', 'name']);
-        $categories = Category::withoutGlobalScope('active')->get(['id', 'name']);
+        $categories = Category::withoutGlobalScope('active')
+            ->when(!empty($validated['main_category_id']) && $validated['main_category_id'] !== 'all', function ($query) use ($validated) {
+                $query->where('main_category_id', (int) $validated['main_category_id']);
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'main_category_id']);
 
         return view('dashboard.vendor.products.index', compact('products', 'brands', 'mainCategories', 'categories'));
     }
@@ -150,6 +155,7 @@ class ProductController extends Controller
 
             'price' => 'required|numeric|min:0',
             'brand_id' => 'nullable|exists:brands,id',
+            'brand_name' => 'nullable|string|max:255|required_without:brand_id',
 
             'main_category_id'   => 'required|exists:main_categories,id',
             'main_category_id_2' => 'nullable|exists:main_categories,id',
@@ -266,6 +272,16 @@ class ProductController extends Controller
         if ($request->has('storage_conditions')) {
             $validated['storage_conditions'] = json_encode($request->input('storage_conditions'), JSON_UNESCAPED_UNICODE);
         }
+
+        if (!empty($validated['brand_name'])) {
+            $brandName = trim($validated['brand_name']);
+            $brand = Brand::firstOrCreate(
+                ['name_en' => $brandName],
+                ['name_ar' => $brandName, 'is_active' => true]
+            );
+            $validated['brand_id'] = $brand->id;
+        }
+        unset($validated['brand_name']);
 
         $validated['vendor_id'] = auth('vendor')->id();
         $validated['is_active'] = $request->has('is_active');
@@ -480,6 +496,7 @@ class ProductController extends Controller
 
             'price' => 'required|numeric|min:0',
             'brand_id' => 'nullable|exists:brands,id',
+            'brand_name' => 'nullable|string|max:255|required_without:brand_id',
             'piece_type' => 'nullable|in:small,medium,large,xlarge',
             'pieces_per_package' => 'nullable|numeric|min:1',
 
@@ -581,6 +598,16 @@ class ProductController extends Controller
         if ($request->has('storage_conditions')) {
             $validated['storage_conditions'] = json_encode($request->input('storage_conditions'), JSON_UNESCAPED_UNICODE);
         }
+
+        if (!empty($validated['brand_name'])) {
+            $brandName = trim($validated['brand_name']);
+            $brand = Brand::firstOrCreate(
+                ['name_en' => $brandName],
+                ['name_ar' => $brandName, 'is_active' => true]
+            );
+            $validated['brand_id'] = $brand->id;
+        }
+        unset($validated['brand_name']);
 
         $validated['is_active'] = $request->get('is_active');
         $validated['requires_delivery_otp'] = $request->get('requires_delivery_otp');

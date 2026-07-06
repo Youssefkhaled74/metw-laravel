@@ -13,7 +13,7 @@
     <x-admin.shared-table-assets />
 
     <div class="card shadow-sm border-0 data-card">
-        <div class="card-header bg-white border-0 py-3">
+        <div class="card-header bg-white border-0 py-3" style="position: sticky; top: 1rem; z-index: 20; background: #fff;">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                 <h5 class="mb-0">{{ __('vendor-dashboard.all_products') }}</h5>
                 <span class="badge rounded-pill text-bg-light border text-muted px-3 py-2 rows-counter-badge">
@@ -22,7 +22,7 @@
                 </span>
             </div>
 
-            <form method="GET" action="{{ route('vendor.products') }}" class="row g-2 align-items-center">
+            <form method="GET" action="{{ route('vendor.products') }}" class="row g-2 align-items-center" id="vendor-products-filter-form">
                 <div class="col-lg-4">
                     <div class="input-group input-group-sm search-shell">
                         <span class="input-group-text bg-white border-end-0 search-icon-shell">
@@ -41,7 +41,7 @@
 
                 <div class="col-lg-2">
                     <select name="brand_id" class="form-select form-select-sm filter-select-modern">
-                        <option value="all" {{ request('brand_id', 'all') === 'all' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'كل البراندات' : 'All brands' }}</option>
+                        <option value="all" {{ request('brand_id', 'all') === 'all' ? 'selected' : '' }}>{{ __('admin-dashboard.all_brands') }}</option>
                         @foreach($brands as $brand)
                             <option value="{{ $brand->id }}" {{ (string) request('brand_id') === (string) $brand->id ? 'selected' : '' }}>
                                 {{ app()->getLocale() === 'ar' ? ($brand->name_ar ?: $brand->name_en) : ($brand->name_en ?: $brand->name_ar) }}
@@ -51,8 +51,8 @@
                 </div>
 
                 <div class="col-lg-2">
-                    <select name="main_category_id" class="form-select form-select-sm filter-select-modern">
-                        <option value="all" {{ request('main_category_id', 'all') === 'all' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'كل الأقسام الرئيسية' : 'All main categories' }}</option>
+                    <select name="main_category_id" id="vendor-main-category-filter" class="form-select form-select-sm filter-select-modern">
+                        <option value="all" {{ request('main_category_id', 'all') === 'all' ? 'selected' : '' }}>{{ __('admin-dashboard.all_main_categories') }}</option>
                         @foreach($mainCategories as $mainCategory)
                             <option value="{{ $mainCategory->id }}" {{ (string) request('main_category_id') === (string) $mainCategory->id ? 'selected' : '' }}>
                                 {{ $mainCategory->name }}
@@ -62,8 +62,8 @@
                 </div>
 
                 <div class="col-lg-2">
-                    <select name="category_id" class="form-select form-select-sm filter-select-modern">
-                        <option value="all" {{ request('category_id', 'all') === 'all' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'كل الأقسام الفرعية' : 'All subcategories' }}</option>
+                    <select name="category_id" id="vendor-category-filter" class="form-select form-select-sm filter-select-modern">
+                        <option value="all" {{ request('category_id', 'all') === 'all' ? 'selected' : '' }}>{{ __('admin-dashboard.all_categories') }}</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}" {{ (string) request('category_id') === (string) $category->id ? 'selected' : '' }}>
                                 {{ $category->name }}
@@ -164,9 +164,9 @@
                                 <tr>
                                     <td class="fw-semibold text-primary">{{ $product->product_number ?? '-' }}</td>
                                     <td class="mobile-hide">
-                                        @php
-                                            $firstImage = $product->media->firstWhere('type', \App\Enum\ProductMediaType::IMAGE);
-                                        @endphp
+                                                @php
+                                                    $firstImage = $product->media->firstWhere('type', \App\Enum\ProductMediaType::IMAGE);
+                                                @endphp
                                         @if($firstImage)
                                             <img src="{{ asset($firstImage->url) }}"
                                                  alt="{{ $product->name }}"
@@ -243,3 +243,22 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainCategoryFilter = document.getElementById('vendor-main-category-filter');
+        const categoryFilter = document.getElementById('vendor-category-filter');
+        const filterForm = document.getElementById('vendor-products-filter-form');
+
+        if (mainCategoryFilter && filterForm) {
+            mainCategoryFilter.addEventListener('change', function () {
+                if (categoryFilter) {
+                    categoryFilter.value = 'all';
+                }
+                filterForm.submit();
+            });
+        }
+    });
+</script>
+@endpush
