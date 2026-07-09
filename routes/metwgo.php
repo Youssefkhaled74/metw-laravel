@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\MetwGo\NotificationController as MetwGoNotification
 use App\Http\Controllers\Api\MetwGo\OrderController as MetwGoOrderController;
 use App\Http\Controllers\Api\MetwGo\ProfileController as MetwGoProfileController;
 use App\Http\Controllers\Api\MetwGo\RegistrationController as MetwGoRegistrationController;
+use App\Http\Controllers\Api\MetwGo\ShippingRequestController as MetwGoShippingRequestController;
 use App\Http\Controllers\Api\MetwGo\WalletController as MetwGoWalletController;
 use Illuminate\Support\Facades\Route;
 
@@ -72,6 +73,14 @@ Route::prefix('metwgo')->group(function () {
         Route::prefix('wallet')->group(function () {
             Route::get('summary', [MetwGoWalletController::class, 'summary']);
             Route::post('withdrawals', [MetwGoWalletController::class, 'withdrawals']);
+        });
+
+        Route::prefix('shipping-requests')->group(function () {
+            Route::get('incoming', [MetwGoShippingRequestController::class, 'incoming']);
+            Route::get('active', [MetwGoShippingRequestController::class, 'active']);
+            Route::get('{requestId}', [MetwGoShippingRequestController::class, 'show'])->whereNumber('requestId');
+            Route::post('{requestId}/start', [MetwGoShippingRequestController::class, 'start'])->whereNumber('requestId');
+            Route::post('{requestId}/reject', [MetwGoShippingRequestController::class, 'reject'])->whereNumber('requestId');
         });
     });
 });

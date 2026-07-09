@@ -21,12 +21,19 @@ class ShipmentRequest extends Model
         'notes',
         'submitted_at',
         'metadata',
+        'representative_id',
+        'rejection_reason_id',
+        'rejection_note',
+        'accepted_at',
+        'rejected_at',
     ];
 
     protected $casts = [
         'status' => ShipmentRequestStatus::class,
         'submitted_at' => 'datetime',
         'metadata' => 'array',
+        'accepted_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function user()
@@ -47,6 +54,16 @@ class ShipmentRequest extends Model
     public function packages()
     {
         return $this->hasMany(ShipmentRequestPackage::class);
+    }
+
+    public function representative()
+    {
+        return $this->belongsTo(Representative::class);
+    }
+
+    public function rejectionReason()
+    {
+        return $this->belongsTo(RejectionReason::class);
     }
 
     protected static function booted()

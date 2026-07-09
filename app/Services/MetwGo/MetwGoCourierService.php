@@ -4,11 +4,13 @@ namespace App\Services\MetwGo;
 
 use App\Enum\RepresentativeAccountType;
 use App\Enum\RepresentativeStatus;
+use App\Enum\ShipmentRequestStatus;
 use App\Models\City;
 use App\Models\OrderItem;
 use App\Models\OtpCode;
 use App\Models\Representative;
 use App\Models\RepresentativeWorkTypeOption;
+use App\Models\ShipmentRequest;
 use App\Models\TransportType;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -45,9 +47,12 @@ class MetwGoCourierService
     {
         return match ($representative->status?->value ?? $representative->status) {
             RepresentativeStatus::APPROVED->value => 'approved',
+            RepresentativeStatus::ACTIVE->value => 'approved',
             RepresentativeStatus::PENDING_REVIEW->value => 'pending_approval',
+            RepresentativeStatus::PENDING_APPROVAL->value => 'pending_approval',
             RepresentativeStatus::REJECTED->value => 'rejected',
             RepresentativeStatus::SUSPENDED->value => 'suspended',
+            RepresentativeStatus::INACTIVE->value => 'suspended',
             default => 'incomplete',
         };
     }
@@ -386,6 +391,88 @@ class MetwGoCourierService
             ]],
             'fee' => (float) ($orderItem->accepted_fee ?? $orderItem->est_price ?? 0),
             'status' => $orderItem->status,
+        ];
+    }
+
+    public function incomingShippingRequestsQuery(Representative $representative): Builder
+    {
+        $query = ShipmentRequest::query()
+            ->with([
+                'senderContact.primaryAddress.governorate',
+                'senderContact.primaryAddress.city',
+                'receiverContact.primaryAddress.governorate',
+                'receiverContact.primaryAddress.city',
+                'packages',
+            ])
+            ->whereNull('representative_id')
+            ->where('status', ShipmentRequestStatus::SUBMITTED->value);
+
+        $governorateIds = $representative->governorates->pluck('id');
+
+        if ($governorateIds->isNotEmpty()) {
+            $query->whereHas('senderContact.primaryAddress', function (Builder $builder) use ($governorateIds) {
+                $builder->whereIn('governorate_id', $governorateIds);
+            });
+        }
+
+        return $query->latest();
+    }
+
+    public function activeShippingRequestQuery(Representative $representative): Builder
+    {
+        return ShipmentRequest::query()
+            ->with([
+                'senderContact.primaryAddress.governorate',
+                'senderContact.primaryAddress.city',
+                'receiverContact.primaryAddress.governorate',
+                'receiverContact.primaryAddress.city',
+                'packages',
+            ])
+            ->where('representative_id', $representative->id)
+            ->where('status', ShipmentRequestStatus::ASSIGNED->value);
+    }
+
+    public function formatShippingRequest(ShipmentRequest $request): array
+    {
+        return [
+            'id' => $request->id,
+            'request_number' => $request->request_number,
+            'sender_name' => $request->senderContact?->full_name,
+            'sender_phone' => $request->senderContact?->primary_mobile,
+            'receiver_name' => $request->receiverContact?->full_name,
+            'receiver_phone' => $request->receiverContact?->primary_mobile,
+            'pickup_address' => $request->senderContact?->primaryAddress?->address_line_1,
+            'dropoff_address' => $request->receiverContact?->primaryAddress?->address_line_1,
+            'package_count' => $request->packages->count(),
+            'status' => $request->status?->value ?? $request->status,
+            'created_at' => $request->created_at?->toIso8601String(),
+        ];
+    }
+
+    public function formatShippingRequestDetails(ShipmentRequest $request): array
+    {
+        return [
+            'id' => $request->id,
+            'request_number' => $request->request_number,
+            'sender' => [
+                'name' => $request->senderContact?->full_name,
+                'phone' => $request->senderContact?->primary_mobile,
+                'address' => $request->senderContact?->primaryAddress?->address_line_1,
+            ],
+            'receiver' => [
+                'name' => $request->receiverContact?->full_name,
+                'phone' => $request->receiverContact?->primary_mobile,
+                'address' => $request->receiverContact?->primaryAddress?->address_line_1,
+            ],
+            'packages' => $request->packages->map(fn ($pkg) => [
+                'name' => $pkg->package_name,
+                'type' => $pkg->package_type,
+                'weight' => (float) $pkg->weight,
+                'quantity' => $pkg->quantity,
+            ])->values(),
+            'notes' => $request->notes,
+            'status' => $request->status?->value ?? $request->status,
+            'created_at' => $request->created_at?->toIso8601String(),
         ];
     }
 

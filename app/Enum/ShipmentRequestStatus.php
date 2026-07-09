@@ -6,6 +6,10 @@ enum ShipmentRequestStatus: string
 {
     case DRAFT = 'draft';
     case SUBMITTED = 'submitted';
+    case ASSIGNED = 'assigned';
+    case COMPLETED = 'completed';
+    case CANCELLED = 'cancelled';
+    case REJECTED = 'rejected';
 
     public static function values(): array
     {
