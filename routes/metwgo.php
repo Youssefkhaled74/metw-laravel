@@ -20,6 +20,7 @@ Route::prefix('metwgo')->group(function () {
         Route::post('password/reset', [MetwGoAuthController::class, 'resetPassword']);
 
         // Registration
+        Route::post('register', [MetwGoRegistrationController::class, 'register']);
         Route::post('register/step-1', [MetwGoRegistrationController::class, 'stepOne']);
         Route::post('register/step-2', [MetwGoRegistrationController::class, 'stepTwo'])->middleware('auth:sanctum');
         Route::post('register/step-3', [MetwGoRegistrationController::class, 'stepThree'])->middleware('auth:sanctum');
