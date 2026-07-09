@@ -1507,4 +1507,19 @@ return [
     'no_shipment_requests_message' => 'There are no shipment requests matching your criteria.',
     'request_summary' => 'Request Summary',
 
+    'rejection_reasons_management' => 'Rejection Reasons Management',
+    'all_rejection_reasons' => 'All Rejection Reasons',
+    'add_rejection_reason' => 'Add Rejection Reason',
+    'add_new_rejection_reason' => 'Add New Rejection Reason',
+    'no_rejection_reasons_found' => 'No rejection reasons found.',
+    'start_adding_rejection_reason' => 'Start by adding a new rejection reason.',
+    'confirm_delete_rejection_reason' => 'Are you sure you want to delete this rejection reason?',
+    'rejection_reasons' => 'Rejection Reasons',
+    'rejection_reason_details' => 'Rejection Reason Details',
+    'create_new_rejection_reason' => 'Create New Rejection Reason',
+    'create_rejection_reason' => 'Create Rejection Reason',
+    'edit_rejection_reason' => 'Edit Rejection Reason',
+    'update_rejection_reason' => 'Update Rejection Reason',
+    'reason_text' => 'Reason Text',
+
 ];

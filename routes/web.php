@@ -313,6 +313,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::patch('/{cancel_reason}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'toggleStatus'])->name('toggle-status');
             });
 
+            Route::prefix('rejection-reasons')->name('rejection-reasons.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'store'])->name('store');
+                Route::get('/{rejection_reason}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'edit'])->name('edit');
+                Route::patch('/{rejection_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'update'])->name('update');
+                Route::delete('/{rejection_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'destroy'])->name('destroy');
+                Route::patch('/{rejection_reason}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'toggleStatus'])->name('toggle-status');
+            });
+
             Route::prefix('states')->name('states.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'index'])->name('index');
                 Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'create'])->name('create');

@@ -1533,4 +1533,19 @@ return [
     'no_shipment_requests_message' => 'لا توجد طلبات شحن تطابق معايير البحث.',
     'request_summary' => 'ملخص الطلب',
 
+    'rejection_reasons_management' => 'إدارة أسباب الرفض',
+    'all_rejection_reasons' => 'كل أسباب الرفض',
+    'add_rejection_reason' => 'إضافة سبب رفض',
+    'add_new_rejection_reason' => 'إضافة سبب رفض جديد',
+    'no_rejection_reasons_found' => 'لم يتم العثور على أسباب رفض.',
+    'start_adding_rejection_reason' => 'ابدأ بإضافة سبب رفض جديد.',
+    'confirm_delete_rejection_reason' => 'هل أنت متأكد من حذف سبب الرفض هذا؟',
+    'rejection_reasons' => 'أسباب الرفض',
+    'rejection_reason_details' => 'تفاصيل سبب الرفض',
+    'create_new_rejection_reason' => 'إنشاء سبب رفض جديد',
+    'create_rejection_reason' => 'إنشاء سبب رفض',
+    'edit_rejection_reason' => 'تعديل سبب الرفض',
+    'update_rejection_reason' => 'تحديث سبب الرفض',
+    'reason_text' => 'نص السبب',
+
 ];

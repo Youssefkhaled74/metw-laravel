@@ -10,5 +10,6 @@ enum OrderStatus: string
     case ON_WAY = 'on_way';
     case DELIVERED = 'delivered';
     case CANCELLED = 'cancelled';
+    case REJECTED = 'rejected';
     case RETURNED = 'returned';
 }

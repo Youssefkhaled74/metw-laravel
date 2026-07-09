@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\MetwGo;
 
+use App\Enum\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
+use App\Models\RejectionReason;
 use App\Services\MetwGo\MetwGoCourierService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -143,6 +145,56 @@ class OrderController extends Controller
             return responseJson(false, 'لا يمكن بدء الطلب قبل الموافقة على الحساب.', [
                 'status' => $status,
             ], 403);
+        } catch (\Throwable $th) {
+            return responseJson(false, $th->getMessage(), null, 500);
+        }
+    }
+
+    public function reject($orderId, Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            $representative = $this->metwGoCourierService->assertRepresentativeExists($user);
+            $this->metwGoCourierService->assertApproved($representative);
+
+            $validated = $request->validate([
+                'reason_id' => ['required', 'integer', 'exists:rejection_reasons,id'],
+                'custom_reason' => ['nullable', 'string', 'max:500'],
+            ]);
+
+            $reason = RejectionReason::findOrFail($validated['reason_id']);
+
+            $orderItem = OrderItem::where('id', $orderId)
+                ->whereNull('representative_id')
+                ->where('status', 'pending')
+                ->firstOrFail();
+
+            $orderItem->update([
+                'status' => OrderStatus::REJECTED->value,
+                'rejection_reason_id' => $validated['reason_id'],
+                'rejection_note' => $validated['custom_reason'] ?? null,
+                'rejected_at' => now(),
+            ]);
+
+            return responseJson(true, 'تم رفض الطلب', [
+                'order_id' => (int) $orderItem->id,
+                'status' => OrderStatus::REJECTED->value,
+                'reason' => $reason->reason_text,
+                'custom_reason' => $validated['custom_reason'] ?? null,
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            if (str_contains($e->getMessage(), 'RejectionReason')) {
+                return responseJson(false, 'سبب الرفض غير موجود.', null, 404);
+            }
+            return responseJson(false, 'لم يتم العثور على الطلب أو تم أخذه بواسطة مندوب آخر.', null, 409);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $status = $e->validator->errors()->first('approval_status');
+            if ($status) {
+                return responseJson(false, 'لا يمكن رفض الطلب قبل الموافقة على الحساب.', [
+                    'status' => $status,
+                ], 403);
+            }
+            throw $e;
         } catch (\Throwable $th) {
             return responseJson(false, $th->getMessage(), null, 500);
         }

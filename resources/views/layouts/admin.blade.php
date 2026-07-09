@@ -2106,6 +2106,13 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.settings.rejection-reasons.*') ? 'active' : '' }}"
+                                           href="{{ route('admin.settings.rejection-reasons.index') }}">
+                                            <i class="fas fa-times-circle"></i>
+                                            <span class="link-text">{{ __('admin-dashboard.rejection_reasons') }}</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.settings.brands.*') ? 'active' : '' }}"
                                            href="{{ route('admin.settings.brands.index') }}">
                                             <i class="fas fa-tags"></i>

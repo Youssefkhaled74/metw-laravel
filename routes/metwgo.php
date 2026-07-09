@@ -35,6 +35,7 @@ Route::prefix('metwgo')->group(function () {
 
     // Public lookup routes
     Route::get('warehouses', [MetwGoLookupController::class, 'warehouses']);
+    Route::get('rejection-reasons', [MetwGoLookupController::class, 'rejectionReasons']);
 
     Route::prefix('lookups')->group(function () {
         Route::get('transport-types', [MetwGoLookupController::class, 'transportTypes']);
@@ -52,6 +53,7 @@ Route::prefix('metwgo')->group(function () {
             Route::get('active', [MetwGoOrderController::class, 'active']);
             Route::get('{orderId}', [MetwGoOrderController::class, 'show'])->whereNumber('orderId');
             Route::post('{orderId}/start', [MetwGoOrderController::class, 'start'])->whereNumber('orderId');
+            Route::post('{orderId}/reject', [MetwGoOrderController::class, 'reject'])->whereNumber('orderId');
         });
 
         Route::prefix('profile')->group(function () {

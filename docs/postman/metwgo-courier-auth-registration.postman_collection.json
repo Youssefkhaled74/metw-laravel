@@ -1300,11 +1300,71 @@
                                                         "listen":  "test"
                                                     }
                                                 ]
-                                  },
-                                  {
-                                      "name":  "Get governorates",
-                                      "request":  {
-                                                      "method":  "GET",
+                                   },
+                                   {
+                                       "name":  "Get rejection reasons",
+                                       "request":  {
+                                                       "method":  "GET",
+                                                       "header":  [
+                                                                      {
+                                                                          "key":  "Accept",
+                                                                          "value":  "application/json"
+                                                                      }
+                                                                  ],
+                                                       "url":  {
+                                                                   "raw":  "{{base_url}}/api/metwgo/rejection-reasons",
+                                                                   "host":  [
+                                                                                "{{base_url}}"
+                                                                            ],
+                                                                   "path":  [
+                                                                                "api",
+                                                                                "metwgo",
+                                                                                "rejection-reasons"
+                                                                            ]
+                                                               }
+                                                   },
+                                       "response":  [
+                                                        {
+                                                            "name":  "Success",
+                                                            "status":  "OK",
+                                                            "code":  200,
+                                                            "header":  [
+                                                                           {
+                                                                               "key":  "Content-Type",
+                                                                               "value":  "application/json"
+                                                                           }
+                                                                       ],
+                                                            "body":  "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"reason_text\": \"العميل طلب إلغاء\"\n    },\n    {\n      \"id\": 2,\n      \"reason_text\": \"مندوب آخر أقرب\"\n    }\n  ]\n}"
+                                                        }
+                                                    ],
+                                       "event":  [
+                                                     {
+                                                         "script":  {
+                                                                        "exec":  [
+                                                                                     "pm.test(\"Route exists - not 404\", function () {",
+                                                                                     "    pm.expect(pm.response.code).to.not.eql(404);",
+                                                                                     "});",
+                                                                                     "pm.test(\"Response is JSON\", function () {",
+                                                                                     "    pm.response.to.have.header(\"Content-Type\");",
+                                                                                     "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                                                                                     "});",
+                                                                                     "if (pm.response.code !== 401 \u0026\u0026 pm.response.code !== 500) {",
+                                                                                     "    pm.test(\"Response has success field\", function () {",
+                                                                                     "        var jsonData = pm.response.json();",
+                                                                                     "        pm.expect(jsonData).to.have.property(\"success\");",
+                                                                                     "    });",
+                                                                                     "}"
+                                                                                 ],
+                                                                        "type":  "text/javascript"
+                                                                    },
+                                                         "listen":  "test"
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "name":  "Get governorates",
+                                       "request":  {
+                                                       "method":  "GET",
                                                       "header":  [
                                                                      {
                                                                          "key":  "Accept",
@@ -2743,10 +2803,96 @@
                                                                    },
                                                         "listen":  "test"
                                                     }
-                                                ]
-                                  },
-                                  {
-                                      "name":  "Get active order",
+                               ]
+                                },
+                                   {
+                                       "name":  "Reject order",
+                                       "request":  {
+                                                       "method":  "POST",
+                                                       "header":  [
+                                                                      {
+                                                                          "key":  "Accept",
+                                                                          "value":  "application/json"
+                                                                      },
+                                                                      {
+                                                                          "key":  "Content-Type",
+                                                                          "value":  "application/json"
+                                                                      },
+                                                                      {
+                                                                          "key":  "Authorization",
+                                                                          "value":  "Bearer {{access_token}}"
+                                                                      }
+                                                                  ],
+                                                       "body":  {
+                                                                    "mode":  "raw",
+                                                                    "raw":  "{\n  \"reason_id\": 1,\n  \"custom_reason\": \"العميل طلب إلغاء\"\n}"
+                                                                },
+                                                       "url":  {
+                                                                   "raw":  "{{base_url}}/api/metwgo/orders/{{orderId}}/reject",
+                                                                   "host":  [
+                                                                                "{{base_url}}"
+                                                                            ],
+                                                                   "path":  [
+                                                                                "api",
+                                                                                "metwgo",
+                                                                                "orders",
+                                                                                "{{orderId}}",
+                                                                                "reject"
+                                                                            ]
+                                                               }
+                                                   },
+                                       "response":  [
+                                                        {
+                                                            "name":  "Rejected",
+                                                            "status":  "OK",
+                                                            "code":  200,
+                                                            "header":  [
+                                                                           {
+                                                                               "key":  "Content-Type",
+                                                                               "value":  "application/json"
+                                                                           }
+                                                                       ],
+                                                            "body":  "{\n  \"success\": true,\n  \"message\": \"تم رفض الطلب\",\n  \"data\": {\n    \"order_id\": 1,\n    \"status\": \"rejected\",\n    \"reason\": \"Other reason\",\n    \"custom_reason\": \"العميل طلب إلغاء\"\n  }\n}"
+                                                        },
+                                                        {
+                                                            "name":  "Conflict - already taken",
+                                                            "status":  "Conflict",
+                                                            "code":  409,
+                                                            "header":  [
+                                                                           {
+                                                                               "key":  "Content-Type",
+                                                                               "value":  "application/json"
+                                                                           }
+                                                                       ],
+                                                            "body":  "{\n  \"success\": false,\n  \"message\": \"لم يتم العثور على الطلب أو تم أخذه بواسطة مندوب آخر.\"\n}"
+                                                        }
+                                                    ],
+                                       "event":  [
+                                                     {
+                                                         "script":  {
+                                                                        "exec":  [
+                                                                                     "pm.test(\"Route exists - not 404\", function () {",
+                                                                                     "    pm.expect(pm.response.code).to.not.eql(404);",
+                                                                                     "});",
+                                                                                     "pm.test(\"Response is JSON\", function () {",
+                                                                                     "    pm.response.to.have.header(\"Content-Type\");",
+                                                                                     "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                                                                                     "});",
+                                                                                     "if (pm.response.code !== 401 \u0026\u0026 pm.response.code !== 500) {",
+                                                                                     "    pm.test(\"Response has success field\", function () {",
+                                                                                     "        var jsonData = pm.response.json();",
+                                                                                     "        pm.expect(jsonData).to.have.property(\"success\");",
+                                                                                     "    });",
+                                                                                     "}"
+                                                                                 ],
+                                                                        "type":  "text/javascript"
+                                                                    },
+                                                         "listen":  "test"
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "name":  "Get active order",
                                       "request":  {
                                                       "method":  "GET",
                                                       "header":  [

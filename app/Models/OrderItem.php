@@ -18,11 +18,19 @@ class OrderItem extends Model
         'item_number',
         'status',
         'parent_id',
-        'is_split'
+        'is_split',
+        'rejection_reason_id',
+        'rejection_note',
+        'rejected_at',
     ];
     protected $casts = [
         'est_date' => 'date',
+        'rejected_at' => 'datetime',
     ];
+    public function rejectionReason()
+    {
+        return $this->belongsTo(RejectionReason::class);
+    }
     public function order()
     {
         return $this->belongsTo(Order::class);

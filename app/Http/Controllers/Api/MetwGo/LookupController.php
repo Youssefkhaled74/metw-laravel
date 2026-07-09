@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\MetwGo;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Governorate;
+use App\Models\RejectionReason;
 use App\Services\MetwGo\MetwGoCourierService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,6 +51,24 @@ class LookupController extends Controller
                 ->values();
 
             return responseJson(true, '', $governorates, 200);
+        } catch (\Throwable $th) {
+            return responseJson(false, $th->getMessage(), null, 500);
+        }
+    }
+
+    public function rejectionReasons(): JsonResponse
+    {
+        try {
+            $reasons = RejectionReason::query()
+                ->orderBy('id')
+                ->get()
+                ->map(fn ($reason) => [
+                    'id' => $reason->id,
+                    'reason_text' => $reason->reason_text,
+                ])
+                ->values();
+
+            return responseJson(true, '', $reasons, 200);
         } catch (\Throwable $th) {
             return responseJson(false, $th->getMessage(), null, 500);
         }
