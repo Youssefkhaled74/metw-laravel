@@ -36,6 +36,7 @@ class Representative extends Model
         'approved_at',
         'suspended_at',
         'is_active',
+        'is_profile_complete',
         'metadata',
     ];
 
@@ -49,6 +50,7 @@ class Representative extends Model
         'approved_at' => 'datetime',
         'suspended_at' => 'datetime',
         'is_active' => 'boolean',
+        'is_profile_complete' => 'boolean',
         'village_service' => 'boolean',
         'metadata' => 'array',
     ];

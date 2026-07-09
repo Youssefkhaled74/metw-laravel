@@ -22,7 +22,7 @@ class RepresentativeController extends Controller
             'mobile' => ['nullable', 'string', 'max:30'],
             'account_type' => ['nullable', 'in:all,free,warehouse'],
             'work_type' => ['nullable', 'in:all,local_delivery,inter_governorate_shipping,bus_driver'],
-            'status' => ['nullable', 'in:all,incomplete,pending_review,approved,rejected,suspended'],
+            'status' => ['nullable', 'in:all,incomplete,pending_review,pending_approval,approved,active,rejected,suspended,inactive'],
             'governorate_id' => ['nullable', 'integer', 'exists:governorates,id'],
             'city_id' => ['nullable', 'integer', 'exists:cities,id'],
             'sort_by' => ['nullable', 'in:account_number,first_name,phone,account_type,status,created_at'],
@@ -83,8 +83,12 @@ class RepresentativeController extends Controller
 
     public function approve(Representative $representative)
     {
+        $newStatus = $representative->status === RepresentativeStatus::PENDING_APPROVAL
+            ? RepresentativeStatus::ACTIVE
+            : RepresentativeStatus::APPROVED;
+
         $representative->update([
-            'status' => RepresentativeStatus::APPROVED,
+            'status' => $newStatus,
             'reviewed_at' => now(),
             'approved_at' => now(),
             'suspended_at' => null,

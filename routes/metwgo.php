@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\MetwGo\ProfileController as MetwGoProfileController
 use App\Http\Controllers\Api\MetwGo\RegistrationController as MetwGoRegistrationController;
 use App\Http\Controllers\Api\MetwGo\ShippingRequestController as MetwGoShippingRequestController;
 use App\Http\Controllers\Api\MetwGo\WalletController as MetwGoWalletController;
+use App\Http\Controllers\Api\Admin\AdminMetwGoController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('metwgo')->group(function () {
@@ -22,6 +23,7 @@ Route::prefix('metwgo')->group(function () {
 
         // Registration
         Route::post('register', [MetwGoRegistrationController::class, 'register']);
+        Route::post('simple-register', [MetwGoRegistrationController::class, 'simpleRegister']);
         Route::post('register/step-1', [MetwGoRegistrationController::class, 'stepOne']);
         Route::post('register/step-2', [MetwGoRegistrationController::class, 'stepTwo'])->middleware('auth:sanctum');
         Route::post('register/step-3', [MetwGoRegistrationController::class, 'stepThree'])->middleware('auth:sanctum');
@@ -33,7 +35,7 @@ Route::prefix('metwgo')->group(function () {
         Route::post('logout', [MetwGoAuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::post('password/change', [MetwGoAuthController::class, 'changePassword'])->middleware('auth:sanctum');
     });
-
+                                    
     // Public lookup routes
     Route::get('warehouses', [MetwGoLookupController::class, 'warehouses']);
     Route::get('rejection-reasons', [MetwGoLookupController::class, 'rejectionReasons']);
@@ -82,5 +84,15 @@ Route::prefix('metwgo')->group(function () {
             Route::post('{requestId}/start', [MetwGoShippingRequestController::class, 'start'])->whereNumber('requestId');
             Route::post('{requestId}/reject', [MetwGoShippingRequestController::class, 'reject'])->whereNumber('requestId');
         });
+
+        // Profile completion (Phase 4)
+        Route::post('profile/complete', [MetwGoRegistrationController::class, 'completeProfile']);
+    });
+
+    // Admin MetwGo API
+    Route::prefix('admin/metwgo')->middleware('auth:sanctum')->group(function () {
+        Route::get('couriers/pending', [AdminMetwGoController::class, 'pendingCouriers']);
+        Route::put('couriers/{representative}/approve', [AdminMetwGoController::class, 'approve']);
+        Route::put('couriers/{representative}/reject', [AdminMetwGoController::class, 'reject']);
     });
 });

@@ -303,6 +303,7 @@ class MetwGoCourierService
             'name' => $fullName,
             'phone' => $representative->phone,
             'approval_status' => $this->approvalStatus($representative),
+            'is_profile_complete' => (bool) $representative->is_profile_complete,
             'avatar' => $profilePhoto?->url ?? ($representative->user?->image ? asset($representative->user->image) : null),
             'rating' => (float) data_get($representative->metadata, 'rating', 4.9),
             'availability_status' => $this->availabilityStatus($representative),
