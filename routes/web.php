@@ -182,6 +182,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/return-requests/{id}/status', [\App\Http\Controllers\Dashboard\Admin\ReturnRequestController::class, 'updateOrderStatus'])->name('return-requests.update-status');
         Route::patch('/return-requests/{id}/reason', [\App\Http\Controllers\Dashboard\Admin\ReturnRequestController::class, 'updateOrderReason'])->name('return-requests.update-reason');
 
+        // Order Return Requests (MetwGo)
+        Route::prefix('return-orders')->name('return-orders.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Dashboard\Admin\OrderReturnController::class, 'pendingReturns'])->name('pending');
+            Route::get('/complaints', [\App\Http\Controllers\Dashboard\Admin\OrderReturnController::class, 'complaints'])->name('complaints');
+            Route::get('/{orderReturnRequest}', [\App\Http\Controllers\Dashboard\Admin\OrderReturnController::class, 'show'])->name('show');
+            Route::patch('/{orderReturnRequest}/status', [\App\Http\Controllers\Dashboard\Admin\OrderReturnController::class, 'updateStatus'])->name('update-status');
+            Route::post('/{orderReturnRequest}/reactivate', [\App\Http\Controllers\Dashboard\Admin\OrderReturnController::class, 'reactivate'])->name('reactivate');
+        });
+
         // Complaints
         Route::prefix('complaints')->name('complaints.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Dashboard\Admin\ComplaintController::class, 'index'])->name('index');
@@ -321,6 +330,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::patch('/{rejection_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'update'])->name('update');
                 Route::delete('/{rejection_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'destroy'])->name('destroy');
                 Route::patch('/{rejection_reason}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'toggleStatus'])->name('toggle-status');
+            });
+
+            Route::prefix('return-reasons')->name('return-reasons.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'store'])->name('store');
+                Route::get('/{return_reason}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'edit'])->name('edit');
+                Route::patch('/{return_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'update'])->name('update');
+                Route::delete('/{return_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'destroy'])->name('destroy');
+                Route::patch('/{return_reason}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'toggleStatus'])->name('toggle-status');
             });
 
             Route::prefix('states')->name('states.')->group(function () {

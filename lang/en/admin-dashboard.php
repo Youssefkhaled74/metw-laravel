@@ -1507,6 +1507,20 @@ return [
     'no_shipment_requests_message' => 'There are no shipment requests matching your criteria.',
     'request_summary' => 'Request Summary',
 
+    'return-reasons' => [
+        'return_reasons' => 'Return Reasons',
+        'all_return_reasons' => 'All Return Reasons',
+        'add_return_reason' => 'Add Return Reason',
+        'edit_return_reason' => 'Edit Return Reason',
+        'reason_text' => 'Reason Text',
+        'reason_text_placeholder' => 'Enter return reason text',
+        'is_active' => 'Active',
+        'created_success' => 'Return reason created successfully.',
+        'updated_success' => 'Return reason updated successfully.',
+        'deleted_success' => 'Return reason deleted successfully.',
+        'status_updated' => 'Return reason status updated successfully.',
+    ],
+
     'rejection_reasons_management' => 'Rejection Reasons Management',
     'all_rejection_reasons' => 'All Rejection Reasons',
     'add_rejection_reason' => 'Add Rejection Reason',

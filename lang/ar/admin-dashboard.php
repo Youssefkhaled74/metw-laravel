@@ -1533,6 +1533,20 @@ return [
     'no_shipment_requests_message' => 'لا توجد طلبات شحن تطابق معايير البحث.',
     'request_summary' => 'ملخص الطلب',
 
+    'return-reasons' => [
+        'return_reasons' => 'أسباب الإرجاع',
+        'all_return_reasons' => 'كل أسباب الإرجاع',
+        'add_return_reason' => 'إضافة سبب إرجاع',
+        'edit_return_reason' => 'تعديل سبب إرجاع',
+        'reason_text' => 'نص السبب',
+        'reason_text_placeholder' => 'أدخل نص سبب الإرجاع',
+        'is_active' => 'مفعل',
+        'created_success' => 'تم إضافة سبب الإرجاع بنجاح.',
+        'updated_success' => 'تم تحديث سبب الإرجاع بنجاح.',
+        'deleted_success' => 'تم حذف سبب الإرجاع بنجاح.',
+        'status_updated' => 'تم تحديث حالة سبب الإرجاع بنجاح.',
+    ],
+
     'rejection_reasons_management' => 'إدارة أسباب الرفض',
     'all_rejection_reasons' => 'كل أسباب الرفض',
     'add_rejection_reason' => 'إضافة سبب رفض',

@@ -7,9 +7,11 @@ use App\Http\Controllers\Api\MetwGo\NotificationController as MetwGoNotification
 use App\Http\Controllers\Api\MetwGo\OrderController as MetwGoOrderController;
 use App\Http\Controllers\Api\MetwGo\ProfileController as MetwGoProfileController;
 use App\Http\Controllers\Api\MetwGo\RegistrationController as MetwGoRegistrationController;
+use App\Http\Controllers\Api\MetwGo\RepReturnController as MetwGoRepReturnController;
 use App\Http\Controllers\Api\MetwGo\ShippingRequestController as MetwGoShippingRequestController;
 use App\Http\Controllers\Api\MetwGo\WalletController as MetwGoWalletController;
 use App\Http\Controllers\Api\Admin\AdminMetwGoController;
+use App\Http\Controllers\Api\Admin\AdminReturnApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('metwgo')->group(function () {
@@ -87,12 +89,27 @@ Route::prefix('metwgo')->group(function () {
 
         // Profile completion (Phase 4)
         Route::post('profile/complete', [MetwGoRegistrationController::class, 'completeProfile']);
+
+        // Return Requests (Representative)
+        Route::post('orders/{orderId}/return-request', [MetwGoRepReturnController::class, 'create'])->whereNumber('orderId');
     });
+
+    // Public return reasons lookup
+    Route::get('return-reasons', [MetwGoRepReturnController::class, 'reasons']);
 
     // Admin MetwGo API
     Route::prefix('admin/metwgo')->middleware('auth:sanctum')->group(function () {
         Route::get('couriers/pending', [AdminMetwGoController::class, 'pendingCouriers']);
         Route::put('couriers/{representative}/approve', [AdminMetwGoController::class, 'approve']);
         Route::put('couriers/{representative}/reject', [AdminMetwGoController::class, 'reject']);
+    });
+
+    // Admin MetwGo Return API
+    Route::prefix('admin/returns')->middleware('auth:sanctum')->group(function () {
+        Route::get('pending', [AdminReturnApiController::class, 'pendingReturns']);
+        Route::get('complaints', [AdminReturnApiController::class, 'complaints']);
+        Route::get('{orderReturnRequest}', [AdminReturnApiController::class, 'show']);
+        Route::put('{orderReturnRequest}/status', [AdminReturnApiController::class, 'updateStatus']);
+        Route::post('{orderReturnRequest}/reactivate', [AdminReturnApiController::class, 'reactivate']);
     });
 });
