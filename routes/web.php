@@ -221,6 +221,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('roles', RoleController::class)->names('roles');
         Route::resource('permissions', PermissionController::class)->names('permissions');
 
+        // Permission Matrix (employee × permission)
+        Route::get('/permission-matrix', [\App\Http\Controllers\Dashboard\Admin\PermissionMatrixController::class, 'index'])->name('permission-matrix.index');
+        Route::put('/permission-matrix', [\App\Http\Controllers\Dashboard\Admin\PermissionMatrixController::class, 'update'])->name('permission-matrix.update');
+
         //Notifications
         Route::get('/notifications', [NotificationController::class, 'json'])->name('notifications');
         Route::get('/all-notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -689,6 +693,12 @@ Route::prefix('vendor')->name('vendor.')->group(function () {
         Route::get('/all-notifications', [VendorNotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/{id}/read', [VendorNotificationController::class, 'markAsRead'])->name('notifications.read');
         Route::post('/notifications/read-all', [VendorNotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+
+        // Urgent Tasks
+        Route::get('/urgent-tasks', [\App\Http\Controllers\Dashboard\Vendor\UrgentTasksController::class, 'index'])->name('urgent-tasks');
+        Route::get('/urgent-tasks/filter', [\App\Http\Controllers\Dashboard\Vendor\UrgentTasksController::class, 'filter'])->name('urgent-tasks.filter');
+        Route::get('/urgent-tasks/stats', [\App\Http\Controllers\Dashboard\Vendor\UrgentTasksController::class, 'stats'])->name('urgent-tasks.stats');
+        Route::post('/urgent-tasks/process', [\App\Http\Controllers\Dashboard\Vendor\UrgentTasksController::class, 'process'])->name('urgent-tasks.process');
 
         // Products Reviews Management
         Route::controller(\App\Http\Controllers\Dashboard\Vendor\ProductController::class)->group(function () {

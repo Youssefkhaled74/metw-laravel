@@ -2076,6 +2076,13 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.permission-matrix*') ? 'active' : '' }}"
+                                   href="{{ route('admin.permission-matrix.index') }}">
+                                    <i class="fas fa-table-cells"></i>
+                                    <span class="link-text">{{ __('admin-dashboard.permission_matrix') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="#settingsSubmenu" data-bs-toggle="collapse"
                                 aria-expanded="{{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }}">
                                     <i class="fas fa-cog"></i>

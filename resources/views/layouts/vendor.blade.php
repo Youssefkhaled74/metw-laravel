@@ -620,6 +620,13 @@
                             <span class="link-text">@lang('vendor-dashboard.return_requests')</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('vendor.urgent-tasks*') ? 'active' : '' }}"
+                           href="{{ route('vendor.urgent-tasks') }}">
+                            <i class="fas fa-bolt"></i>
+                            <span class="link-text">المهام العاجلة</span>
+                        </a>
+                    </li>
                     {{-- <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('vendor.reports') ? 'active' : '' }}"
                            href="{{ route('vendor.reports') }}">

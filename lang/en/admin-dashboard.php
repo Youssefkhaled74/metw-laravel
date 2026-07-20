@@ -1536,4 +1536,15 @@ return [
     'update_rejection_reason' => 'Update Rejection Reason',
     'reason_text' => 'Reason Text',
 
+    // Permission Matrix
+    'permission_matrix_management' => 'Permission Matrix',
+    'permission_matrix_subtitle' => 'Manage employee permissions from a single matrix screen. Check or uncheck permissions for each employee.',
+    'permission_name' => 'Permission Name',
+    'search_employees' => 'Search by name, email, position...',
+    'toggle_all' => 'Toggle All',
+    'matrix_selected_count' => ':count permissions checked',
+    'permission_matrix_updated' => 'Employee permissions updated successfully.',
+    'permission_matrix_error' => 'An error occurred while updating permissions. Please try again.',
+    'saving' => 'Saving...',
+
 ];

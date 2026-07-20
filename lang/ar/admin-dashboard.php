@@ -1562,4 +1562,15 @@ return [
     'update_rejection_reason' => 'تحديث سبب الرفض',
     'reason_text' => 'نص السبب',
 
+    // Permission Matrix
+    'permission_matrix_management' => 'مصفوفة الصلاحيات',
+    'permission_matrix_subtitle' => 'إدارة صلاحيات الموظفين من شاشة مصفوفة واحدة. قم بتحديد أو إلغاء تحديد الصلاحيات لكل موظف.',
+    'permission_name' => 'اسم الصلاحية',
+    'search_employees' => 'بحث بالاسم، البريد الإلكتروني، المنصب...',
+    'toggle_all' => 'تبديل الكل',
+    'matrix_selected_count' => ':count صلاحية محددة',
+    'permission_matrix_updated' => 'تم تحديث صلاحيات الموظفين بنجاح.',
+    'permission_matrix_error' => 'حدث خطأ أثناء تحديث الصلاحيات. يرجى المحاولة مرة أخرى.',
+    'saving' => 'جاري الحفظ...',
+
 ];
