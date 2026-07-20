@@ -94,6 +94,12 @@
                                         <i class="{{ $sortIcon('id') }}"></i>
                                     </a>
                                 </th>
+                                <th class="text-nowrap sortable-col {{ $currentSort === 'position' ? 'is-active' : '' }}" aria-sort="{{ $currentSort === 'position' ? ($currentDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
+                                    <a href="{{ $sortUrl('position') }}" class="sortable-link">
+                                        <span>{{ __('admin-dashboard.display_order') }}</span>
+                                        <i class="{{ $sortIcon('position') }}"></i>
+                                    </a>
+                                </th>
                                 <th class="text-nowrap sortable-col {{ $currentSort === 'name' ? 'is-active' : '' }}" aria-sort="{{ $currentSort === 'name' ? ($currentDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
                                     <a href="{{ $sortUrl('name') }}" class="sortable-link">
                                         <span>{{ __('admin-dashboard.name') }}</span>
@@ -118,6 +124,10 @@
                                 @endphp
                                 <tr>
                                     <td class="fw-semibold text-muted">{{ $mainCategory->id }}</td>
+
+                                    <td>
+                                        <span class="badge bg-primary-subtle text-primary">{{ $mainCategory->position }}</span>
+                                    </td>
 
                                     <td>
                                         <div class="d-flex align-items-center gap-3">

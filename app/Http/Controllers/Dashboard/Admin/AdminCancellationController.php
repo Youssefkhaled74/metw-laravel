@@ -250,7 +250,7 @@ class AdminCancellationController extends Controller
                     'wallet_id' => $wallet->id,
                     'reference_id' => 'REFUND-' . $returnRequest->return_number,
                     'amount' => $refundAmount,
-                    'description' => ' refunded via Mitozon Wallet for cancellation request ' . $returnRequest->return_number,
+                    'description' => ' refunded via Metwzon Wallet for cancellation request ' . $returnRequest->return_number,
                     'type' => 'increase',
                 ]);
 

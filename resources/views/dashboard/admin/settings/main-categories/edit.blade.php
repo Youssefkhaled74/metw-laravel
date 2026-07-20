@@ -57,6 +57,15 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+            <div class="mb-3">
+                <label for="position" class="form-label">{{ __('admin-dashboard.display_order') }}</label>
+                <input type="number" class="form-control @error('position') is-invalid @enderror"
+                    id="position" name="position" value="{{ old('position', $mainCategory->position) }}" min="0">
+                @error('position')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                <small class="text-muted">{{ __('admin-dashboard.display_order_help') }}</small>
+            </div>
             <div class="form-check mb-3">
                 <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1"
                     {{ old('is_active', $mainCategory->is_active) ? 'checked' : '' }}>

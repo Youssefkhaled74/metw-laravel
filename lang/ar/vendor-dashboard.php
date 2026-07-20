@@ -698,4 +698,21 @@ return [
     'discount_end_must_be_today_or_later' => 'يجب أن يكون تاريخ نهاية الخصم اليوم أو في المستقبل',
     'discount_start_must_be_today_or_later' => 'يجب أن يكون تاريخ بداية الخصم اليوم أو في المستقبل',
 
+    // Brand Logo / Trademark
+    'brand_logo' => 'الشعار التجاري',
+    'brand_logo_subtitle' => 'إدارة الشعار التجاري للمتجر. سيظهر هذا الشعار في كل مكان يُعرض فيه علامتك التجارية.',
+    'current_logo' => 'الشعار الحالي',
+    'upload_logo' => 'رفع شعار جديد',
+    'brand_name' => 'اسم العلامة التجارية',
+    'brand_name_placeholder' => 'أدخل اسم العلامة التجارية / المتجر',
+    'logo_file' => 'صورة الشعار',
+    'max_size_2mb' => 'الحد الأقصى لحجم الملف: 2 ميجابايت',
+    'preview' => 'معاينة',
+    'save_logo' => 'حفظ الشعار',
+    'remove_logo' => 'إزالة الشعار',
+    'no_logo_uploaded' => 'لم يتم رفع شعار بعد.',
+    'confirm_remove_logo' => 'هل أنت متأكد أنك تريد إزالة الشعار؟',
+    'brand_logo_updated' => 'تم تحديث الشعار التجاري بنجاح.',
+    'brand_logo_removed' => 'تم إزالة الشعار التجاري بنجاح.',
+
 ];

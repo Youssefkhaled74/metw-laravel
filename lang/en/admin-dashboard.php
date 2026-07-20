@@ -608,20 +608,20 @@ return [
         'keep_current_image' => 'Leave empty to keep the current image.',
         'required_field' => '*',
 
-        // Contact Admin Management
-        'contact_admin' => 'E-Wallet Details',
-        'add_new_contact' => 'Add New E-Wallet Details',
-        'all_contacts' => 'All E-Wallet Details',
-        'no_contacts_found' => 'No e-wallet details found',
-        'no_contacts_message' => 'Start by adding your first e-wallet details entry.',
-        'create_contact' => 'Create E-Wallet Details',
-        'edit_contact' => 'Edit E-Wallet Details',
-        'edit_contact_details' => 'Edit E-Wallet Details',
-        'contact_details' => 'E-Wallet Details',
-        'create_contact_button' => 'Create E-Wallet Details',
-        'update_contact_button' => 'Update E-Wallet Details',
-        'contact_value_placeholder' => 'Enter wallet detail value (number, link, name, etc.)',
-        'confirm_delete_contact' => 'Are you sure you want to delete this e-wallet details entry?',
+        // Electronic Wallet Information
+        'contact_admin' => 'Electronic Wallet Information',
+        'add_new_contact' => 'Add New Electronic Wallet',
+        'all_contacts' => 'All Electronic Wallets',
+        'no_contacts_found' => 'No electronic wallets found',
+        'no_contacts_message' => 'Start by adding your first electronic wallet entry.',
+        'create_contact' => 'Create Electronic Wallet',
+        'edit_contact' => 'Edit Electronic Wallet',
+        'edit_contact_details' => 'Edit Electronic Wallet Details',
+        'contact_details' => 'Electronic Wallet Details',
+        'create_contact_button' => 'Create Electronic Wallet',
+        'update_contact_button' => 'Update Electronic Wallet',
+        'contact_value_placeholder' => 'Enter wallet account number or details (e.g. Vodafone Cash, bank account number)',
+        'confirm_delete_contact' => 'Are you sure you want to delete this electronic wallet entry?',
 
         // Return Request Details Page
         'return_request_details' => 'Return Request Details',
@@ -1546,5 +1546,13 @@ return [
     'permission_matrix_updated' => 'Employee permissions updated successfully.',
     'permission_matrix_error' => 'An error occurred while updating permissions. Please try again.',
     'saving' => 'Saving...',
+
+    // Management Contact Information
+    'management_contact_info' => 'Management Contact Information',
+    'management_contact_subtitle' => 'Contact information of authorized management employees, automatically loaded from employee records.',
+
+    // Main Category Ordering
+    'display_order' => 'Display Order',
+    'display_order_help' => 'Numeric order for displaying categories. Lower numbers appear first.',
 
 ];

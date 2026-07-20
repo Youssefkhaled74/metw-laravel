@@ -708,4 +708,21 @@ return [
     'discount_end_must_be_after_start' => 'The discount end date must be after the start date',
     'discount_end_must_be_today_or_later' => 'The discount end date must be today or later',
     'discount_start_must_be_today_or_later' => 'The discount start date must be today or later',
+
+    // Brand Logo / Trademark
+    'brand_logo' => 'Brand Logo',
+    'brand_logo_subtitle' => 'Manage your store trademark and logo. This logo will be displayed wherever your brand is shown.',
+    'current_logo' => 'Current Logo',
+    'upload_logo' => 'Upload New Logo',
+    'brand_name' => 'Brand Name',
+    'brand_name_placeholder' => 'Enter your brand / store name',
+    'logo_file' => 'Logo Image',
+    'max_size_2mb' => 'Max file size: 2MB',
+    'preview' => 'Preview',
+    'save_logo' => 'Save Logo',
+    'remove_logo' => 'Remove Logo',
+    'no_logo_uploaded' => 'No logo uploaded yet.',
+    'confirm_remove_logo' => 'Are you sure you want to remove your logo?',
+    'brand_logo_updated' => 'Brand logo updated successfully.',
+    'brand_logo_removed' => 'Brand logo removed successfully.',
 ];

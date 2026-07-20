@@ -407,20 +407,20 @@ return [
         'whatsapp_placeholder' => '+1234567890',
         'required_field' => '*',
 
-        // Contact Admin Management
-        'contact_admin' => 'بيانات المحافظ الإلكترونية',
-        'add_new_contact' => 'إضافة بيانات محفظة إلكترونية جديدة',
-        'all_contacts' => 'كل بيانات المحافظ الإلكترونية',
-        'no_contacts_found' => 'لا توجد بيانات محافظ إلكترونية',
-        'no_contacts_message' => 'ابدأ بإضافة أول بيانات محفظة إلكترونية.',
-        'create_contact' => 'إنشاء بيانات محفظة إلكترونية',
-        'edit_contact' => 'تعديل بيانات المحفظة الإلكترونية',
-        'edit_contact_details' => 'تعديل تفاصيل بيانات المحفظة الإلكترونية',
-        'contact_details' => 'تفاصيل بيانات المحفظة الإلكترونية',
-        'create_contact_button' => 'إنشاء بيانات محفظة إلكترونية',
-        'update_contact_button' => 'تحديث بيانات المحفظة الإلكترونية',
-        'contact_value_placeholder' => 'اكتب قيمة بيانات المحفظة (رقم، رابط، اسم، ...)',
-        'confirm_delete_contact' => 'هل أنت متأكد أنك تريد حذف بيانات المحفظة الإلكترونية هذه؟',
+        // Electronic Wallet Information
+        'contact_admin' => 'معلومات المحافظ الإلكترونية',
+        'add_new_contact' => 'إضافة محفظة إلكترونية جديدة',
+        'all_contacts' => 'جميع المحافظ الإلكترونية',
+        'no_contacts_found' => 'لا توجد محافظ إلكترونية',
+        'no_contacts_message' => 'ابدأ بإضافة أول محفظة إلكترونية.',
+        'create_contact' => 'إنشاء محفظة إلكترونية',
+        'edit_contact' => 'تعديل المحفظة الإلكترونية',
+        'edit_contact_details' => 'تعديل تفاصيل المحفظة الإلكترونية',
+        'contact_details' => 'تفاصيل المحفظة الإلكترونية',
+        'create_contact_button' => 'إنشاء محفظة إلكترونية',
+        'update_contact_button' => 'تحديث المحفظة الإلكترونية',
+        'contact_value_placeholder' => 'أدخل رقم حساب المحفظة أو التفاصيل (مثال: فودافون كاش، رقم حساب بنكي)',
+        'confirm_delete_contact' => 'هل أنت متأكد أنك تريد حذف هذه المحفظة الإلكترونية؟',
         'whatsapp_placeholder' => '+1234567890',
         'required_field' => '*',
         'cancel_button' => 'إلغاء',
@@ -1572,5 +1572,13 @@ return [
     'permission_matrix_updated' => 'تم تحديث صلاحيات الموظفين بنجاح.',
     'permission_matrix_error' => 'حدث خطأ أثناء تحديث الصلاحيات. يرجى المحاولة مرة أخرى.',
     'saving' => 'جاري الحفظ...',
+
+    // Management Contact Information
+    'management_contact_info' => 'معلومات الاتصال الإدارية',
+    'management_contact_subtitle' => 'معلومات الاتصال الخاصة بالموظفين الإداريين المعتمدين، محملة تلقائياً من سجلات الموظفين.',
+
+    // Main Category Ordering
+    'display_order' => 'ترتيب العرض',
+    'display_order_help' => 'الترتيب الرقمي لعرض التصنيفات. الأرقام الأصغر تظهر أولاً.',
 
 ];

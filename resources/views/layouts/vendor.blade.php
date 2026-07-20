@@ -635,6 +635,13 @@
                         </a>
                     </li> --}}
                     <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('vendor.brand-logo*') ? 'active' : '' }}"
+                           href="{{ route('vendor.brand-logo.index') }}">
+                            <i class="fas fa-award"></i>
+                            <span class="link-text">@lang('vendor-dashboard.brand_logo')</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('vendor.profile*') ? 'active' : '' }}"
                            href="{{ route('vendor.profile') }}">
                             <i class="fas fa-user"></i>

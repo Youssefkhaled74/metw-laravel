@@ -231,6 +231,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 
+        //Management Contact Info (auto from employees)
+        Route::get('/management-contact', [\App\Http\Controllers\Dashboard\Admin\ManagementContactController::class, 'index'])->name('management-contact.index');
+
         // Settings Management
         Route::prefix('settings')->name('settings.')->group(function () {
             // Banner Management
@@ -687,6 +690,11 @@ Route::prefix('vendor')->name('vendor.')->group(function () {
             Route::patch('/return-requests/{returnRequest}/seller-status', 'updateSellerStatus')->name('return-requests.seller-status');
 
         });
+
+        // Brand Logo / Trademark
+        Route::get('/brand-logo', [\App\Http\Controllers\Dashboard\Vendor\BrandLogoController::class, 'index'])->name('brand-logo.index');
+        Route::put('/brand-logo', [\App\Http\Controllers\Dashboard\Vendor\BrandLogoController::class, 'update'])->name('brand-logo.update');
+        Route::delete('/brand-logo', [\App\Http\Controllers\Dashboard\Vendor\BrandLogoController::class, 'destroy'])->name('brand-logo.destroy');
 
         //Notifications
         Route::get('/notifications', [VendorNotificationController::class, 'json'])->name('notifications');

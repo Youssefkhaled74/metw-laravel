@@ -2108,8 +2108,15 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.settings.contact-admins.*') ? 'active' : '' }}"
                                            href="{{ route('admin.settings.contact-admins.index') }}">
-                                            <i class="fas fa-address-card"></i>
+                                            <i class="fas fa-wallet"></i>
                                             <span class="link-text">{{ __('admin-dashboard.contact_admin') }}</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.management-contact*') ? 'active' : '' }}"
+                                           href="{{ route('admin.management-contact.index') }}">
+                                            <i class="fas fa-address-book"></i>
+                                            <span class="link-text">{{ __('admin-dashboard.management_contact_info') }}</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">

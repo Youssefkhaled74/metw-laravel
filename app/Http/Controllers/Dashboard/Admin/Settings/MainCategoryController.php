@@ -20,10 +20,10 @@ class MainCategoryController extends Controller
 
         $search = trim((string) $request->input('search'));
         $status = $request->input('status', 'all');
-        $sort = $request->input('sort', 'id');
-        $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $sort = $request->input('sort', 'position');
+        $direction = strtolower((string) $request->input('direction', 'asc')) === 'asc' ? 'asc' : 'desc';
 
-        $allowedSorts = ['id', 'name', 'slug', 'created_at'];
+        $allowedSorts = ['id', 'name', 'slug', 'position', 'created_at'];
         if (! in_array($sort, $allowedSorts, true)) {
             $sort = 'id';
         }
@@ -75,6 +75,7 @@ class MainCategoryController extends Controller
             'translations.ar.slug' => 'nullable|string|max:255|unique:main_category_translations,slug',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
             'is_active' => 'boolean',
+            'position' => 'nullable|integer|min:0',
         ]);
 
         $imagePath = uploadImage($request, 'image', 'storage/main-categories');
@@ -89,6 +90,7 @@ class MainCategoryController extends Controller
             'slug' => $slug,
             'image' => $imagePath,
             'is_active' => $validated['is_active'],
+            'position' => $validated['position'] ?? 0,
         ]);
 
         foreach ($validated['translations'] as $locale => $data) {
@@ -121,27 +123,25 @@ class MainCategoryController extends Controller
         'translations.ar.slug' => 'nullable|string|max:255|unique:main_category_translations,slug,'. optional($mainCategory->translation('ar'))->id,
         'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         'is_active' => 'boolean',
+        'position' => 'nullable|integer|min:0',
         ]);
+
+        $updateData = [
+            'name' => $validated['translations']['en']['name'],
+            'slug' => Str::slug($validated['translations']['en']['slug']),
+            'is_active' => $request->has('is_active'),
+            'position' => $validated['position'] ?? $mainCategory->position,
+        ];
 
         if ($request->hasFile('image')) {
             if ($mainCategory->image && File::exists(public_path($mainCategory->image))) {
                 File::delete(public_path($mainCategory->image));
             }
             $imagePath = uploadImage($request, 'image', 'storage/main-categories');
-
-            $validated['image'] = $imagePath;
+            $updateData['image'] = $imagePath;
         }
 
-        $validated['name'] = $validated['translations']['en']['name'];
-        $slug = Str::slug($validated['translations']['en']['slug']);
-
-        $validated['is_active'] = $request->has('is_active');
-        $mainCategory->update([
-            'name' => $validated['name'],
-            'slug' => $slug,
-            'image' => $imagePath,
-            'is_active' => $validated['is_active'],
-        ]);
+        $mainCategory->update($updateData);
 
         foreach ($validated['translations'] as $locale => $data) {
             $translation = $mainCategory->translations()->where('locale', $locale)->first();

@@ -15,6 +15,7 @@ class MainCategory extends Model
         'image',
         'slug',
         'is_active',
+        'position',
     ];
     protected $casts = [
         'is_active' => 'boolean',
