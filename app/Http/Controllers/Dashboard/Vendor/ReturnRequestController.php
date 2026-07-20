@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Dashboard\Vendor;
 
+use App\Enum\CancellationSellerStatus;
+use App\Enum\ReturnStatus;
 use App\Http\Controllers\Controller;
 use App\Models\ReturnRequest;
-use App\Enum\ReturnStatus;
 use App\Models\ReturnRequestItem;
 use App\Notifications\OrderStatusUpdated;
 use Illuminate\Http\Request;
@@ -101,6 +102,7 @@ class ReturnRequestController extends Controller
         $returnRequest->load([
             'user',
             'order',
+            'order.user',
             'items.product',
             'items.orderItem.shipmentCompany',
             'pickupaddress'
@@ -126,6 +128,82 @@ class ReturnRequestController extends Controller
         return redirect()->back()->with('success', $message);
     }
 
+    public function updateSellerStatus(Request $request, ReturnRequest $returnRequest)
+    {
+        $validated = $request->validate([
+            'seller_status' => 'required|string|in:approved,rejected,under_inspection,return_accepted,return_rejected',
+            'seller_rejection_reason' => 'nullable|string|max:1000',
+            'return_rejection_reason' => 'nullable|string|max:1000',
+            'inspected_at' => 'nullable|date',
+        ]);
+
+        $vendorId = auth('vendor')->id();
+
+        // Verify vendor owns items in this return request
+        $hasVendorItems = $returnRequest->items()
+            ->whereHas('orderItem.product', function ($q) use ($vendorId) {
+                $q->where('vendor_id', $vendorId);
+            })->exists();
+
+        if (! $hasVendorItems) {
+            return redirect()->back()->with('error', 'غير مصرح لك بتحديث حالة هذا الطلب');
+        }
+
+        $updateData = [
+            'seller_status' => $validated['seller_status'],
+        ];
+
+        if ($validated['seller_status'] === CancellationSellerStatus::REJECTED->value) {
+            $updateData['seller_rejection_reason'] = $validated['seller_rejection_reason'] ?? null;
+            $updateData['status'] = ReturnStatus::REJECTED->value;
+        }
+
+        if ($validated['seller_status'] === CancellationSellerStatus::RETURN_REJECTED->value) {
+            $updateData['return_rejection_reason'] = $validated['return_rejection_reason'] ?? null;
+            $updateData['status'] = ReturnStatus::REJECTED->value;
+        }
+
+        if ($validated['seller_status'] === CancellationSellerStatus::APPROVED->value) {
+            $updateData['status'] = ReturnStatus::APPROVED->value;
+        }
+
+        if ($validated['seller_status'] === CancellationSellerStatus::UNDER_INSPECTION->value) {
+            $updateData['status'] = ReturnStatus::PROCESSING->value;
+            $updateData['inspected_at'] = $validated['inspected_at'] ?? now();
+        }
+
+        if ($validated['seller_status'] === CancellationSellerStatus::RETURN_ACCEPTED->value) {
+            $updateData['status'] = ReturnStatus::APPROVED->value;
+        }
+
+        $returnRequest->update($updateData);
+
+        // Notify buyer
+        $buyer = $returnRequest->user;
+        if ($buyer) {
+            $statusLabel = $returnRequest->sellerStatusLabel();
+            $key = 'seller_status_updated';
+            app()->setLocale($buyer->default_lang ?? 'ar');
+            $buyer->notify(new OrderStatusUpdated(
+                title: __("notifications.{$key}.title"),
+                body: __("notifications.{$key}.body", [
+                    'return_number' => $returnRequest->return_number,
+                    'status' => $statusLabel,
+                ]),
+                data: [
+                    'key' => $key,
+                    'id' => $returnRequest->id,
+                    'notification_type' => 'ecommerce',
+                    'navigation_type' => 'order_tracking_return',
+                ],
+                type: 'ecommerce',
+                navigationType: 'order_tracking_return'
+            ));
+        }
+
+        return redirect()->back()->with('success', 'تم تحديث حالة الطلب بنجاح');
+    }
+
     public function toggleItemStatus(Request $request, $id)
     {
         $validated = $request->validate([
@@ -137,7 +215,6 @@ class ReturnRequestController extends Controller
 
         $action = $validated['action'];
 
-        // ✅ map action → status
         $newStatus = $action === 'approve' ? 'approved' : 'rejected';
 
         $item->update(['status' => $newStatus]);
@@ -146,7 +223,6 @@ class ReturnRequestController extends Controller
         $user = $returnRequest?->user;
         $productName = $item->orderItem?->product?->name ?? __('vendor-dashboard.product');
 
-        // ✅ status → notification key
         $statusToKey = [
             'approved' => 'return_approved',
             'rejected' => 'return_rejected',
@@ -156,16 +232,13 @@ class ReturnRequestController extends Controller
 
         if ($user && $user->notifications_enabled) {
 
-            // ✅ force user language
             app()->setLocale($user->default_lang ?? 'en');
 
-            // ✅ translated text (FCM only)
             $title = __("notifications.$key.title");
             $body  = __("notifications.$key.body", [
                 'product' => $productName,
             ]);
 
-            // ✅ DB stores only key
             $data = [
                 'key' => $key,
                 'id' => $item->id,

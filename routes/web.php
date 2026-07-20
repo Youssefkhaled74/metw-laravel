@@ -182,6 +182,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/return-requests/{id}/status', [\App\Http\Controllers\Dashboard\Admin\ReturnRequestController::class, 'updateOrderStatus'])->name('return-requests.update-status');
         Route::patch('/return-requests/{id}/reason', [\App\Http\Controllers\Dashboard\Admin\ReturnRequestController::class, 'updateOrderReason'])->name('return-requests.update-reason');
 
+        // Cancellation Request Management (طلبات الإلغاء / المرتجع)
+        Route::prefix('cancellations')->name('cancellations.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Dashboard\Admin\AdminCancellationController::class, 'index'])->name('index');
+            Route::get('/complaints', [\App\Http\Controllers\Dashboard\Admin\AdminCancellationController::class, 'complaints'])->name('complaints');
+            Route::get('/approved', [\App\Http\Controllers\Dashboard\Admin\AdminCancellationController::class, 'approved'])->name('approved');
+            Route::get('/{returnRequest}', [\App\Http\Controllers\Dashboard\Admin\AdminCancellationController::class, 'show'])->name('show');
+            Route::post('/{returnRequest}/reactivate', [\App\Http\Controllers\Dashboard\Admin\AdminCancellationController::class, 'reactivate'])->name('reactivate');
+            Route::post('/{returnRequest}/complete', [\App\Http\Controllers\Dashboard\Admin\AdminCancellationController::class, 'completeCancellation'])->name('complete');
+        });
+
         // Order Return Requests (MetwGo)
         Route::prefix('return-orders')->name('return-orders.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Dashboard\Admin\OrderReturnController::class, 'pendingReturns'])->name('pending');
@@ -670,6 +680,7 @@ Route::prefix('vendor')->name('vendor.')->group(function () {
             Route::get('/return-requests/{returnRequest}/edit', 'show')->name('return-requests.show');
             // Route::patch('/return-requests/{returnRequest}/toggle-status', 'toggleStatus')->name('return-requests.toggle-status');
             Route::patch('/return-requests/items/{id}/toggle-status', 'toggleItemStatus')->name('return-requests.items.toggle-status');
+            Route::patch('/return-requests/{returnRequest}/seller-status', 'updateSellerStatus')->name('return-requests.seller-status');
 
         });
 

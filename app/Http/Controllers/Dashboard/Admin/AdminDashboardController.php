@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard\Admin;
 
 use App\Enum\BusinessProfileStatus;
+use App\Enum\CancellationSellerStatus;
 use App\Enum\ComplaintStatus;
 use App\Enum\ComplaintType;
 use App\Enum\PaymentStatus;
@@ -336,11 +337,25 @@ class AdminDashboardController extends Controller
                 ],
             ],
             [
+                'title' => 'قسم شكاوى إلغاء طلبات',
+                'items' => [
+                    ['label' => 'شكاوى إلغاء طلبات الشراء', 'count' => $count(ReturnRequest::class, fn ($query) => $query->cancellations()->whereHas('complaints', fn ($cq) => $cq->whereIn('status', ['pending', 'under_review']))), 'note' => 'طلبات إلغاء بها شكاوى بانتظار إعادة التفعيل.', 'url' => $route('admin.cancellations.complaints')],
+                    ['label' => 'إعادة تفعيل طلبات الإلغاء', 'count' => $count(ReturnRequest::class, fn ($query) => $query->cancellations()->whereNotNull('admin_reactivation_reason')), 'note' => 'طلبات أُعيد تفعيلها من الإدارة.', 'url' => $route('admin.cancellations.index', ['status' => 'requested'])],
+                ],
+            ],
+            [
+                'title' => 'قسم طلبات إلغاء موافق عليها',
+                'items' => [
+                    ['label' => 'إلغاءات بانتظار إكمال الإدارة', 'count' => $count(ReturnRequest::class, fn ($query) => $query->cancellations()->sellerApproved()->where('status', ReturnStatus::REQUESTED->value)), 'note' => 'طلبات إلغاء وافق عليها البائع وتحتاج إكمال من الإدارة مع استرداد المبلغ.', 'url' => $route('admin.cancellations.approved')],
+                    ['label' => 'إلغاءات مكتملة (تم الاسترداد)', 'count' => $count(ReturnRequest::class, fn ($query) => $query->cancellations()->where('status', ReturnStatus::COMPLETED->value)), 'note' => 'طلبات الإلغاء التي تم معالجتها واسترداد المبلغ للمحفظة.', 'url' => $route('admin.cancellations.index', ['status' => 'completed'])],
+                ],
+            ],
+            [
                 'title' => 'طلبات معلقة أو غير مكتملة',
                 'items' => [
                     ['label' => 'طلبات الشراء المعلقة', 'count' => $count(Order::class, fn ($query) => $query->where('status', OrderStatus::PENDING->value)), 'note' => 'الطلبات التي لم تُعتمد بعد داخل المتجر الإلكتروني.', 'url' => $route('admin.ecommerce-orders', ['status' => 'pending'])],
-                    ['label' => 'طلبات الإلغاء المعلقة', 'count' => $count(ReturnRequest::class, fn ($query) => $query->where('status', ReturnStatus::REQUESTED->value)), 'note' => 'طلبات الإلغاء الجديدة بانتظار أول إجراء.', 'url' => $route('admin.return-requests', ['request_type' => 'cancellation', 'status' => 'requested'])],
-                    ['label' => 'طلبات الإرجاع المعلقة', 'count' => $count(ReturnRequest::class, fn ($query) => $query->where('status', ReturnStatus::REQUESTED->value)), 'note' => 'طلبات الإرجاع الجديدة بانتظار أول إجراء.', 'url' => $route('admin.return-requests', ['status' => 'requested'])],
+                    ['label' => 'طلبات الإلغاء المعلقة', 'count' => $count(ReturnRequest::class, fn ($query) => $query->cancellations()->where('status', ReturnStatus::REQUESTED->value)), 'note' => 'طلبات الإلغاء الجديدة بانتظار أول إجراء.', 'url' => $route('admin.cancellations.index', ['status' => 'requested'])],
+                    ['label' => 'طلبات الإرجاع المعلقة', 'count' => $count(ReturnRequest::class, fn ($query) => $query->returns()->where('status', ReturnStatus::REQUESTED->value)), 'note' => 'طلبات الإرجاع الجديدة بانتظار أول إجراء.', 'url' => $route('admin.return-requests', ['status' => 'requested'])],
                     ['label' => 'طلبات الشحن المعلقة', 'count' => $count(ShipmentRequest::class, fn ($query) => $query->where('status', ShipmentRequestStatus::SUBMITTED->value)), 'note' => 'طلبات الشحن التي تم إرسالها ولم تُعالج بعد.', 'url' => $route('admin.shipment-requests.index', ['status' => 'submitted'])],
                     ['label' => 'طلبات التوصيل المعلقة', 'count' => $count(EcommerceOrder::class, fn ($query) => $query->where('status', OrderStatus::PENDING->value)), 'note' => 'طلبات التوصيل داخل مسار الشحن العادي.', 'url' => $route('admin.shipment-orders', ['status' => 'pending'])],
                 ],

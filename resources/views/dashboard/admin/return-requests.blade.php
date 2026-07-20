@@ -21,7 +21,7 @@
             </div>
 
             <form method="GET" action="{{ route('admin.return-requests') }}" class="row g-2 align-items-center">
-                <div class="col-lg-5">
+                <div class="col-lg-4">
                     <div class="input-group input-group-sm search-shell">
                         <span class="input-group-text bg-white border-end-0 search-icon-shell">
                             <i class="fas fa-search text-muted"></i>
@@ -38,7 +38,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="col-lg-2">
                     <select id="statusFilter" name="status" class="form-select form-select-sm filter-select-modern">
                         <option value="all">{{ app()->getLocale() === 'ar' ? 'كل الحالات' : 'All statuses' }}</option>
                         @foreach ($statuses as $status)
@@ -49,7 +49,7 @@
                     </select>
                 </div>
 
-                <div class="col-lg-3">
+                <div class="col-lg-2">
                     <select id="refundTypeFilter" name="refund_type" class="form-select form-select-sm filter-select-modern">
                         <option value="all">{{ app()->getLocale() === 'ar' ? 'كل أنواع الاسترداد' : 'All refund types' }}</option>
                         <option value="wallet" {{ request('refund_type') === 'wallet' ? 'selected' : '' }}>
@@ -61,10 +61,22 @@
                     </select>
                 </div>
 
+                <div class="col-lg-2">
+                    <select id="requestTypeFilter" name="request_type" class="form-select form-select-sm filter-select-modern">
+                        <option value="all">{{ app()->getLocale() === 'ar' ? 'كل أنواع الطلبات' : 'All request types' }}</option>
+                        <option value="return" {{ request('request_type') === 'return' ? 'selected' : '' }}>
+                            {{ app()->getLocale() === 'ar' ? 'إرجاع' : 'Return' }}
+                        </option>
+                        <option value="cancellation" {{ request('request_type') === 'cancellation' ? 'selected' : '' }}>
+                            {{ app()->getLocale() === 'ar' ? 'إلغاء' : 'Cancellation' }}
+                        </option>
+                    </select>
+                </div>
+
                 <input type="hidden" name="sort_by" value="{{ request('sort_by', 'created_at') }}">
                 <input type="hidden" name="sort_dir" value="{{ request('sort_dir', 'desc') }}">
 
-                <div class="col-lg-3 d-flex gap-2">
+                <div class="col-lg-2 d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
                         <i class="fas fa-filter me-1"></i> {{ app()->getLocale() === 'ar' ? 'تطبيق' : 'Apply' }}
                     </button>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\CancellationSellerStatus;
 use App\Enum\ReturnStatus;
 use App\Enum\ReturnReason;
 use App\Enum\RequestType;
@@ -21,6 +22,14 @@ class ReturnRequest extends Model
         'return_number',
         'request_type',
         'status',
+        'seller_status',
+        'seller_rejection_reason',
+        'return_rejection_reason',
+        'admin_reactivation_reason',
+        'reactivated_at',
+        'inspected_at',
+        'admin_refund_amount',
+        'wallet_credited_at',
         'reason',
         'other_reason',
         'notes',
@@ -34,21 +43,25 @@ class ReturnRequest extends Model
         'refund_type',
 
         // ===== إضافات مالية =====
-        'vendor_refund_commission_total', // مجموع عمولة المرتجع على الفيندور
-        'vendor_deduction_total',         // الخصم الفعلي من الفيندور
-        'return_shipping_total',          // مجموع تكلفة المرتجع للشحن
-        'shipment_commission_total',      // مجموع عمولة شركة الشحن
-        'shipment_net_total',             // مجموع صافي شركة الشحن
-        'shipping_paid_by',               // مين دفع الشحن: customer/vendor/platform
+        'vendor_refund_commission_total',
+        'vendor_deduction_total',
+        'return_shipping_total',
+        'shipment_commission_total',
+        'shipment_net_total',
+        'shipping_paid_by',
     ];
 
     protected $casts = [
         'status' => ReturnStatus::class,
+        'seller_status' => CancellationSellerStatus::class,
         'request_type' => RequestType::class,
-        // 'reason' => ReturnReason::class,
         'pickup_date' => 'date',
         'refunded_at' => 'datetime',
+        'reactivated_at' => 'datetime',
+        'inspected_at' => 'datetime',
+        'wallet_credited_at' => 'datetime',
         'cancel_reason_ids' => 'array',
+        'admin_refund_amount' => 'decimal:2',
     ];
 
     protected static function booted()
@@ -144,4 +157,45 @@ class ReturnRequest extends Model
         return $this->morphMany(Complaint::class, 'complaintable');
     }
 
+    public function scopeSellerApproved($query)
+    {
+        return $query->where('seller_status', CancellationSellerStatus::APPROVED->value);
+    }
+
+    public function scopePendingAdminCompletion($query)
+    {
+        return $query->cancellations()
+            ->where('seller_status', CancellationSellerStatus::APPROVED->value)
+            ->where('status', ReturnStatus::REQUESTED->value);
+    }
+
+    public function scopeWithComplaints($query)
+    {
+        return $query->cancellations()
+            ->whereHas('complaints', function ($q) {
+                $q->whereIn('status', ['pending', 'under_review']);
+            });
+    }
+
+    public function sellerStatusLabel(): string
+    {
+        if (! $this->seller_status) {
+            return 'بانتظار رد البائع';
+        }
+
+        return $this->seller_status instanceof CancellationSellerStatus
+            ? $this->seller_status->label()
+            : $this->seller_status;
+    }
+
+    public function sellerStatusCss(): string
+    {
+        if (! $this->seller_status) {
+            return 'secondary';
+        }
+
+        return $this->seller_status instanceof CancellationSellerStatus
+            ? $this->seller_status->cssClass()
+            : 'secondary';
+    }
 }
