@@ -95,6 +95,9 @@ class ShipmentCompanyDashboardController extends Controller
         $activeLocations = $company->shipmentLocations()->where('is_active', true)->count();
         $inactiveLocations = $company->shipmentLocations()->where('is_active', false)->count();
 
+        // Representatives
+        $activeRepresentatives = $company->representatives()->where('is_active', true)->count();
+
         // Flow counts
         $flowCounts = [
             'pending' => OrderItem::where('shipment_company_id', $company->id)->where('status', 'pending')->count(),

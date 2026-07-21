@@ -85,6 +85,135 @@
                 </div>
             </div>
 
+            <!-- Business Information -->
+            @if($vendor->businessProfile)
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-building me-2 text-primary"></i>المعلومات التجارية</h5>
+                    <span class="badge bg-{{ $vendor->businessProfile->status->value === 'approved' ? 'success' : ($vendor->businessProfile->status->value === 'rejected' ? 'danger' : 'warning') }}">
+                        {{ match($vendor->businessProfile->status->value) {
+                            'approved' => 'معتمدة',
+                            'rejected' => 'مرفوضة',
+                            'pending_review' => 'قيد المراجعة',
+                            default => $vendor->businessProfile->status->value,
+                        } }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">الاسم القانوني</small>
+                            <div class="fw-semibold">{{ $vendor->businessProfile->legal_name ?? '—' }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">الاسم التجاري</small>
+                            <div class="fw-semibold">{{ $vendor->businessProfile->commercial_name ?? '—' }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">الرقم الضريبي</small>
+                            <div class="fw-semibold">{{ $vendor->businessProfile->tax_number ?? '—' }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">رقم السجل التجاري</small>
+                            <div class="fw-semibold">{{ $vendor->businessProfile->commercial_register_number ?? '—' }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">جهة الاتصال</small>
+                            <div class="fw-semibold">{{ $vendor->businessProfile->contact_name ?? '—' }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">هاتف الاتصال</small>
+                            <div class="fw-semibold">{{ $vendor->businessProfile->contact_phone ?? '—' }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- Account Profile Information -->
+            @if($vendor->accountProfile)
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-id-card me-2 text-info"></i>معلومات الحساب</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @if($vendor->accountProfile->national_id)
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">الرقم القومي</small>
+                            <div class="fw-semibold">{{ $vendor->accountProfile->national_id }}</div>
+                        </div>
+                        @endif
+                        @if($vendor->accountProfile->gender)
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">الجنس</small>
+                            <div class="fw-semibold">{{ $vendor->accountProfile->gender === 'male' ? 'ذكر' : 'أنثى' }}</div>
+                        </div>
+                        @endif
+                        @if($vendor->accountProfile->date_of_birth)
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">تاريخ الميلاد</small>
+                            <div class="fw-semibold">{{ $vendor->accountProfile->date_of_birth->format('Y-m-d') }}</div>
+                        </div>
+                        @endif
+                        @if($vendor->accountProfile->alternate_phone)
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">هاتف بديل</small>
+                            <div class="fw-semibold">{{ $vendor->accountProfile->alternate_phone }}</div>
+                        </div>
+                        @endif
+                        @if($vendor->accountProfile->display_name)
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">الاسم المعروض</small>
+                            <div class="fw-semibold">{{ $vendor->accountProfile->display_name }}</div>
+                        </div>
+                        @endif
+                        @if($vendor->accountProfile->account_number)
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">رقم الحساب</small>
+                            <div class="fw-semibold">{{ $vendor->accountProfile->account_number }}</div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- Uploaded Documents -->
+            @if($vendor->mediaFiles->isNotEmpty())
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-file-alt me-2 text-success"></i>المستندات المرفقة</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach($vendor->mediaFiles as $file)
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center gap-3 p-3 border rounded">
+                                <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    @if(in_array($file->extension, ['jpg', 'jpeg', 'png']))
+                                        <i class="fas fa-image text-primary"></i>
+                                    @elseif($file->extension === 'pdf')
+                                        <i class="fas fa-file-pdf text-danger"></i>
+                                    @else
+                                        <i class="fas fa-file text-secondary"></i>
+                                    @endif
+                                </div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="fw-semibold text-truncate">{{ $file->original_name }}</div>
+                                    <small class="text-muted">{{ strtoupper($file->extension) }} · {{ round($file->size / 1024, 1) }} KB</small>
+                                </div>
+                                <a href="{{ $file->url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <!-- Change Password -->
             <div class="card">
                 <div class="card-header">
@@ -131,7 +260,7 @@
 
         <div class="col-md-4">
             <!-- Profile Summary -->
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-body">
                     <div class="text-center mb-4">
                         @if($vendor->logo)
@@ -145,6 +274,9 @@
                         @endif
                         <h4 class="mb-0">{{ $vendor->name }}</h4>
                         <p class="text-muted">{{ __('vendor-dashboard.vendor') }}</p>
+                        @if($vendor->brand_name)
+                            <p class="text-muted small mb-0">{{ $vendor->brand_name }}</p>
+                        @endif
                     </div>
 
                     <div class="list-group list-group-flush">
@@ -160,6 +292,12 @@
                             <small class="text-muted d-block">{{ __('vendor-dashboard.address') }}</small>
                             <div>{{ $vendor->address }}</div>
                         </div>
+                        @if($vendor->vendor_number)
+                        <div class="list-group-item">
+                            <small class="text-muted d-block">رقم البائع</small>
+                            <div class="fw-semibold">{{ $vendor->vendor_number }}</div>
+                        </div>
+                        @endif
                         <div class="list-group-item">
                             <small class="text-muted d-block">{{ __('vendor-dashboard.member_since') }}</small>
                             <div>{{ $vendor->created_at->format('M d, Y') }}</div>
@@ -167,6 +305,51 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Business Profile Status -->
+            @if($vendor->businessProfile)
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold">الملف التجاري</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width: 48px; height: 48px;"
+                             @if($vendor->businessProfile->status->value === 'approved')
+                                class="bg-success-subtle text-success"
+                             @elseif($vendor->businessProfile->status->value === 'rejected')
+                                class="bg-danger-subtle text-danger"
+                             @else
+                                class="bg-warning-subtle text-warning"
+                             @endif>
+                            <i class="fas fa-{{ $vendor->businessProfile->status->value === 'approved' ? 'check-circle' : ($vendor->businessProfile->status->value === 'rejected' ? 'times-circle' : 'clock') }}"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">
+                                {{ match($vendor->businessProfile->status->value) {
+                                    'approved' => 'تم الاعتماد',
+                                    'rejected' => 'مرفوض',
+                                    'pending_review' => 'قيد المراجعة',
+                                    default => $vendor->businessProfile->status->value,
+                                } }}
+                            </div>
+                            @if($vendor->businessProfile->submitted_at)
+                                <small class="text-muted">أُرسل {{ $vendor->businessProfile->submitted_at->diffForHumans() }}</small>
+                            @endif
+                        </div>
+                    </div>
+                    @if($vendor->businessProfile->rejection_reason)
+                        <div class="alert alert-danger small mb-0">
+                            <strong>سبب الرفض:</strong> {{ $vendor->businessProfile->rejection_reason }}
+                        </div>
+                    @endif
+                    <a href="{{ route('vendor.business-profile.upsert') }}" class="btn btn-outline-primary btn-sm w-100 mt-2">
+                        <i class="fas fa-edit me-1"></i> تعديل الملف التجاري
+                    </a>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 @endsection

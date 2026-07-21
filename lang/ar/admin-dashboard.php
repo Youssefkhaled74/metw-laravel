@@ -2,7 +2,7 @@
 
 return [
     'admin_dashboard' => 'لوحة تحكم الإدارة',
-    'dashboard_overview' => 'المهام العاجلة',
+    'dashboard_overview' => 'نظرة عامة على لوحة التحكم',
 
     // Statistics Cards
     'total_users' => 'إجمالي المستخدمين',
@@ -51,7 +51,7 @@ return [
     'amount' => 'المبلغ',
     'view_all_orders' => 'عرض جميع الطلبات',
     'no_recent_shipment_orders' => 'لا توجد طلبات تطبيق الشحن والتوصيل السريع حديثة.',
-    'no_recent_ecommerce_orders' => 'لا توجد طلبات تجارة إلكترونية حديثة.',
+    'no_recent_ecommerce_orders' => 'لا توجد طلبات البائع من الماركت حديثة.',
 
     // Chart Labels
     'shipment_revenue' => 'إيرادات تطبيق الشحن والتوصيل السريع',
@@ -234,8 +234,8 @@ return [
         'total_amount' => 'المبلغ الإجمالي',
         'shipped' => 'تم التوصيل',
         'returned' => 'تم الإرجاع',
-        'no_ecommerce_orders_found' => 'لا توجد طلبات تجارة إلكترونية',
-        'no_ecommerce_orders_message' => 'لا توجد طلبات تجارة إلكترونية في النظام حتى الآن.',
+        'no_ecommerce_orders_found' => 'لا توجد طلبات البائع من الماركت',
+        'no_ecommerce_orders_message' => 'لا توجد طلبات البائع من الماركت في النظام حتى الآن.',
         // Vendor Management
         'vendors_management' => 'إدارة البائعين',
         'all_vendors' => 'جميع البائعين',
@@ -940,7 +940,7 @@ return [
     'edit_vendor_details' => 'تعديل تفاصيل المورد',
     'vendor_details' => 'تفاصيل المورد',
     'vendor_information' => 'معلومات المورد',
-    'back_to_vendors' => 'العودة إلى الموردين',
+    'back_to_vendors' => 'العودة إلى البائعين',
     'create_vendor' => 'إنشاء مورد',
     'update_vendor' => 'تحديث المورد',
     'vendor_created_successfully' => 'تم إنشاء المورد بنجاح',

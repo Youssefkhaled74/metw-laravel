@@ -432,6 +432,10 @@
         height: 100%;
     }
 
+    #revenueChart {
+        max-height: 280px;
+    }
+
     .section-title {
         font-weight: 700;
         font-size: 1.05rem;
@@ -698,6 +702,23 @@
     </div>
 </div>
 
+{{-- Monthly Revenue Chart --}}
+<div class="mt-4">
+    <h5 class="section-title"><i class="fas fa-chart-line"></i> {{ __('shipment-dashboard.monthly_revenue') }}</h5>
+    <div class="card flow-card">
+        <div class="card-body">
+            @if($monthly_revenue->count())
+                <canvas id="revenueChart" height="100"></canvas>
+            @else
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-chart-bar fa-2x mb-2 opacity-25"></i>
+                    <p class="mb-0">{{ __('shipment-dashboard.no_recent_orders') }}</p>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+
 {{-- Coverage & Pricing + Representatives --}}
 <div class="row g-3 mt-3">
     <div class="col-md-6">
@@ -748,5 +769,72 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+@php
+    $revenueData = $monthly_revenue->reverse()->values();
+    $monthNames = [
+        1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+        5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Aug',
+        9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec',
+    ];
+@endphp
+
+@if($revenueData->count())
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('revenueChart');
+    if (!ctx) return;
+
+    const labels = {!! json_encode($revenueData->pluck('month')->map(fn($m) => $monthNames[$m] ?? $m)->values()) !!};
+    const data = {!! json_encode($revenueData->pluck('total')->values()) !!};
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '{{ __("shipment-dashboard.total_revenue") }}',
+                data: data,
+                backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                borderColor: 'rgba(34, 197, 94, 1)',
+                borderWidth: 1,
+                borderRadius: 6,
+                maxBarThickness: 48,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '{{ __("admin-dashboard.EGP") }} ' + Number(context.parsed.y).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    },
+                    grid: { color: 'rgba(0,0,0,0.04)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+});
+</script>
+@endif
+@endpush
 
 @endsection

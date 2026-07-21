@@ -161,4 +161,9 @@ class ShipmentCompany extends Authenticatable
         return $this->hasOne(ShipmentCommission::class);
     }
 
+    public function representatives()
+    {
+        return $this->hasMany(Representative::class);
+    }
+
 }

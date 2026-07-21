@@ -27,12 +27,14 @@ class UrgentTasksController extends Controller
         $search = $request->get('search', '');
 
         $data = $this->service->getAllTasks($sort, $search);
+        $notifications = $this->service->getNotifications($search);
 
         return view('dashboard.vendor.urgent-tasks.index', [
             'tasks' => $data['tasks'],
             'stats' => $data['stats'],
             'currentSort' => $sort,
             'currentSearch' => $search,
+            'notifications' => $notifications,
         ]);
     }
 

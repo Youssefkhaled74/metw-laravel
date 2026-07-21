@@ -95,7 +95,7 @@ class AdminDashboardController extends Controller
                         'url' => $route('admin.users', ['verification_status' => 'unverified']),
                     ],
                     [
-                        'label' => 'حسابات الموردين قيد المراجعة',
+                        'label' => 'حسابات البائعين قيد المراجعة',
                         'count' => $summaryItems[1],
                         'note' => 'ملفات النشاط التجاري بانتظار اعتماد الإدارة.',
                         'url' => $route('admin.vendors', ['profile_status' => 'pending_review']),
@@ -130,7 +130,7 @@ class AdminDashboardController extends Controller
                         'url' => $route('admin.users'),
                     ],
                     [
-                        'label' => 'الموردون الموقوفون أو المحذوفون',
+                        'label' => 'البائعون الموقوفون أو المحذوفون',
                         'count' => $summaryItems[6],
                         'note' => 'يشمل الحسابات غير النشطة والمرفوعة من النظام.',
                         'url' => $route('admin.vendors', ['status' => 'inactive']),
@@ -241,7 +241,7 @@ class AdminDashboardController extends Controller
                         'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::USER->value, 'status' => ComplaintStatus::PENDING->value]),
                     ],
                     [
-                        'label' => 'شكاوى الموردين',
+                        'label' => 'شكاوى البائعين',
                         'count' => $summaryItems[22],
                         'note' => 'الشكاوى العامة للموردين قيد المتابعة.',
                         'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::VENDOR->value, 'status' => ComplaintStatus::PENDING->value]),
@@ -309,7 +309,7 @@ class AdminDashboardController extends Controller
                 'title' => 'حسابات جديدة تحتاج موافقة',
                 'items' => [
                     ['label' => 'حسابات المستخدمين غير الموثقة', 'count' => $count(User::class, fn ($query) => $query->whereNull('email_verified_at')), 'note' => 'تحتاج مراجعة بيانات الدخول والتوثيق قبل الاعتماد.', 'url' => $route('admin.users', ['verification_status' => 'unverified'])],
-                    ['label' => 'حسابات الموردين قيد المراجعة', 'count' => $count(VendorBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::PENDING_REVIEW->value)), 'note' => 'الملفات التجارية بانتظار اعتماد الإدارة.', 'url' => $route('admin.vendors', ['profile_status' => 'pending_review'])],
+                    ['label' => 'حسابات البائعين قيد المراجعة', 'count' => $count(VendorBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::PENDING_REVIEW->value)), 'note' => 'الملفات التجارية بانتظار اعتماد الإدارة.', 'url' => $route('admin.vendors', ['profile_status' => 'pending_review'])],
                     ['label' => 'حسابات المستودعات قيد المراجعة', 'count' => $count(WarehouseBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::PENDING_REVIEW->value)), 'note' => 'الملفات التجارية للمستودعات تحتاج موافقة.', 'url' => $route('admin.settings.warehouses.index', ['profile_status' => 'pending_review'])],
                     ['label' => 'حسابات شركات الشحن غير المفعلة', 'count' => $count(ShipmentCompany::class, fn ($query) => $query->withoutGlobalScope('active')->where('is_active', false)), 'note' => 'يمكن مراجعتها وتفعيلها من صفحة الشركات.', 'url' => $route('admin.shipment-companies', ['status' => 'inactive'])],
                     ['label' => 'حسابات المناديب قيد المراجعة', 'count' => $count(Representative::class, fn ($query) => $query->where('status', RepresentativeStatus::PENDING_REVIEW->value)), 'note' => 'اختر المناديب بانتظار الاعتماد أو الرفض.', 'url' => $route('admin.representatives.index', ['status' => 'pending_review'])],
@@ -319,7 +319,7 @@ class AdminDashboardController extends Controller
                 'title' => 'حسابات موقوفة أو ملغية',
                 'items' => [
                     ['label' => 'المستخدمون المحذوفون', 'count' => $count(User::class, fn ($query) => $query->onlyTrashed()), 'note' => 'الحسابات الملغية أو المحذوفة من النظام.', 'url' => $route('admin.users')],
-                    ['label' => 'الموردون الموقوفون أو المحذوفون', 'count' => $count(Vendor::class, fn ($query) => $query->withTrashed()->where(function ($subQuery) { $subQuery->where('is_active', false)->orWhereNotNull('deleted_at'); })), 'note' => 'يشمل الحسابات غير النشطة والمرفوعة من النظام.', 'url' => $route('admin.vendors', ['status' => 'inactive'])],
+                    ['label' => 'البائعون الموقوفون أو المحذوفون', 'count' => $count(Vendor::class, fn ($query) => $query->withTrashed()->where(function ($subQuery) { $subQuery->where('is_active', false)->orWhereNotNull('deleted_at'); })), 'note' => 'يشمل الحسابات غير النشطة والمرفوعة من النظام.', 'url' => $route('admin.vendors', ['status' => 'inactive'])],
                     ['label' => 'المستودعات الملغية', 'count' => $count(WarehouseBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::REJECTED->value)), 'note' => 'تعتمد هذه القيمة على حالة ملف الاعتماد للمستودع.', 'url' => $route('admin.settings.warehouses.index', ['profile_status' => 'rejected'])],
                     ['label' => 'المناديب الموقوفون أو المرفوضون', 'count' => $count(Representative::class, fn ($query) => $query->whereIn('status', [RepresentativeStatus::SUSPENDED->value, RepresentativeStatus::REJECTED->value])), 'note' => 'يمكن مراجعة الحالة من صفحة المناديب.', 'url' => $route('admin.representatives.index')],
                 ],
@@ -364,7 +364,7 @@ class AdminDashboardController extends Controller
                 'title' => 'شكاوى معلقة أو غير مغلقة',
                 'items' => [
                     ['label' => 'شكاوى المستخدمين', 'count' => $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::USER->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])), 'note' => 'الشكاوى العامة للمستخدمين قيد المتابعة.', 'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::USER->value, 'status' => ComplaintStatus::PENDING->value])],
-                    ['label' => 'شكاوى الموردين', 'count' => $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::VENDOR->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])), 'note' => 'الشكاوى العامة للموردين قيد المتابعة.', 'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::VENDOR->value, 'status' => ComplaintStatus::PENDING->value])],
+                    ['label' => 'شكاوى البائعين', 'count' => $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::VENDOR->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])), 'note' => 'الشكاوى العامة للموردين قيد المتابعة.', 'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::VENDOR->value, 'status' => ComplaintStatus::PENDING->value])],
                     ['label' => 'شكاوى المستودعات', 'count' => $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::WAREHOUSE->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])), 'note' => 'الشكاوى العامة للمستودعات قيد المتابعة.', 'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::WAREHOUSE->value, 'status' => ComplaintStatus::PENDING->value])],
                     ['label' => 'شكاوى المناديب', 'count' => $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::REPRESENTATIVE->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])), 'note' => 'الشكاوى العامة للمناديب قيد المتابعة.', 'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::REPRESENTATIVE->value, 'status' => ComplaintStatus::PENDING->value])],
                 ],

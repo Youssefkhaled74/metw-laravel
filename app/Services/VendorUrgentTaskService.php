@@ -33,12 +33,14 @@ class VendorUrgentTaskService
         $cancellations = $this->getCancellationRequests($search);
         $returns = $this->getReturnRequests($search);
         $shippedOrders = $this->getShippedOrders($search);
+        $notifications = $this->getNotifications($search);
 
         $tasks = collect();
         $tasks = $tasks->concat($purchases);
         $tasks = $tasks->concat($cancellations);
         $tasks = $tasks->concat($returns);
         $tasks = $tasks->concat($shippedOrders);
+        $tasks = $tasks->concat($notifications);
 
         // Sort
         $tasks = match ($sortBy) {
@@ -50,7 +52,7 @@ class VendorUrgentTaskService
 
         return [
             'tasks' => $tasks,
-            'stats' => $this->getStats($purchases, $cancellations, $returns, $shippedOrders),
+            'stats' => $this->getStats($purchases, $cancellations, $returns, $shippedOrders, $notifications),
         ];
     }
 
@@ -237,20 +239,63 @@ class VendorUrgentTaskService
     }
 
     /**
+     * Get unread vendor notifications
+     */
+    public function getNotifications(string $search = ''): Collection
+    {
+        $vendor = auth('vendor')->user();
+        $notifications = $vendor->unreadNotifications()->latest()->get();
+
+        if ($search) {
+            $notifications = $notifications->filter(fn($n) =>
+                str_contains($n->data['title'] ?? '', $search) ||
+                str_contains($n->data['message'] ?? '', $search)
+            )->values();
+        }
+
+        return $notifications->map(function ($notification) {
+            $age = Carbon::parse($notification->created_at);
+            $hoursOld = $age->diffInHours(now());
+
+            return [
+                'type' => 'notification',
+                'type_label' => 'إشعار',
+                'type_icon' => 'fas fa-bell',
+                'type_color' => 'warning',
+                'id' => $notification->id,
+                'order_number' => $notification->data['title'] ?? 'إشعار جديد',
+                'customer_name' => $notification->data['message'] ?? '',
+                'created_at' => $notification->created_at,
+                'age_text' => $this->getAgeText($hoursOld),
+                'priority' => 'medium',
+                'priority_label' => 'متوسطة',
+                'priority_order' => 3,
+                'status_label' => 'جديد',
+                'status_color' => 'warning',
+                'detail_url' => $notification->data['url'] ?? null,
+                'process_url' => null,
+                'notification_id' => $notification->id,
+            ];
+        });
+    }
+
+    /**
      * Get aggregated stats
      */
     public function getStats(
         ?Collection $purchases = null,
         ?Collection $cancellations = null,
         ?Collection $returns = null,
-        ?Collection $shippedOrders = null
+        ?Collection $shippedOrders = null,
+        ?Collection $notifications = null
     ): array {
         $purchases ??= $this->getPurchaseOrders();
         $cancellations ??= $this->getCancellationRequests();
         $returns ??= $this->getReturnRequests();
         $shippedOrders ??= $this->getShippedOrders();
+        $notifications ??= $this->getNotifications();
 
-        $allTasks = $purchases->concat($cancellations)->concat($returns)->concat($shippedOrders);
+        $allTasks = $purchases->concat($cancellations)->concat($returns)->concat($shippedOrders)->concat($notifications);
         $criticalCount = $allTasks->where('priority', 'critical')->count();
         $highCount = $allTasks->where('priority', 'high')->count();
 
@@ -262,6 +307,7 @@ class VendorUrgentTaskService
             'cancellations' => $cancellations->count(),
             'returns' => $returns->count(),
             'shipping' => $shippedOrders->count(),
+            'notifications' => $notifications->count(),
         ];
     }
 

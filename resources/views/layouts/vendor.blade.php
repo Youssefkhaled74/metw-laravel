@@ -279,6 +279,27 @@
             box-shadow: var(--topbar-shadow);
             overflow: visible;
             backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+
+        .page-header-wrapper.compact .topbar-shell {
+            padding: 0.45rem 1.1rem;
+            margin-bottom: 0 !important;
+        }
+
+        .page-header-wrapper.compact .page-title-wrapper h1 {
+            font-size: 1.1rem;
+        }
+
+        .page-header-wrapper.compact .page-title-wrapper h1::after {
+            width: 24px;
+            height: 2px;
+            margin-top: 0.25rem;
+        }
+
+        .page-header-wrapper.compact .topbar-control {
+            min-height: 34px;
+            padding: 0.3rem 0.65rem;
         }
 
         .topbar-shell {
@@ -579,7 +600,7 @@
                 </div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('vendor.dashboard') ? 'active' : '' }}"
+                        <a class="nav-link {{ request()->routeIs('vendor.dashboard') || request()->routeIs('vendor.urgent-tasks*') ? 'active' : '' }}"
                            href="{{ route('vendor.dashboard') }}">
                             <i class="fas fa-tachometer-alt"></i>
                             <span class="link-text">@lang('vendor-dashboard.dashboard')</span>
@@ -624,7 +645,7 @@
                         <a class="nav-link {{ request()->routeIs('vendor.urgent-tasks*') ? 'active' : '' }}"
                            href="{{ route('vendor.urgent-tasks') }}">
                             <i class="fas fa-bolt"></i>
-                            <span class="link-text">المهام العاجلة</span>
+                            <span class="link-text">نظرة عامة على لوحة التحكم</span>
                         </a>
                     </li>
                     {{-- <li class="nav-item">
@@ -664,7 +685,7 @@
     </nav>
 
     <main class="main-content px-3 px-md-4" id="mainContent">
-        <div class="page-header-wrapper">
+        <div class="page-header-wrapper" id="pageHeader">
             <div class="topbar-shell d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div class="page-title-wrapper">
                     <h1 class="h2 mb-0">@yield('page-title', __('vendor-dashboard.page_title_dashboard'))</h1>
@@ -802,8 +823,16 @@
         const mainContent = document.getElementById('mainContent');
         const sidebar = document.getElementById('vendorSidebar');
         const storageKey = 'vendorSidebarCollapsed';
+        const pageHeader = document.getElementById('pageHeader');
 
         attachTableSearchHandlers();
+
+        // Compact header on scroll
+        if (mainContent && pageHeader) {
+            mainContent.addEventListener('scroll', function () {
+                pageHeader.classList.toggle('compact', mainContent.scrollTop > 50);
+            });
+        }
 
         const isDesktop = () => window.innerWidth >= 992;
 

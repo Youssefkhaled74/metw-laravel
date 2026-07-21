@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-2 col-md-6">
         <div class="card stat-card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #6f42c1, #e83e8c);">
             <div class="card-body d-flex align-items-center justify-content-between">
                 <div>
@@ -38,7 +38,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-2 col-md-6">
         <div class="card stat-card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #0dcaf0, #6610f2);">
             <div class="card-body d-flex align-items-center justify-content-between">
                 <div>
@@ -47,6 +47,19 @@
                 </div>
                 <div class="stat-icon text-white-50">
                     <i class="fas fa-truck"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-6">
+        <div class="card stat-card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #198754, #20c997);">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-white-50 mb-1">إشعارات جديدة</h6>
+                    <h2 class="text-white fw-bold mb-0" id="stat-notifications">{{ $stats['notifications'] ?? 0 }}</h2>
+                </div>
+                <div class="stat-icon text-white-50">
+                    <i class="fas fa-bell"></i>
                 </div>
             </div>
         </div>

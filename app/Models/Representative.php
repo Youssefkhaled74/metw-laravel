@@ -17,6 +17,7 @@ class Representative extends Model
         'user_id',
         'account_number',
         'warehouse_id',
+        'shipment_company_id',
         'first_name',
         'father_name',
         'last_name',

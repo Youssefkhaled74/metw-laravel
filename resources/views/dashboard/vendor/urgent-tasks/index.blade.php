@@ -1,11 +1,11 @@
 @extends('layouts.vendor')
 
-@section('title', 'المهام العاجلة')
+@section('title', 'نظرة عامة على لوحة التحكم')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="fw-bold mb-1">المهام العاجلة</h4>
+        <h4 class="fw-bold mb-1">نظرة عامة على لوحة التحكم</h4>
         <p class="text-muted mb-0 small">جميع الطلبات والمهام التي تتطلب اهتمامك الفوري</p>
     </div>
     <div class="d-flex align-items-center gap-2">
@@ -37,6 +37,45 @@
 <div id="tasks-container">
     @include('dashboard.vendor.urgent-tasks.partials.task-list', ['tasks' => $tasks])
 </div>
+
+@if($notifications->isNotEmpty())
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-bell me-2 text-warning"></i>الإشعارات الجديدة</h5>
+        <a href="{{ route('vendor.notifications.index') }}" class="small text-decoration-none">عرض الكل</a>
+    </div>
+    <div class="card-body">
+        <ul class="list-group list-group-flush">
+            @foreach($notifications as $notification)
+                <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">
+                                @if(!empty($notification['detail_url']))
+                                    <a href="{{ $notification['detail_url'] }}" class="text-decoration-none text-dark"
+                                       onclick="markNotificationAsRead('{{ $notification['notification_id'] }}')">
+                                        {{ $notification['order_number'] }}
+                                    </a>
+                                @else
+                                    {{ $notification['order_number'] }}
+                                @endif
+                            </div>
+                            @if(!empty($notification['customer_name']))
+                                <div class="text-muted small">{{ $notification['customer_name'] }}</div>
+                            @endif
+                            <div class="text-muted small"><i class="fas fa-clock me-1"></i>{{ $notification['age_text'] }}</div>
+                        </div>
+                    </div>
+                    <span class="badge bg-warning-subtle text-warning rounded-pill">جديد</span>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+</div>
+@endif
 
 @include('dashboard.vendor.urgent-tasks.partials.empty-state')
 @endsection
@@ -80,6 +119,12 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('stat-cancellations').textContent = stats.cancellations;
         document.getElementById('stat-returns').textContent = stats.returns;
         document.getElementById('stat-shipping').textContent = stats.shipping;
+        if (document.getElementById('stat-notifications')) {
+            document.getElementById('stat-notifications').textContent = stats.notifications ?? 0;
+        }
+        if (document.getElementById('badge-notifications')) {
+            document.getElementById('badge-notifications').textContent = stats.notifications ?? 0;
+        }
     }
 
     // Filter tabs

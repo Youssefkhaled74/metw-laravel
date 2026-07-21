@@ -23,7 +23,7 @@
                                         'shipping_cancellation' => 'إلغاء الشحن',
                                         'return' => 'المرتجعات',
                                         'user' => 'المستخدمين',
-                                        'vendor' => 'الموردين',
+                                        'vendor' => 'البائعين',
                                         'warehouse' => 'المستودعات',
                                         'representative' => 'المناديب',
                                         default => $typeValue,

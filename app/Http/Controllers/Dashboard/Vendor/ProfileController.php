@@ -12,6 +12,14 @@ class ProfileController extends Controller
     public function index()
     {
         $vendor = auth('vendor')->user();
+        $vendor->load([
+            'businessProfile',
+            'accountProfile',
+            'mediaFiles' => function ($query) {
+                $query->where('collection_name', 'business_profile_documents');
+            },
+        ]);
+
         return view('dashboard.vendor.profile.index', compact('vendor'));
     }
 

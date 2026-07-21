@@ -1973,7 +1973,7 @@
                                 <a class="nav-link {{ request()->routeIs('admin.urgent-tasks') ? 'active' : '' }}"
                                 href="{{ route('admin.urgent-tasks') }}">
                                     <i class="fas fa-exclamation-triangle"></i>
-                                    <span class="link-text">المهام العاجلة</span>
+                                    <span class="link-text">نظرة عامة على لوحة التحكم</span>
                                 </a>
                             </li>
                             <!-- <li class="nav-item">

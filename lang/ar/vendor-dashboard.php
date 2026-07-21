@@ -12,7 +12,7 @@ return [
     'page_title_dashboard' => 'لوحة التحكم للتاجر',
     'lang_en' => 'الإنجليزية',
     'lang_ar' => 'العربية',
-    'vendor_dashboard' => 'المهام العاجلة',
+    'vendor_dashboard' => 'نظرة عامة على لوحة التحكم',
     'total_products' => 'إجمالي المنتجات',
     'active_products' => 'المنتجات النشطة',
     'total_orders' => 'إجمالي الطلبات',
@@ -113,7 +113,7 @@ return [
 
     // Dashboard Overview
     'dashboard_overview' => 'نظرة عامة على لوحة التحكم',
-    'urgent_tasks' => 'المهام العاجلة',
+    'urgent_tasks' => 'نظرة عامة على لوحة التحكم',
     'latest_updates' => 'آخر التحديثات',
     'new_incomplete_sales_orders' => 'طلبات البيع الجديدة غير المكتملة',
     'new_incomplete_cancellation_requests' => 'طلبات الإلغاء الجديدة غير المكتملة',

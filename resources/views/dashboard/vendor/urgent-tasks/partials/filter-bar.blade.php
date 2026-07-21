@@ -39,6 +39,11 @@
             <i class="fas fa-truck me-1"></i> شحن
             <span class="badge bg-info ms-1" id="badge-shipping">{{ $stats['shipping'] }}</span>
         </button>
+        <button class="btn btn-sm btn-outline-warning rounded-pill px-3 {{ request()->get('type') === 'notification' ? 'active' : '' }}"
+                data-type="notification">
+            <i class="fas fa-bell me-1"></i> إشعارات
+            <span class="badge bg-warning ms-1" id="badge-notifications">{{ $stats['notifications'] ?? 0 }}</span>
+        </button>
     </div>
 </div>
 

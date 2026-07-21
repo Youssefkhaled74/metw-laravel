@@ -79,7 +79,7 @@
 
                     <p>
                         {{ $isArabic
-                            ? 'متابعة أداء الإيرادات الشهرية للشحن والتجارة الإلكترونية مع مقارنة إجمالي كل مصدر.'
+                            ? 'متابعة أداء الإيرادات الشهرية للشحن وتطبيق الماركت مع مقارنة إجمالي كل مصدر.'
                             : 'Track monthly revenue performance for shipment and ecommerce streams with a clean source comparison.'
                         }}
                     </p>
@@ -150,7 +150,7 @@
                 <div class="mrev-breakdown-head">
                     <div>
                         <h5>{{ $isArabic ? 'توزيع الإيرادات' : 'Revenue split' }}</h5>
-                        <p>{{ $isArabic ? 'مقارنة مباشرة بين إيرادات الشحن والتجارة الإلكترونية.' : 'A direct comparison between shipment and ecommerce revenue.' }}</p>
+                        <p>{{ $isArabic ? 'مقارنة مباشرة بين إيرادات الشحن وتطبيق الماركت.' : 'A direct comparison between shipment and ecommerce revenue.' }}</p>
                     </div>
                 </div>
 
