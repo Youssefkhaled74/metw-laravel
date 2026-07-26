@@ -1,0 +1,704 @@
+Comprehensive Development Notes - MetwLogistic System
+Document Overview
+This document consolidates all feedback and requirements from multiple review files regarding the MetwLogistic mobile applications, website, dashboards, and supplier accounts. All notes are organized by category for easier reference and implementation.
+
+PART ONE: DELIVERY REPRESENTATIVE APP REQUIREMENTS
+Vehicle Categories & Codes
+The following vehicle types must be available in the representative registration:
+
+Code	Vehicle Type (Arabic)	Vehicle Type (English Translation)
+05	ميكروباص راكب ورحالت وسياحة	Passenger Microbus & Tourism
+06	باص سفريات ورحالت وسياحة	Bus & Tourism
+07	سيارة خاصة	Private Car
+08	توكتوك	Tuk-tuk
+09	تروسيكل	Tricycle
+10	نقل صغير تمناية	Small 8-Wheel Transport
+11	نقل ربع (نصف نقل صغير)	Quarter Transport
+12	نقل حمولة 2 طن	2 Ton Transport
+13	نقل حمولة 3 طن	3 Ton Transport
+14	نقل حمولة 4 طن	4 Ton Transport
+15	نقل حمولة 5 طن	5 Ton Transport
+16	نقل سيارات ومعدات ثقيلة	Car & Heavy Equipment Transport
+Required Fields for Representative Registration
+Vehicle Make: ماركة وسيلة النقل المستخدمة
+
+Vehicle Model: موديل وسيلة النقل المستخدمة
+
+License Plate (Letters + Numbers): رقم لوحة وسيلة النقل المستخدمة المرخصة (أحرف) + (أرقام)
+
+Clear Personal Photo: حمل صورة شخصية واضحة
+
+National ID - Front: حمل صورة بطاقة الرقم القومي – وجه
+
+National ID - Back: حمل صورة بطاقة الرقم القومي – ظهر
+
+Vehicle Photo: حمل صورة لوسيلة النقل المستخدمة
+
+Driver License - Front: حمل صورة رخصة القيادة – وجه – إذا كنت سائق مركبة مُرخصة
+
+Driver License - Back: حمل صورة رخصة القيادة – ظهر – إذا كنت سائق مركبة مُرخصة
+
+Vehicle License - Front: حمل صورة رخصة سير – وجه – المركبة المرخصة
+
+Vehicle License - Back: حمل صورة رخصة سير – ظهر – المركبة المرخصة
+
+Representative Classification Codes
+Category Code	Class Description	Maximum Weight (kg)	Maximum Volume (m³)
+0101	شنطة محمولة مع مواصلات (Bag with Public Transport)	20	0.05
+0202	بوكس محمول مع دراجة (Box with Bicycle)	20	0.05
+0303	بوكس محمول مع موتوسيكل (Box with Motorcycle)	100	0.20
+0404	بوكس محمول مع فيسبا (Box with Vespa)	100	0.20
+0505	ميكروباص ركاب ورحلات وسياحة (Microbus)	300	0.80
+0606	باص سفريات ورحلات وسياحة (Bus)	300	0.80
+0707	سيارة خاصة (Private Car)	700	0.60
+0808	توكتوك (Tuk-tuk)	300	0.80
+0909	تروسيكل (Tricycle)	700	4.00
+1010	نقل صغير تمناية (Small Transport)	1200	3.00
+1111	نقل ربع (Quarter Transport)	1500	7.00
+1212	نقل حمولة 2 طن (2 Ton Transport)	2000	8.00
+1313	نقل حمولة 3 طن (3 Ton Transport)	3000	12.00
+1414	نقل حمولة 4 طن (4 Ton Transport)	4000	18.00
+1515	نقل حمولة 5 طن (5 Ton Transport)	5000	26.00
+1616	نقل سيارات ومعدات ثقيلة (Heavy Equipment)	Unlimited	Unlimited
+PART TWO: GENERAL APPLICATION NOTES
+Terminology & Labeling Changes
+Change "Categories" to "Product Sections": تعديل كلمة الفئات لتصبح أقسام المنتجات
+
+Product Categories: Currently showing only 10 sections in the Market app, but the provided Excel file contains 51 sections.
+
+Sub-category Issues: When opening main sections, sub-categories appear incorrectly - some belong to other main sections, and some are from the shipment classification file rather than the product sections file.
+
+Data Mix-up: There appears to be confusion between data from the Product Sections file and the Shipment Classification & Pricing file.
+
+Product Description Mismatch: The product details screen description does not match the Excel file provided.
+
+Bottom Icon Bar: The bottom icon bar disappears when entering any section or product - it should remain visible as agreed.
+
+Default Language: Applications, website, and dashboards must open in Arabic by default. English should be an option for those who prefer it.
+
+User Preferences: After first use, applications must open with the language and settings the user last selected, and should not change until the user changes them manually.
+
+User Registration Data: Does not match the Excel file provided.
+
+Address Data: Does not match the Excel file provided.
+
+Shipment Information Data: Does not match the Excel file provided.
+
+Website Links in Addresses: Not required.
+
+Governorate & City Lists: Incorrect in the shipping app - do not match the attached Excel file.
+
+Language in Governorate/City Lists: Arabic language is missing from the shipping app lists.
+
+Shipment Classification Lists: Arabic language is missing in the shipping app.
+
+Shipping Companies Display: The app's role is not to display shipping company data - its role is to create shipping requests and show company names and prices from search results only. Displaying full shipping company data turns the app into a free commercial directory.
+
+Data Verification: All data that does not match the provided Excel files must be carefully reviewed against the files before modification. You can request the latest versions of Excel files to ensure accuracy.
+
+UI/UX Issues
+App Icon Display: When opening either app, an icon image appears instead of the logo image for each app.
+
+Search Bar Text: Shows "(الاسكو)" or "(Lasco)" instead of "(ميتوزون)".
+
+Black Strip: There is a black strip at the top of the Market app screen that only disappears after entering sections or products.
+
+Login Screen Image: Replace the image above "الدخول كزائر" (Login as Guest) with the specific logo for each app, with a solid background matching the current background color. Increase the white background area to balance the logo background size.
+
+Login Screen Font Size: The font size is too small and needs to be increased.
+
+Profile Screen Green Rectangle: The green rectangle at the bottom of the profile screen should be changed to match the orange rectangle color on the login screen.
+
+Cart Screen Green Rectangle: The green rectangle at the bottom of the cart screen should be changed to match the orange rectangle color on the login screen.
+
+PART THREE: ADMIN DASHBOARD NOTES
+General Admin Panel Requirements
+URL Name: The link was sent to us with "Lasco" and "السكو" - MetwLogistic has been cancelled. Please ensure the link contains "MetwLogistic".
+
+Dashboard Landing Page: When opening the Admin Dashboard, it shows an "Overview" screen that needs to be changed to an "Urgent Tasks" screen with the following sections:
+
+URGENT TASKS DASHBOARD - ADMIN
+New Accounts Pending Approval:
+User accounts pending approval
+
+Seller accounts pending approval
+
+Shipping company accounts pending approval
+
+Representative accounts pending approval
+
+Suspended or Cancelled Accounts:
+Suspended/cancelled user accounts
+
+Suspended/cancelled seller accounts
+
+Suspended/cancelled shipping company accounts
+
+Suspended/cancelled representative accounts
+
+Admin Approvals:
+Pending payment requests (When WhatsApp message sent to buyer for payment - include purchase order number, order status, and "View Order" link)
+
+Approved cancellation requests
+
+Approved return requests
+
+Purchase order cancellation complaints
+
+Product return complaints
+
+Metwzon Wallet refund requests
+
+Pending or Incomplete Orders:
+Pending purchase orders (Order number, status, and "View Order" link)
+
+Pending cancellation orders (Cancellation number, status, and "View Order" link)
+
+Pending return orders (Return number, status, and "View Order" link)
+
+Pending shipping orders (Shipping order number, status, and "View Order" link)
+
+Pending express delivery orders (Delivery order number, status, and "View Order" link)
+
+Open or Unresolved Complaints:
+User complaints
+
+Seller complaints
+
+Shipping company complaints
+
+Representative complaints
+
+Additional Admin Dashboard Requirements
+Sticky Header: The top row must be fixed (frozen) on all screens while scrolling down, with the top row data reduced to a single line.
+
+Data Mix-up in Product Categories: There is confusion between data in the Product Categories Excel file - sub-categories are now under incorrect main categories.
+
+Data Mix-up Between Files: There is confusion between the Product Categories Excel file and the Shipment Classification Excel file.
+
+Monthly Revenue: Should have a section in the sidebar menu (blue menu). When opened, it should display a revenue report table (can provide the table).
+
+Quick Actions: "Add New Seller" and "Add New Shipping Company" are not required in quick actions, as sellers and shipping companies should create their own accounts through the website, and the admin simply approves account openings.
+
+Shipping Order Details: Do not match the provided Excel file or what was discussed in meetings and correspondence.
+
+ID Numbers: The identification numbers in all sections are not ordered and have no sorting key.
+
+Missing Search Boxes: The following sections are missing search boxes in the blue sidebar menu:
+
+Shipping orders
+
+E-commerce orders (Market purchases)
+
+Return orders
+
+Employees
+
+Suppliers/Sellers
+
+Shipping companies
+
+Account Data Mismatch: All accounts (User - Seller - Shipping Company - Employee) do not match the provided Excel files (can provide latest updates).
+
+Commission & Fees Section: Refund fees, balance transfer fees, and minimum refund fees apply to users, not merchants. These should be separated under "Administrative Fees".
+
+Notifications Section: Sellers and shipping companies have not been included - need to add a "Supplier Notifications" section (sellers and shipping companies).
+
+Products Section: Need to add a "View" option for each product to open the product screen.
+
+Filter Tools: Need to freeze filter tools and prevent them from disappearing.
+
+Category Filter Labels: "ALL Categories" should be changed to "الأقسام الرئيسية للمنتجات" (Main Product Categories), and "ALL Sub Categories" should be changed to "الأقسام الفرعية للمنتجات" (Sub Product Categories).
+
+Filter Data Issues: Both the ALL Categories and ALL Sub Categories filters contain the same data, which does not match the provided Excel files. Additionally, when using filters, each Sub Categories list should be subordinate to one of the items in the Categories list - this is not implemented.
+
+Category Order: The Categories (Main Product Sections) list must be ordered according to the sequence numbers in the provided Excel file (can display each number next to its corresponding section in the filter list).
+
+Stores Section: No stores section exists in the Admin Dashboard - this is needed.
+
+Return Orders Section: Requirements:
+
+Return orders will only appear for orders that have been received by the buyer.
+
+Buyer Return Reason List (when submitting return request):
+
+Wrong product
+
+Damaged product
+
+Poor quality product
+
+Product does not match description
+
+Other reasons (opens text box for product condition description) - Send
+
+Seller Return Request Status List:
+
+Product requested for return (automatic option)
+
+Return request approved
+
+Return request rejected (with reason text) - Buyer sees WhatsApp complaint link
+
+Product received and under inspection
+
+Refund accepted
+
+Refund rejected (with reason text) - Buyer sees WhatsApp complaint link
+
+Approved Return Flow:
+
+If seller selects "Return request approved" → Automatic notification to buyer: "Return request approved. You can send the product back to the seller with the representative who will contact you."
+
+"Return Shipping Request" option appears for seller to select → initiates product return shipping from buyer to seller
+
+Rejected Return Flow:
+
+If seller selects "Return request rejected" or "Refund rejected" and buyer submits a return complaint
+
+Appears in Admin "Urgent Tasks" → Admin Approvals → Product Return Complaints section
+
+Format: "Complaint #000 for Return #000 from Customer #000 for Purchase Order #000 - Open return status for details"
+
+Admin action: "Reactivate return request" (with reason)
+
+Automatic notification to seller: "Please review MetwLogistic Customer Service regarding Complaint #000 for Return #000 from Customer #000 for Purchase Order #000 - Open return status for details"
+
+Accepted Refund Flow:
+
+If seller selects "Refund accepted" → Automatic notification to buyer: "Product return approved. Product value will be refunded to your account."
+
+Appears in Admin "Urgent Tasks" → Admin Approvals → Approved Return Requests section
+
+Format: "Approval for Return #000 from Seller #000 for Customer #000 for Purchase Order #000 - Open return status for details"
+
+Admin updates return status to "Return completed" and enters the amount paid by buyer
+
+This amount will have fees deducted according to previously sent formulas
+
+Net amount will be automatically added to user's Metwzon Wallet
+
+Accepted Cancellation Flow:
+
+If seller selects "Cancellation accepted" → Automatic notification to buyer: "Product purchase cancellation approved. Product value will be refunded to your account."
+
+Appears in Admin "Urgent Tasks" → Admin Approvals → Approved Cancellation Requests section
+
+Format: "Approval for Cancellation #000 from Seller #000 for Customer #000 for Purchase Order #000 - Open cancellation status for details"
+
+Admin updates cancellation status to "Cancellation completed" and enters the amount paid by buyer
+
+This amount will have fees deducted according to previously sent formulas
+
+Net amount will be automatically added to user's Metwzon Wallet
+
+Automatic notification to buyer: "Amount 000 has been added to your Metwzon Wallet after approval of Cancellation #000. You can log in to your account and request wallet refund in whole or in part, or use the balance for other products."
+
+Admin Cancellation Status Options:
+
+Reactivate cancellation request (with reason)
+
+Cancellation completed
+
+Order Status Views: All purchase, cancellation, and return order statuses for sellers will appear in their "Urgent Tasks" section as active lists requiring their action. Similarly, all shipping orders for shipping companies.
+
+Website Links in Addresses: Reiterating that website link-based addresses are not needed.
+
+Employee Data: Does not match the provided Excel file.
+
+Employee Roles List: Requires a table screen as follows:
+
+Admin activates the checkbox for each employee name and number with the corresponding task and assigned permission
+
+Employee Number	Employee Name	Permission/Section Access	Status (Checkbox)
+1-1000+	[Name]	[Role/Section]	☐
+Settings Section: In the Settings section, the "Management Contact Information" data needs to be modified. It should become a section for "Governorate and City Data" in Arabic and similar.
+
+Note: "Cash Vodafone" should be changed to "Vodafone Cash" and likewise for all government/administrative names.
+
+Automatic SMS Messages: Must apply the same correction to government/administrative names in SMS messages sent to users.
+
+Fix "ZonMeto": All messages contain the reversed word "ZonMeto" - should be corrected to "Metwzon" (Note: This is likely a simple typo of the letter 'O').
+
+Contact Information: In the Settings section, the Management Contact Information needs a separate list where employees can read the management contact data, separate from the admin.
+
+Cancellation Section: Unclear what its purpose or role is.
+
+Brand/Trademark Section: Need to add a commercial mark logo for the brand to be known through the website - upload and modify brand section.
+
+Product Categories Section: Not ordered by numbers and has no sorting key, making it difficult to match with the Excel file. Some data is unclear (e.g., "الرا" - "نجل" - "عر�").
+
+Sub-category Data: Does not match the provided Excel file.
+
+Category Definition: "القطعة" - "الوزن" - "الوزن وحجم" (Piece - Weight - Weight and Volume) are confusing concepts that were not requested.
+
+Countries Section: Required as the app operates within Egypt only, as mentioned.
+
+Governorates Section: Contains errors.
+
+Cities Section: Contains errors (Excel file with governorates, capitals, and subordinate cities was sent).
+
+Districts/Areas Section: Contains errors and is not required as it doesn't exist.
+
+Shipment Types Section: Not required.
+
+Delivery Types Section: Not required.
+
+Pages Section: Not clear.
+
+Product Measurements Section: Contains identification numbers that are not ordered and have no sorting key.
+
+Package Sizes Section: Does not match the provided Excel file.
+
+Numbering System Review: Need to review the numbering system for accounts, orders, products, and notifications:
+
+Item	Format
+User Number	USR-00000001
+Seller Number	VDR-00000001
+Shipping Company Number	SHP-00000001
+Employee Number	EMP-00000001
+Product Number	PRD-00000001
+Package Number	PKG-00000001
+Shipping Order Number	F-ORD-00000001
+Purchase Order Number	M-ORD-00000001
+Cancellation Order Number	M-CAN-00000001
+Return Order Number	RET-00000001
+Cancellation Complaint Number	CAN-COM-00000001
+Return Complaint Number	RET-COM-00000001
+Express Delivery Order Number	EXP-ORD-00000001
+Express Delivery Complaint Number	EXP-COM-00000001
+Registration Request Number	REG-REQ-00000001
+User Notification Number	NOT-00000001
+Supplier Notification Number	S-NOT-00000001
+Terminology Corrections in Admin Dashboard:
+
+"نظرة عامة على لوحة التحكم" (Dashboard Overview) → "المهام العاجلة" (Urgent Tasks)
+
+"طلبات التجارة الإلكترونية" (E-commerce Orders) → "طلبات الشراء من الماركت" (Market Purchase Orders)
+
+"التجارة الإلكترونية" (E-commerce) → "تطبيق الماركت" (Market App)
+
+"تطبيق الشحن والتوصيل" (Shipping & Delivery App) → "الشحنة" (Shipment) - in all sections
+
+"الطلب" (The Order) → "الطلب" (The Request) - in all sections (for returns/cancellations)
+
+"البائع" (Seller) → "الموردون" (Suppliers)
+
+"جميع البائعين" (All Sellers) → "جميع الموردين" (All Suppliers)
+
+"إدارة البائعين" (Manage Sellers) → "إدارة الموردين" (Manage Suppliers)
+
+PART FOUR: SHIPPING COMPANY DASHBOARD
+Shipping Company Dashboard - Urgent Tasks
+When opening the Shipping Company Dashboard, the "Overview" screen needs to be changed to "Urgent Tasks" with the following sections:
+
+New Orders
+MetwExpress Orders:
+
+Shipping orders
+
+Pickup representative orders
+
+Delivery representative orders
+
+Metwzon Orders:
+
+Shipping orders
+
+Product delivery cancellation orders
+
+Product return orders
+
+Pickup representative orders
+
+Delivery representative orders
+
+Pending Received Orders Status Tracking
+MetwExpress Orders (incomplete)
+Metwzon Orders (incomplete)
+
+New Notifications Received
+Additional Shipping Company Requirements
+Sticky Header: Need to freeze the top row on all screens while scrolling down, with the top row data reduced to a single line.
+
+Shipment Classification: Does not match the provided Excel file.
+
+Identification Numbers: Not ordered and have no sorting key.
+
+Shipping Locations Section: Not required - website link addresses are not needed.
+
+Pricing Section: Does not match the Shipment Classification & Pricing Excel file provided.
+
+Profile Data: Does not match the Account Opening Data Excel file provided.
+
+Return Orders Section: Unclear for us.
+
+Revenue Report: Can be provided.
+
+PART FIVE: DASHBOARD GENERAL NOTES
+All Dashboards (Admin, Shipping Companies, etc.)
+Info Bar Layout: At the top of the Urgent Tasks screen, there are 6 colored rectangles taking up too much space. Replace with a single info bar at the top with icons, frozen while scrolling.
+
+Horizontal Scroll Bar: Needs to be fixed at the bottom of all screens instead of scrolling down to reveal it (like many websites).
+
+Scroll Bar Width: Need to increase width by 1.5x for both horizontal and vertical scroll bars.
+
+Settings Menu: Need to fix the appearance of settings sections in the blue menu - do not collapse the menu within the settings word.
+
+Menu Color: Change the blue menu color to solid orange (non-gradient).
+
+Color Scheme: Use only orange and black colors - no other colors. (Info bar at the top of any section, scroll bars, and the rectangle in urgent tasks showing total users should all use only black and orange).
+
+Language Mixing: In dashboards, website, and applications, many sections and lists mix Arabic and English, especially in statuses. Need to separate the languages - when Arabic is selected, no English words should appear.
+
+Back Button: Every screen needs a back button to return to the previous screen.
+
+Sticky Filters: The top row of screens (containing search and filters) is still not frozen - needs to be fixed.
+
+User Preferences: Need to save user preferences (especially language selection) in dashboards, website, and applications - should not change on subsequent logins.
+
+Data Display: For screens with lots of data, enable sidebar scrolling to display all data on the same screen instead of splitting across multiple pages (1,2,3,4,5...). If impossible, display the maximum possible with scrolling (e.g., 300 rows), then go to next page.
+
+Examples: 27 governorates split across 2 screens? 263 cities split across several screens? 51 main categories split across several screens?
+
+Sorting: Upon opening any section, data should appear sorted by the number column (account number, order number, product number, etc.). The first column should always be the identification number to allow sorting.
+
+Account Data Mismatches: The following still have data mismatches with Excel files:
+
+User account
+
+Seller account
+
+Shipping company account
+
+Employee account
+
+Shipping order information
+
+Product attempts/sessions
+
+Unified Numbering System: Need to standardize numbering for accounts, products, and orders:
+
+Item	Format	Description
+USR-00000001	User	مستخدم
+VDR-00000001	Vendor/Seller	بائع
+PRD-00000001	Product	منتج
+M-ORD-00000001	Market Order (Purchase)	طلب شراء منتج
+F-ORD-00000001	Freight/Shipping Order	طلب شحن
+RET-00000001	Return Order	طلب إرجاع منتج
+M-CAN-00000001	Market Cancellation	طلب إلغاء شراء
+F-CAN-00000001	Freight Cancellation	طلب إلغاء شحن
+WAR-00000001	Warehouse	مستودع شحن
+EMP-00000001	Employee	موظف
+NOT-00000001	Notification	إشعار
+PART SIX: RETURN POLICY & SHIPPING FEES
+Shipping Fees Structure
+Fee Type	Amount	Notes
+Shipping Fee	Free (0 EGP)	Base fee
+Shipping Fee	Variable	Depending on governorate
+Shipping Fee	Free	When purchase amount reaches 000 EGP
+Expected Delivery Time	0 Days	Standard delivery
+Return Policy
+Policy Item	Status
+Returnable	Yes/No (depending on product)
+Returnable	Variable depending on governorate
+Return Fee	Free when purchase amount reaches 000 EGP
+Cancellation/Return Fee	Free (0 EGP)
+Cancellation/Return Fee	Variable depending on governorate
+Return Validity Period	0 Days
+Sales & Shipping Process Flow
+Seller must request shipping before accepting product sale
+
+After shipping approval, seller accepts the product
+
+Customer pays the deposit amount
+
+Admin confirms the amount paid and approves shipping start
+
+This is the complete sales and shipping scenario.
+
+PART SEVEN: BRANDING & TERMINOLOGY
+Brand Name Corrections
+Current (Incorrect)	Correct
+Lasco	MetwLogistic
+السكو	ميتولوجستيك
+ZonMeto (reversed)	Metwzon
+Metw-Express (with hyphen)	MetwExpress (without hyphen)
+Note: Metw-Express does not contain a hyphen - it should be "MetwExpress"
+
+PART EIGHT: PRODUCT CATEGORIES DATA REQUIREMENTS
+Product Categories File Status
+The provided file contains 51 main sections
+
+Sub-categories need to be properly assigned to their correct main categories
+
+Some data appears to be from the wrong file (Shipment Classification instead of Product Categories)
+
+Numbers and sorting keys need to be implemented
+
+Category Structure
+Main categories (الأقسام الرئيسية للمنتجات)
+
+Sub-categories (الأقسام الفرعية للمنتجات)
+
+Each sub-category must be linked to exactly one main category
+
+PART NINE: SHIPMENT CLASSIFICATION DATA REQUIREMENTS
+Classification File Status
+Contains errors and mismatches
+
+Some data appears to have been mixed with Product Categories file
+
+Pricing structure needs verification against the Excel file
+
+Required Classification Fields
+Weight limits
+
+Volume limits
+
+Vehicle types
+
+Pricing tiers
+
+PART TEN: USER/ACCOUNT DATA REQUIREMENTS
+Registration Data Requirements
+All account registration data must match the latest versions of Excel files provided:
+
+User Data (مستخدم)
+
+Personal information
+
+Contact details
+
+Address information
+
+Governorate/City selection
+
+Seller/Vendor Data (بائع/مورد)
+
+Business information
+
+Commercial registration (if applicable)
+
+Bank details
+
+Contact information
+
+Shipping Company Data (شركة شحن)
+
+Company registration
+
+Contact information
+
+Service areas (governorates/cities)
+
+Pricing structure
+
+Employee Data (موظف)
+
+Personal information
+
+Role/permissions
+
+Contact details
+
+Department assignment
+
+Representative Data (مندوب)
+
+Personal information
+
+Vehicle details
+
+License information
+
+Classification code
+
+SUMMARY OF ACTION ITEMS
+High Priority
+Fix all terminology/labeling issues across all platforms
+
+Correct language mix-ups (ensure Arabic-only when selected)
+
+Update all data to match latest Excel files
+
+Fix the bottom icon bar to remain visible
+
+Set default language to Arabic and save user preferences
+
+Add missing search boxes in dashboard sections
+
+Implement Urgent Tasks as default landing page for all dashboards
+
+Fix sub-category assignments to correct main categories
+
+Correct product descriptions to match Excel file
+
+Update return order workflow as specified
+
+Medium Priority
+Increase scroll bar width
+
+Fix frozen header rows
+
+Implement unified numbering system
+
+Add stores section to admin dashboard
+
+Add supplier notifications section
+
+Implement employee roles table
+
+Fix governorate/city lists with Arabic language
+
+Remove website links from addresses
+
+Update color scheme to orange and black only
+
+Low Priority
+Fix app icons to show logos
+
+Adjust font sizes on login screen
+
+Change green rectangles to orange
+
+Remove black strip from market app
+
+Adjust login screen image layout
+
+Fix search bar placeholder text
+
+Add back buttons to all screens
+
+Review and remove unnecessary sections (shipment types, delivery types, pages, districts)
+
+APPENDIX: AVAILABLE REFERENCE FILES
+The following Excel files are available for reference and should be requested if needed:
+
+Product Categories - Contains 51 sections with proper hierarchy
+
+Shipment Classification & Pricing - Contains classification codes, weight limits, volume limits
+
+Governorates & Cities - Complete list with Arabic names and hierarchies
+
+Account Opening Data - Registration fields for all user types
+
+Product Information - Complete product details and descriptions
+
+Employee Data - Employee information and roles
+
+Shipping Order Details - Complete shipping order fields and workflow
+
+Revenue Report Template - Monthly revenue reporting structure
+
+This document consolidates all feedback from the following files:
+
+ملحق ملاحظات 1 - تفاصيل مطلوبة بالتطبيق الإلكتروني المخصص للمناديب
+
+ملحق ملاحظات 1 - ملاحظات على التطبيقين والموقع الإلكتروني ولوحات المعلومات والتحكم وحسابات الموردين
+
+ملحق ملاحظات 2 - ملاحظات على لوحات المعلومات والتحكم
+
+ملحق ملاحظات 3 - ملاحظات على التطبيقين ولوحة معلومات الأدمن
+
+Last Updated: Document compiled from multiple review files
