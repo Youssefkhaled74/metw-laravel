@@ -59,7 +59,7 @@ return [
     'price_medium' => 'السعر لكل كيلو (بالكيلوجرام)',
     'price_small' => 'السعر لكل كيلو (بالكيلوجرام)',
     // Dashboard page
-    'page_title_dashboard' => 'نظرة عامة على لوحة التحكم',
+    'page_title_dashboard' => 'المهام العاجلة',
     'total_orders' => 'إجمالي الطلبات',
     'pending_orders' => 'طلبات قيد الانتظار',
     'return_requests' => 'طلبات الارجاع',
@@ -94,7 +94,7 @@ return [
     'current_status' => 'الحالة الحالية:',
     'cancel' => 'إلغاء',
     'no_recent_orders' => 'لا توجد طلبات حديثة.',
-    'urgent_tasks_title' => 'نظرة عامة على لوحة التحكم',
+    'urgent_tasks_title' => 'المهام العاجلة',
     'urgent_tasks_subtitle' => 'لوحة متابعة مباشرة لطلبات Metw Express و Metwzon مع آخر العناصر والإشعارات الجديدة.',
     'urgent_metw_express_section' => 'Metw Express - طلبات ميتو إكسبريس',
     'urgent_metwzon_section' => 'Metwzon - طلبات ميتوزون',
@@ -623,6 +623,7 @@ return [
     'price' => 'السعر',
     'assignment' => 'التعيين',
     'clear_filters' => 'مسح الفلاتر',
+    'not_available' => 'غير متوفر',
 
     // Pricing help
     'category_pricing_help' => 'تعيين التسعير لكل تصنيف حسب نوع الوزن/الحجم',

@@ -58,6 +58,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Admin Dashboard Routes
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Dashboard\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/overview', [\App\Http\Controllers\Dashboard\Admin\AdminDashboardController::class, 'dashboard2'])->name('dashboard.overview');
         Route::get('/urgent-tasks', [\App\Http\Controllers\Dashboard\Admin\AdminDashboardController::class, 'urgentTasks'])->name('urgent-tasks');
         Route::get('/dashboard/monthly-revenue', [\App\Http\Controllers\Dashboard\Admin\AdminDashboardController::class, 'monthlyRevenue'])->name('dashboard.monthly-revenue');
 
@@ -158,6 +159,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/vendors/{vendor}', [\App\Http\Controllers\Dashboard\Admin\VendorController::class, 'update'])->name('vendors.update');
         Route::get('/vendors/{vendor}/products', [\App\Http\Controllers\Dashboard\Admin\VendorController::class, 'products'])->name('vendors.products');
         Route::patch('/vendors/{vendor}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\VendorController::class, 'toggleStatus'])->name('vendors.toggle-status');
+        // Stores Management
+        Route::get('/stores', [\App\Http\Controllers\Dashboard\Admin\StoreController::class, 'index'])->name('stores');
         // Shipment Companies Management
         Route::get('/shipment-companies', [ShipmentController::class, 'companies'])->name('shipment-companies');
         Route::get('/shipment-companies/create', [ShipmentController::class, 'createCompany'])->name('shipment-companies.create');

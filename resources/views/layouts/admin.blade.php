@@ -40,10 +40,10 @@
             --metw-orange-dark: #F45B2E;
             --metw-orange-soft: #FFF1EC;
 
-            --metw-purple: #7B00A8;
-            --metw-purple-dark: #4C0078;
-            --metw-purple-deep: #1F1235;
-            --metw-purple-soft: #F5EBFF;
+            --metw-purple: #1A1A1A;
+            --metw-purple-dark: #111111;
+            --metw-purple-deep: #0A0A0A;
+            --metw-purple-soft: #F5F5F5;
 
             --metw-bg: #F7F5FA;
             --metw-bg-2: #FBFAFD;
@@ -58,12 +58,12 @@
             --metw-success: #35D36F;
             --metw-danger: #FF4B2E;
             --metw-warning: #FFB347;
-            --metw-info: #7B00A8;
+            --metw-info: #FF7043;
 
-            --metw-gradient-primary: linear-gradient(135deg, #FF7043 0%, #7B00A8 100%);
-            --metw-gradient-purple: linear-gradient(135deg, #8A00B8 0%, #4C0078 100%);
+            --metw-gradient-primary: linear-gradient(135deg, #FF7043 0%, #F45B2E 100%);
+            --metw-gradient-purple: linear-gradient(135deg, #222222 0%, #111111 100%);
             --metw-gradient-orange: linear-gradient(135deg, #FF7A45 0%, #FF5A3C 100%);
-            --metw-gradient-admin: linear-gradient(160deg, #1F1235 0%, #4C0078 55%, #7B00A8 100%);
+            --metw-gradient-admin: linear-gradient(160deg, #F45B2E 0%, #FF7043 55%, #FF8A65 100%);
 
             --metw-radius-sm: 12px;
             --metw-radius-md: 16px;
@@ -73,7 +73,7 @@
             --metw-shadow-xs: 0 3px 10px rgba(36, 23, 46, 0.04);
             --metw-shadow-sm: 0 8px 24px rgba(36, 23, 46, 0.07);
             --metw-shadow-md: 0 16px 38px rgba(36, 23, 46, 0.12);
-            --metw-shadow-purple: 0 18px 36px rgba(123, 0, 168, 0.20);
+            --metw-shadow-purple: 0 18px 36px rgba(244, 91, 46, 0.20);
             --metw-shadow-orange: 0 14px 28px rgba(255, 112, 67, 0.22);
 
             --topbar-bg: #FFFFFF;
@@ -101,7 +101,7 @@
             overflow: hidden;
             color: var(--metw-text);
             background:
-                radial-gradient(circle at top left, rgba(123, 0, 168, 0.10), transparent 34rem),
+                radial-gradient(circle at top left, rgba(244, 91, 46, 0.10), transparent 34rem),
                 radial-gradient(circle at top right, rgba(255, 112, 67, 0.09), transparent 30rem),
                 linear-gradient(180deg, #FFFFFF 0%, var(--metw-bg) 100%);
             font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -151,7 +151,7 @@
             height: 100dvh;
             overflow-y: auto;
             background:
-                radial-gradient(circle at top center, rgba(123, 0, 168, 0.13), transparent 34rem),
+                radial-gradient(circle at top center, rgba(244, 91, 46, 0.13), transparent 34rem),
                 radial-gradient(circle at bottom center, rgba(255, 112, 67, 0.13), transparent 28rem),
                 linear-gradient(135deg, #FFFFFF 0%, #F8F2FF 50%, #FFF3EE 100%) !important;
         }
@@ -165,17 +165,43 @@
         }
 
         .main-content::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, rgba(123, 0, 168, 0.45), rgba(255, 112, 67, 0.50));
+            background: linear-gradient(180deg, rgba(244, 91, 46, 0.45), rgba(255, 112, 67, 0.50));
             border-radius: 999px;
             border: 2px solid rgba(248, 245, 250, 0.85);
         }
 
         .main-content::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, rgba(123, 0, 168, 0.65), rgba(255, 112, 67, 0.68));
+            background: linear-gradient(180deg, rgba(244, 91, 46, 0.65), rgba(255, 112, 67, 0.68));
         }
 
         body.sidebar-collapsed .main-content {
             margin-inline-start: var(--sidebar-collapsed-width);
+        }
+
+        body::-webkit-scrollbar {
+            width: 10px;
+        }
+        body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        body::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 999px;
+        }
+        body::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        .main-content {
+            scrollbar-width: auto;
+            scrollbar-color: #c1c1c1 #f1f1f1;
+        }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #f8f9fa;
         }
 
         /* =========================
@@ -212,7 +238,7 @@
 
         .sidebar::-webkit-scrollbar,
         .sidebar-menu::-webkit-scrollbar {
-            width: 6px;
+            width: 10px;
         }
 
         .sidebar::-webkit-scrollbar-track,
@@ -445,7 +471,7 @@
         .sidebar .nav-link.active i:not(.chevron) {
             color: #FFFFFF;
             background: var(--metw-gradient-primary);
-            box-shadow: 0 8px 18px rgba(123, 0, 168, 0.20);
+            box-shadow: 0 8px 18px rgba(244, 91, 46, 0.20);
         }
 
         .sidebar .nav-link.active .chevron {
@@ -612,7 +638,7 @@
             border-radius: var(--metw-radius-xl);
             background:
                 radial-gradient(circle at 100% 0%, rgba(255, 112, 67, 0.10), transparent 14rem),
-                radial-gradient(circle at 0% 0%, rgba(123, 0, 168, 0.09), transparent 14rem),
+                radial-gradient(circle at 0% 0%, rgba(244, 91, 46, 0.09), transparent 14rem),
                 rgba(255, 255, 255, 0.94);
         }
 
@@ -684,10 +710,10 @@
         .topbar-control:hover,
         .topbar-control:focus {
             color: var(--metw-purple) !important;
-            border-color: rgba(123, 0, 168, 0.22) !important;
+            border-color: rgba(244, 91, 46, 0.22) !important;
             background: #FFFFFF !important;
             transform: translateY(-1px);
-            box-shadow: 0 10px 22px rgba(123, 0, 168, 0.10);
+            box-shadow: 0 10px 22px rgba(244, 91, 46, 0.10);
         }
 
         #sidebarMobileToggle {
@@ -764,7 +790,7 @@
         }
 
         .card:hover {
-            border-color: rgba(123, 0, 168, 0.14) !important;
+            border-color: rgba(244, 91, 46, 0.14) !important;
             transform: translateY(-2px);
             box-shadow: var(--metw-shadow-md) !important;
         }
@@ -898,7 +924,7 @@
 
         .btn-outline-primary {
             color: var(--metw-purple) !important;
-            border-color: rgba(123, 0, 168, 0.28) !important;
+            border-color: rgba(244, 91, 46, 0.28) !important;
             background: #FFFFFF !important;
         }
 
@@ -919,7 +945,7 @@
         .btn-outline-secondary:hover,
         .btn-light:hover {
             color: var(--metw-purple) !important;
-            border-color: rgba(123, 0, 168, 0.20) !important;
+            border-color: rgba(244, 91, 46, 0.20) !important;
             background: var(--metw-purple-soft) !important;
         }
 
@@ -967,8 +993,8 @@
         .form-control:focus,
         .form-select:focus {
             background-color: #FFFFFF !important;
-            border-color: rgba(123, 0, 168, 0.32) !important;
-            box-shadow: 0 0 0 0.22rem rgba(123, 0, 168, 0.10) !important;
+            border-color: rgba(244, 91, 46, 0.32) !important;
+            box-shadow: 0 0 0 0.22rem rgba(244, 91, 46, 0.10) !important;
         }
 
         .input-group-text {
@@ -1042,7 +1068,7 @@
         }
 
         .bg-primary {
-            background-color: var(--metw-purple) !important;
+            background-color: var(--metw-orange) !important;
         }
 
         .bg-danger {
@@ -1441,10 +1467,10 @@
             --metw-orange-dark: #ea5523;
             --metw-orange-soft: #fff3ed;
 
-            --metw-purple: #6f2dbd;
-            --metw-purple-dark: #4b1688;
-            --metw-purple-deep: #21142f;
-            --metw-purple-soft: #f4edff;
+            --metw-purple: #1A1A1A;
+            --metw-purple-dark: #111111;
+            --metw-purple-deep: #0A0A0A;
+            --metw-purple-soft: #F5F5F5;
 
             --metw-bg: #f6f5f8;
             --metw-bg-2: #fbfafc;
@@ -1456,8 +1482,8 @@
             --metw-muted: #746b7c;
             --metw-border: #ebe6f0;
 
-            --metw-gradient-primary: linear-gradient(135deg, #ff6b35 0%, #6f2dbd 100%);
-            --metw-gradient-admin: linear-gradient(180deg, #21142f 0%, #32164f 52%, #4b1688 100%);
+            --metw-gradient-primary: linear-gradient(135deg, #ff6b35 0%, #ea5523 100%);
+                --metw-gradient-admin: linear-gradient(180deg, #F45B2E 0%, #FF7043 52%, #FF8A65 100%);
 
             --metw-radius-sm: 10px;
             --metw-radius-md: 14px;
@@ -1973,7 +1999,7 @@
                                 <a class="nav-link {{ request()->routeIs('admin.urgent-tasks') ? 'active' : '' }}"
                                 href="{{ route('admin.urgent-tasks') }}">
                                     <i class="fas fa-exclamation-triangle"></i>
-                                    <span class="link-text">نظرة عامة على لوحة التحكم</span>
+                                    <span class="link-text">المهام العاجلة</span>
                                 </a>
                             </li>
                             <!-- <li class="nav-item">
@@ -2010,6 +2036,13 @@
                                 href="{{ route('admin.vendors') }}">
                                     <i class="fas fa-store"></i>
                                     <span class="link-text">{{ __('admin-dashboard.vendors') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.stores*') ? 'active' : '' }}"
+                                href="{{ route('admin.stores') }}">
+                                    <i class="fas fa-store-alt"></i>
+                                    <span class="link-text">{{ __('admin-dashboard.stores_management') }}</span>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -2305,10 +2338,8 @@
                                             </a>
                                         </li>
                                     @endif --}}
-                                </ul>
+                                 </ul>
                             </li>
-                        @endif
-                    @endif
                     </ul>
                 </div>
                 <div class="sidebar-footer">

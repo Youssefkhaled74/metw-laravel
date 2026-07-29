@@ -131,8 +131,11 @@
                             @foreach ($orders as $order)
                                 @php
                                     $companies = $order->items->pluck('shipmentCompany')->filter()->unique('id');
-                                    $customerName = $order->user->username ?? 'N/A';
-                                    $statusDisplay = is_object($order->status) ? $order->status->name : $order->status;
+                                    $customerName = $order->user->username ?? __('admin-dashboard.not_available');
+                                    $statusValue = is_object($order->status) ? $order->status->value : $order->status;
+                                    $statusDisplay = __('admin-dashboard.' . $statusValue) !== 'admin-dashboard.' . $statusValue
+                                        ? __('admin-dashboard.' . $statusValue)
+                                        : ucfirst($statusValue);
                                 @endphp
                                 <tr>
                                     <td class="fw-semibold text-primary">{{ $order->order_number }}</td>
@@ -225,7 +228,7 @@
                                                                 {{ $order->user->username ?? __('admin-dashboard.not_available') }}</p>
                                                             <p><strong>{{ __('admin-dashboard.current_status') }}:</strong>
                                                                 <span
-                                                                    class="badge bg-secondary">{{ ucfirst($statusDisplay) }}</span>
+                                                                    class="badge bg-secondary">{{ $statusDisplay }}</span>
                                                             </p>
                                                         </div>
                                                         <div class="modal-footer">

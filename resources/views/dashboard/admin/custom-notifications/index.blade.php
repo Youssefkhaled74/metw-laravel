@@ -70,7 +70,7 @@
                                             class="form-select modern-input @error('recipient_type') is-invalid @enderror"
                                             required>
                                         <option value="user" {{ old('recipient_type', 'user') === 'user' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'المستخدمين' : 'Users' }}</option>
-                                        <option value="vendor" {{ old('recipient_type') === 'vendor' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'البائعين' : 'Vendors' }}</option>
+                                        <option value="vendor" {{ old('recipient_type') === 'vendor' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'الموردين' : 'Vendors' }}</option>
                                         <option value="shipment_company" {{ old('recipient_type') === 'shipment_company' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'شركات الشحن' : 'Shipment Companies' }}</option>
                                     </select>
                                     @error('recipient_type')
@@ -472,7 +472,7 @@
             const recipientLabels = {
                 ar: {
                     user: { icon: 'fa-user', singular: 'مستخدم', plural: 'المستخدمين', all: 'جميع المستخدمين', one: 'مستخدم واحد', multiple: 'مستخدمين متعددين', choose: 'اختر مستخدم...', search: 'البحث عن المستخدمين...' },
-                    vendor: { icon: 'fa-store', singular: 'بائع', plural: 'البائعين', all: 'جميع البائعين', one: 'بائع واحد', multiple: 'بائعين متعددين', choose: 'اختر بائع...', search: 'البحث عن البائعين...' },
+                    vendor: { icon: 'fa-store', singular: 'مورد', plural: 'الموردين', all: 'جميع الموردين', one: 'مورد واحد', multiple: 'مورد متعددون', choose: 'اختر مورد...', search: 'البحث عن الموردين...' },
                     shipment_company: { icon: 'fa-truck', singular: 'شركة شحن', plural: 'شركات الشحن', all: 'جميع شركات الشحن', one: 'شركة شحن واحدة', multiple: 'شركات شحن متعددة', choose: 'اختر شركة شحن...', search: 'البحث عن شركات الشحن...' }
                 },
                 en: {

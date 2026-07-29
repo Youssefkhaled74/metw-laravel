@@ -623,6 +623,7 @@ return [
     'price' => 'Price',
     'assignment' => 'Assignment',
     'clear_filters' => 'Clear Filters',
+    'not_available' => 'N/A',
 
     // Pricing help
     'category_pricing_help' => 'Set pricing per category based on weight/size type',

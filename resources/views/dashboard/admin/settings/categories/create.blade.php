@@ -9,6 +9,12 @@
     <li class="breadcrumb-item active">{{ __('admin-dashboard.create_new_category') }}</li>
 @endsection
 
+@section('page-actions')
+    <a href="{{ route('admin.settings.categories.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> {{ __('admin-dashboard.back_to_list') }}
+    </a>
+@endsection
+
 @section('content')
     <div class="row justify-content-center">
         <div class="col-md-8">

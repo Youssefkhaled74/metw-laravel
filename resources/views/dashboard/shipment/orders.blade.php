@@ -159,7 +159,7 @@
                                     </td>
                                     <td>
                                         <span class="status-pill {{ in_array($statusValue, ['delivered']) ? 'status-active' : (in_array($statusValue, ['cancelled','returned']) ? 'status-inactive' : 'packages-pill') }}">
-                                            {{ ucfirst(str_replace('_', ' ', $statusValue)) }}
+                                            {{ __('shipment-dashboard.' . $statusValue) !== 'shipment-dashboard.' . $statusValue ? __('shipment-dashboard.' . $statusValue) : ucfirst(str_replace('_', ' ', $statusValue)) }}
                                         </span>
                                     </td>
                                     <td>
@@ -244,10 +244,10 @@
                                                             <p><strong>@lang('shipment-dashboard.order')</strong>
                                                                 {{ $order->order_number }}</p>
                                                             <p><strong>@lang('shipment-dashboard.customer')</strong>
-                                                                {{ $order->user->username ?? 'N/A' }}</p>
+                                                                {{ $order->user->username ?? @lang('shipment-dashboard.not_available') }}</p>
                                                             <p><strong>@lang('shipment-dashboard.current_status')</strong>
                                                                 <span
-                                                                    class="badge bg-secondary">{{ ucfirst(str_replace('_', ' ', $statusValue)) }}</span>
+                                                                    class="badge bg-secondary">{{ __('shipment-dashboard.' . $statusValue) !== 'shipment-dashboard.' . $statusValue ? __('shipment-dashboard.' . $statusValue) : ucfirst(str_replace('_', ' ', $statusValue)) }}</span>
                                                             </p>
                                                         </div>
                                                         <div class="modal-footer">

@@ -34,7 +34,15 @@ class Complaint extends Model
 
     protected static function booted()
     {
-        static::assignPrefixedNumberOnCreate('complaint_number', 'CMP');
+        static::creating(function (Complaint $complaint) {
+            $prefix = match($complaint->complaint_type) {
+                ComplaintType::PURCHASE_CANCELLATION => 'CAN-COM',
+                ComplaintType::SHIPPING_CANCELLATION => 'CAN-COM',
+                ComplaintType::RETURN => 'RET-COM',
+                default => 'CMP',
+            };
+            $complaint->complaint_number = $complaint->generateSequentialNumber('complaint_number', $prefix);
+        });
     }
 
     public function complaintable()

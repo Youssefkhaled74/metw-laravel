@@ -12,7 +12,7 @@ return [
     'page_title_dashboard' => 'لوحة التحكم للتاجر',
     'lang_en' => 'الإنجليزية',
     'lang_ar' => 'العربية',
-    'vendor_dashboard' => 'نظرة عامة على لوحة التحكم',
+    'vendor_dashboard' => 'المهام العاجلة',
     'total_products' => 'إجمالي المنتجات',
     'active_products' => 'المنتجات النشطة',
     'total_orders' => 'إجمالي الطلبات',
@@ -112,8 +112,8 @@ return [
     'no_category' => 'بدون فئة',
 
     // Dashboard Overview
-    'dashboard_overview' => 'نظرة عامة على لوحة التحكم',
-    'urgent_tasks' => 'نظرة عامة على لوحة التحكم',
+    'dashboard_overview' => 'المهام العاجلة',
+    'urgent_tasks' => 'المهام العاجلة',
     'latest_updates' => 'آخر التحديثات',
     'new_incomplete_sales_orders' => 'طلبات البيع الجديدة غير المكتملة',
     'new_incomplete_cancellation_requests' => 'طلبات الإلغاء الجديدة غير المكتملة',

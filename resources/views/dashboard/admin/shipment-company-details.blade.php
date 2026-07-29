@@ -10,6 +10,9 @@
 @endsection
 
 @section('page-actions')
+    <a href="{{ route('admin.shipment-companies') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> {{ __('admin-dashboard.back_to_list') }}
+    </a>
     <form action="{{ route('admin.shipment-companies.toggle-status', $company->id) }}" method="POST" class="d-inline">
         @csrf
         @method('PATCH')

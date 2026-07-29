@@ -208,7 +208,8 @@ return [
         'no_ecommerce_orders_found' => 'No Marketplace Purchase Orders Found',
         'no_ecommerce_orders_message' => 'There are no marketplace purchase orders in the system yet.',
         // Vendor Management
-        'vendors_management' => 'Sellers Management',
+    'vendors_management' => 'Sellers Management',
+    'stores_management' => 'Stores Management',
         'all_vendors' => 'All Sellers',
         'add_first_vendor' => 'Add First Vendor',
         'no_vendors_found' => 'No Sellers Found',

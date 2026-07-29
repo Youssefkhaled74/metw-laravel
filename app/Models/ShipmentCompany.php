@@ -149,7 +149,7 @@ class ShipmentCompany extends Authenticatable
 
     protected static function booted()
     {
-        static::assignPrefixedNumberOnCreate('company_number', 'SHC');
+        static::assignPrefixedNumberOnCreate('company_number', 'SHP');
 
         static::addGlobalScope('active', function ($q) {
             $q->where('is_active', true);

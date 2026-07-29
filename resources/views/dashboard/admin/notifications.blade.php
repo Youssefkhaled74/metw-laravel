@@ -44,7 +44,7 @@
                             <strong class="d-block text-primary mb-1">
                                 {{ $text('Notification', 'الإشعار') }} #{{ $notification->notification_number ?? 'NOT-00000000' }}
                             </strong>
-                            <strong>{{ $notification->data['title'] ?? 'Notification' }}</strong><br>
+                            <strong>{{ $notification->data['title'] ?? $text('Notification', 'الإشعار') }}</strong><br>
                             <small>{{ $notification->data['body'] ?? '' }}</small><br>
                             <small class="text-muted">
                                 {{ $notification->created_at->diffForHumans() }}

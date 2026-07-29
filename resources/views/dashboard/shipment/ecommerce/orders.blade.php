@@ -138,7 +138,7 @@
                                     </td>
                                     <td>
                                         <span class="status-pill {{ in_array($statusValue, ['delivered']) ? 'status-active' : (in_array($statusValue, ['cancelled','returned']) ? 'status-inactive' : 'packages-pill') }}">
-                                            {{ ucfirst(str_replace('_', ' ', $statusValue)) }}
+                                            {{ __('shipment-dashboard.' . $statusValue) !== 'shipment-dashboard.' . $statusValue ? __('shipment-dashboard.' . $statusValue) : ucfirst(str_replace('_', ' ', $statusValue)) }}
                                         </span>
                                     </td>
                                     <td>

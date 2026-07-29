@@ -102,7 +102,7 @@
 
                     </div>
                     <div>
-                        <span class="badge bg-info">{{ ucfirst($status->value) }}</span>                    </div>
+                        <span class="badge bg-info">{{ __('shipment-dashboard.' . $status->value) !== 'shipment-dashboard.' . $status->value ? __('shipment-dashboard.' . $status->value) : ucfirst($status->value) }}</span>                    </div>
                 </div>
 
                 <div class="card-body">

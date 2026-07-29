@@ -42,7 +42,7 @@
                                     </tr>
                                     <tr>
                                         <td><strong>{{ __('shipment-dashboard.tracking_number') }}:</strong></td>
-                                        <td>{{ $order->tracking_number ?? 'N/A' }}</td>
+                                        <td>{{ $order->tracking_number ?? __('shipment-dashboard.not_available') }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>{{ __('shipment-dashboard.order_date') }}:</strong></td>
@@ -55,13 +55,13 @@
                                                 $status = $order->payment_status?->value ?? '';
                                             @endphp
                                             <span class="badge bg-{{ $status === 'paid' ? 'success' : ($status === 'failed' ? 'danger' : ($status === 'pending' ? 'warning' : 'secondary')) }}">
-                                                {{ ucfirst($status ?: 'unknown') }}
+                                                {{ __('shipment-dashboard.' . $status) !== 'shipment-dashboard.' . $status ? __('shipment-dashboard.' . $status) : ucfirst($status ?: 'unknown') }}
                                             </span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>{{ __('shipment-dashboard.payment_method') }}:</strong></td>
-                                        <td>{{ $order->payment_method ?? 'N/A' }}</td>
+                                        <td>{{ $order->payment_method ?? __('shipment-dashboard.not_available') }}</td>
                                     </tr>
                                 </table>
                             </div>
@@ -106,19 +106,19 @@
                                 <table class="table table-borderless mb-0">
                                     <tr>
                                         <td><strong>{{ __('shipment-dashboard.customer_name') }}:</strong></td>
-                                        <td>{{ $order->user->username ?? 'N/A' }}</td>
+                                        <td>{{ $order->user->username ?? __('shipment-dashboard.not_available') }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>{{ __('shipment-dashboard.email') }}:</strong></td>
-                                        <td>{{ $order->user->email ?? 'N/A' }}</td>
+                                        <td>{{ $order->user->email ?? __('shipment-dashboard.not_available') }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>{{ __('shipment-dashboard.phone') }}:</strong></td>
-                                        <td>{{ $order->user->phone ?? 'N/A' }}</td>
+                                        <td>{{ $order->user->phone ?? __('shipment-dashboard.not_available') }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>{{ __('shipment-dashboard.registered_since') }}:</strong></td>
-                                        <td>{{ $order->user->created_at->format('Y-m-d') ?? 'N/A' }}</td>
+                                        <td>{{ $order->user->created_at->format('Y-m-d') ?? __('shipment-dashboard.not_available') }}</td>
                                     </tr>
                                 </table>
                             </div>
@@ -180,7 +180,7 @@
                                                                 class="rounded me-2">
                                                         @endif
                                                         <div>
-                                                            <strong>{{ $item->product->name ?? 'N/A' }}</strong><br>
+                                                            <strong>{{ $item->product->name ?? __('shipment-dashboard.not_available') }}</strong><br>
                                                             <small class="text-muted">{{ __('shipment-dashboard.sku') }}: {{ $item->product->sku ?? '-' }}</small><br>
                                                             @if ($item->product->vendor)
                                                                 <small class="text-info">{{ __('shipment-dashboard.vendor') }}: {{ $item->product->vendor->name }}</small>

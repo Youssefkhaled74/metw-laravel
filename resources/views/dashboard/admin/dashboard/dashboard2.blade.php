@@ -28,7 +28,7 @@
                 'url' => $routeOrNull('admin.shipment-orders'),
             ],
             [
-                'label' => $text('Pending Vendors', 'البائعون المعلقون'),
+                'label' => $text('Pending Vendors', 'الموردون المعلقون'),
                 'value' => $stats['pending_vendor_approvals'] ?? 0,
                 'helper' => $text('Business profiles waiting for approval.', 'الملفات التجارية في انتظار الموافقة.'),
                 'icon' => 'fas fa-store-alt',
@@ -68,7 +68,7 @@
             [
                 'label' => $label('admin-dashboard.total_vendors', 'Total Vendors'),
                 'value' => $stats['total_vendors'] ?? 0,
-                'helper' => $text('Vendor accounts inside the platform.', 'حسابات البائعين داخل المنصة.'),
+                'helper' => $text('Vendor accounts inside the platform.', 'حسابات الموردين داخل المنصة.'),
                 'icon' => 'fas fa-store',
                 'tone' => 'success',
                 'url' => $routeOrNull('admin.vendors'),
@@ -125,9 +125,9 @@
                 'url' => $routeOrNull('admin.shipment-orders'),
             ],
             [
-                'label' => $text('Approved Vendors', 'البائعون المعتمدون'),
+                'label' => $text('Approved Vendors', 'الموردون المعتمدون'),
                 'value' => $stats['approved_vendors'] ?? 0,
-                'helper' => $text('Vendors approved to operate normally.', 'البائعون المعتمدون للعمل بشكل طبيعي.'),
+                'helper' => $text('Vendors approved to operate normally.', 'الموردون المعتمدون للعمل بشكل طبيعي.'),
                 'icon' => 'fas fa-user-check',
                 'tone' => 'success',
                 'url' => $routeOrNull('admin.vendors'),
@@ -166,8 +166,8 @@
                 'url' => $routeOrNull('admin.shipment-orders'),
             ],
             [
-                'label' => $text('Vendors', 'البائعون'),
-                'helper' => $text('Review vendor profile, branches, products, and approvals.', 'راجع ملف البائع والفروع والمنتجات والموافقات.'),
+                'label' => $text('Vendors', 'الموردون'),
+                'helper' => $text('Review vendor profile, branches, products, and approvals.', 'راجع ملف المورد والفروع والمنتجات والموافقات.'),
                 'icon' => 'fas fa-store',
                 'url' => $routeOrNull('admin.vendors'),
             ],
@@ -203,7 +203,7 @@
             <div class="dashboard-hero-content">
                 <div>
                     <span class="dashboard-eyebrow">{{ $text('Metw Admin Control Center', 'مركز تحكم ميتولوجيستيك') }}</span>
-                    <h1 class="dashboard-title">{{ $label('admin-dashboard.dashboard_overview', $text('Dashboard Overview', 'نظرة عامة على لوحة التحكم')) }}</h1>
+                    <h1 class="dashboard-title">{{ $label('admin-dashboard.dashboard_overview', $text('Dashboard Overview', 'المهام العاجلة')) }}</h1>
                     <p class="dashboard-subtitle mb-0">
                         {{ $text('Understand what needs action, what is moving, and what belongs to the new Phase 2 business flow.', 'اعرف ما يحتاج إلى إجراء، وما يتحرك، وما يخص مسار الأعمال الجديد في المرحلة الثانية.') }}
                     </p>
@@ -257,7 +257,7 @@
                 <div>
                     <span class="section-kicker">{{ $text('Business health', 'صحة المنصة') }}</span>
                     <h2>{{ $text('Main Platform Numbers', 'الأرقام الرئيسية للمنصة') }}</h2>
-                    <p>{{ $text('High-level numbers for users, vendors, products, and shipment partners.', 'أرقام عامة للمستخدمين والبائعين والمنتجات وشركاء الشحن.') }}</p>
+                    <p>{{ $text('High-level numbers for users, vendors, products, and shipment partners.', 'أرقام عامة للمستخدمين والموردين والمنتجات وشركاء الشحن.') }}</p>
                 </div>
             </div>
 

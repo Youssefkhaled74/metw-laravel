@@ -2,13 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GeneratesPrefixedNumber;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Package extends Model
 {
-    use HasFactory ,SoftDeletes;
+    use HasFactory, SoftDeletes, GeneratesPrefixedNumber;
+
+    protected static function booted(): void
+    {
+        static::assignPrefixedNumberOnCreate('package_number', 'PKG');
+    }
     protected $fillable = [
         'package_number',
         'type_id',

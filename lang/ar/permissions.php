@@ -4,7 +4,7 @@ return array (
   'admin.login' => 'تسجيل دخول المشرف',
   'admin.logout' => 'تسجيل خروج المشرف',
   'admin.dashboard' => 'لوحة التحكم',
-  'admin.shipment-orders' => 'طلبات تطبيق الشحن والتوصيل السريع',
+  'admin.shipment-orders' => 'طلبات الشحنة',
   'admin.shipment-orders.show' => 'عرض طلب الشحن',
   'admin.shipment-orders.update-status' => 'تحديث حالة طلب الشحن',
   'admin.shipment-orders.assign-company' => 'تعيين شركة شحن',

@@ -1,11 +1,11 @@
 @extends('layouts.vendor')
 
-@section('title', 'نظرة عامة على لوحة التحكم')
+@section('title', 'المهام العاجلة')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="fw-bold mb-1">نظرة عامة على لوحة التحكم</h4>
+        <h4 class="fw-bold mb-1">المهام العاجلة</h4>
         <p class="text-muted mb-0 small">جميع الطلبات والمهام التي تتطلب اهتمامك الفوري</p>
     </div>
     <div class="d-flex align-items-center gap-2">

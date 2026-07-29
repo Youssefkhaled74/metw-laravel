@@ -101,14 +101,14 @@
             <!-- Seller Status -->
             <div class="cancel-detail-card mb-4">
                 <div class="cancel-detail-header">
-                    <h5><i class="fas fa-store me-2 text-purple"></i> حالة البائع</h5>
+                    <h5><i class="fas fa-store me-2 text-purple"></i> حالة المورد</h5>
                     <span class="cancel-status-badge badge bg-{{ $sellerStatusCss }}">{{ $sellerStatusLabel }}</span>
                 </div>
                 <div class="cancel-detail-body">
                     @if ($returnRequest->seller_rejection_reason)
                         <div class="alert alert-danger mb-3">
                             <i class="fas fa-exclamation-circle me-1"></i>
-                            <strong>سبب رفض البائع:</strong> {{ $returnRequest->seller_rejection_reason }}
+                            <strong>سبب رفض المورد:</strong> {{ $returnRequest->seller_rejection_reason }}
                         </div>
                     @endif
                     @if ($returnRequest->return_rejection_reason)
@@ -119,7 +119,7 @@
                     @endif
                     @if (! $sellerStatus)
                         <div class="alert alert-info mb-0">
-                            <i class="fas fa-clock me-1"></i> لم يتخذ البائع أي إجراء بعد.
+                            <i class="fas fa-clock me-1"></i> لم يتخذ المورد أي إجراء بعد.
                         </div>
                     @endif
                     @if ($returnRequest->inspected_at)
@@ -284,11 +284,11 @@
             @if ($seller)
                 <div class="cancel-detail-card mb-4">
                     <div class="cancel-detail-header">
-                        <h5><i class="fas fa-store me-2 text-purple"></i> بيانات البائع</h5>
+                        <h5><i class="fas fa-store me-2 text-purple"></i> بيانات المورد</h5>
                     </div>
                     <div class="cancel-detail-body">
                         <div class="info-item mb-2">
-                            <span class="info-label">اسم البائع</span>
+                            <span class="info-label">اسم المورد</span>
                             <span class="info-value fw-semibold">{{ $seller->name ?? '-' }}</span>
                         </div>
                         <div class="info-item mb-2">
@@ -296,7 +296,7 @@
                             <span class="info-value">{{ $seller->email ?? '-' }}</span>
                         </div>
                         <div class="info-item mb-0">
-                            <span class="info-label">رقم البائع</span>
+                            <span class="info-label">رقم المورد</span>
                             <span class="info-value">VDR-{{ str_pad($seller->id, 8, '0', STR_PAD_LEFT) }}</span>
                         </div>
                     </div>

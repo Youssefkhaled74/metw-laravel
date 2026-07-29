@@ -14,7 +14,7 @@
         <div class="cancel-card-header">
             <div>
                 <h5><i class="fas fa-check-circle me-2 text-success"></i> طلبات الإلغاء الموافق عليها</h5>
-                <p class="text-muted mb-0 mt-1" style="font-size:.85rem;">الطلبات التيوافق البائع عليها وتحتاج إكمال من الإدارة مع استرداد المبلغ للمحفظة</p>
+                <p class="text-muted mb-0 mt-1" style="font-size:.85rem;">الطلبات التيوافق المورد عليها وتحتاج إكمال من الإدارة مع استرداد المبلغ للمحفظة</p>
             </div>
             <span class="badge bg-success rounded-pill">{{ $cancellations->total() }} طلب</span>
         </div>
@@ -48,7 +48,7 @@
                                 <th>رقم الإلغاء</th>
                                 <th>رقم الطلب</th>
                                 <th>العميل</th>
-                                <th>البائع</th>
+                                <th>المورد</th>
                                 <th>المنتجات</th>
                                 <th>السبب</th>
                                 <th>التاريخ</th>
@@ -239,7 +239,7 @@
                 <div class="cancel-empty-state">
                     <i class="fas fa-check-circle"></i>
                     <h5>لا توجد طلبات إلغاء موافق عليها</h5>
-                    <p>جميع طلبات الإلغاء التيوافق عليها البائع تم معالجتها.</p>
+                    <p>جميع طلبات الإلغاء التيوافق عليها المورد تم معالجتها.</p>
                 </div>
             @endif
         </div>

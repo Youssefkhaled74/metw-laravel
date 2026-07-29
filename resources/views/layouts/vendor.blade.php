@@ -645,7 +645,7 @@
                         <a class="nav-link {{ request()->routeIs('vendor.urgent-tasks*') ? 'active' : '' }}"
                            href="{{ route('vendor.urgent-tasks') }}">
                             <i class="fas fa-bolt"></i>
-                            <span class="link-text">نظرة عامة على لوحة التحكم</span>
+                            <span class="link-text">المهام العاجلة</span>
                         </a>
                     </li>
                     {{-- <li class="nav-item">

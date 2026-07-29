@@ -119,7 +119,7 @@
                         <tbody>
                             @foreach ($orders as $order)
                                 @php
-                                    $customerName = $order->user->username ?? 'N/A';
+                                    $customerName = $order->user->username ?? __('admin-dashboard.not_available');
                                     $statusValue = is_object($order->status) ? $order->status->value : (string) $order->status;
                                     $statusColor = match ($statusValue) {
                                         'delivered' => 'success',

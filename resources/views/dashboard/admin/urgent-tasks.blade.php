@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'نظرة عامة على لوحة التحكم')
-@section('page-title', 'نظرة عامة على لوحة التحكم')
+@section('title', 'المهام العاجلة')
+@section('page-title', 'المهام العاجلة')
 
 @section('content')
     @php
@@ -79,7 +79,7 @@
                 <div class="urg-hero-copy">
                     <span class="urg-chip">لوحة المتابعة العاجلة</span>
 
-                    <h3>نظرة عامة على لوحة التحكم</h3>
+                    <h3>المهام العاجلة</h3>
 
                     <p>
                         متابعة سريعة للحسابات والطلبات والموافقات والشكاوى التي تحتاج إجراءً فوريًا، مع عرض الأولويات بشكل واضح ومنظم.
@@ -150,7 +150,7 @@
                 <input
                     type="text"
                     id="urgentSearchInput"
-                    placeholder="بحث سريع داخل نظرة عامة على لوحة التحكم..."
+                    placeholder="بحث سريع داخل المهام العاجلة..."
                 >
             </div>
 

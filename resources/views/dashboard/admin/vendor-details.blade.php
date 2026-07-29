@@ -142,7 +142,7 @@
             <div class="vds-hero-side">
                 <div class="vds-score-card">
                     <div class="vds-score-top">
-                        <span>{{ $text('Vendor readiness', 'جاهزية البائع') }}</span>
+                        <span>{{ $text('Vendor readiness', 'جاهزية المورد') }}</span>
                         <strong>{{ $readinessScore }}%</strong>
                     </div>
 
@@ -188,7 +188,7 @@
                     <div class="vds-section-head">
                         <div>
                             <h5>{{ __('admin-dashboard.vendor_information') }}</h5>
-                            <p>{{ $text('Main vendor profile and verification status.', 'البيانات الأساسية وحالة توثيق البائع.') }}</p>
+                            <p>{{ $text('Main vendor profile and verification status.', 'البيانات الأساسية وحالة توثيق المورد.') }}</p>
                         </div>
                     </div>
 
@@ -244,7 +244,7 @@
                     <div class="vds-section-head">
                         <div>
                             <h5>{{ __('admin-dashboard.contact_information') }}</h5>
-                            <p>{{ $text('Vendor contact channels and location.', 'قنوات التواصل وموقع البائع.') }}</p>
+                            <p>{{ $text('Vendor contact channels and location.', 'قنوات التواصل وموقع المورد.') }}</p>
                         </div>
                     </div>
 
@@ -324,7 +324,7 @@
             <div class="vds-section-head">
                 <div>
                     <h5>{{ __('admin-dashboard.recent_products') }}</h5>
-                    <p>{{ $text('Latest products from this vendor.', 'أحدث منتجات هذا البائع.') }}</p>
+                    <p>{{ $text('Latest products from this vendor.', 'أحدث منتجات هذا المورد.') }}</p>
                 </div>
 
                 <a href="{{ route('admin.vendors.products', $vendor->id) }}" class="btn btn-sm vds-light-btn">
@@ -423,8 +423,8 @@
 
                     <p>
                         {{ $vendorCommission
-                            ? $text('This vendor uses a custom commission profile.', 'هذا البائع يستخدم إعداد عمولة مخصص.')
-                            : $text('This vendor currently uses the public commission profile.', 'هذا البائع يستخدم إعداد العمولة العام حالياً.')
+                            ? $text('This vendor uses a custom commission profile.', 'هذا المورد يستخدم إعداد عمولة مخصص.')
+                            : $text('This vendor currently uses the public commission profile.', 'هذا المورد يستخدم إعداد العمولة العام حالياً.')
                         }}
                     </p>
                 </div>
@@ -521,8 +521,8 @@
 
                             <p class="vds-modal-subtitle mb-0">
                                 {{ $vendorCommission
-                                    ? $text('Edit this vendor custom commission values.', 'تعديل قيم العمولة المخصصة لهذا البائع.')
-                                    : $text('Create a custom commission profile for this vendor.', 'إنشاء إعداد عمولة مخصص لهذا البائع.')
+                                    ? $text('Edit this vendor custom commission values.', 'تعديل قيم العمولة المخصصة لهذا المورد.')
+                                    : $text('Create a custom commission profile for this vendor.', 'إنشاء إعداد عمولة مخصص لهذا المورد.')
                                 }}
                             </p>
                         </div>

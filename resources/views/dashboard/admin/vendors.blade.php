@@ -113,7 +113,7 @@
 
                 <div class="vnd-hero-text">
                     <span class="vnd-chip">
-                        {{ $text('Vendors management', 'إدارة البائعين') }}
+                        {{ $text('Vendors management', 'إدارة الموردين') }}
                     </span>
 
                     <h4>{{ __('admin-dashboard.vendors_management') }}</h4>
@@ -121,7 +121,7 @@
                     <p>
                         {{ $text(
                             'Search, review vendor activity, monitor status, and manage vendors from one clean screen.',
-                            'ابحث وراجع نشاط البائعين وتابع حالتهم وأدرهم من شاشة واحدة واضحة.'
+                            'ابحث وراجع نشاط الموردين وتابع حالتهم وأدرهم من شاشة واحدة واضحة.'
                         ) }}
                     </p>
                 </div>
@@ -201,7 +201,7 @@
                 <div class="row g-3 align-items-end">
                     <div class="col-12 col-xl-5 col-lg-6">
                         <label class="vnd-label" for="vendorsSearch">
-                            {{ $text('Search vendors', 'بحث البائعين') }}
+                            {{ $text('Search vendors', 'بحث الموردين') }}
                         </label>
 
                         <div class="vnd-input-icon">
@@ -264,7 +264,7 @@
                     <p>
                         {{ $text(
                             'Important vendor information is grouped to keep the table easy to scan.',
-                            'تم تجميع أهم بيانات البائع لتسهيل قراءة الجدول بسرعة.'
+                            'تم تجميع أهم بيانات المورد لتسهيل قراءة الجدول بسرعة.'
                         ) }}
                     </p>
                 </div>

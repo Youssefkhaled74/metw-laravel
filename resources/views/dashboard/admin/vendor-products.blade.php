@@ -67,7 +67,7 @@
         <a href="{{ route('admin.dashboard') }}">{{ $text('Dashboard', 'لوحة التحكم') }}</a>
     </li>
     <li class="breadcrumb-item">
-        <a href="{{ route('admin.vendors') }}">{{ $text('Vendors', 'البائعين') }}</a>
+        <a href="{{ route('admin.vendors') }}">{{ $text('Vendors', 'الموردين') }}</a>
     </li>
     <li class="breadcrumb-item">
         <a href="{{ route('admin.vendors.show', $vendor->id) }}">{{ $vendor->name }}</a>
@@ -96,7 +96,7 @@
 
                 <div class="vpr-hero-text">
                     <span class="vpr-chip">
-                        {{ $text('Vendor products', 'منتجات البائع') }}
+                        {{ $text('Vendor products', 'منتجات المورد') }}
                     </span>
 
                     <h3>{{ $vendor->name }}</h3>
@@ -113,7 +113,7 @@
             <div class="vpr-hero-side">
                 <a href="{{ route('admin.vendors.show', $vendor->id) }}" class="btn vpr-light-btn">
                     <i class="fas {{ $isArabic ? 'fa-arrow-right ms-1' : 'fa-arrow-left me-1' }}"></i>
-                    {{ $text('Vendor profile', 'ملف البائع') }}
+                    {{ $text('Vendor profile', 'ملف المورد') }}
                 </a>
             </div>
         </section>
@@ -144,7 +144,7 @@
             <div class="vpr-section-head">
                 <div>
                     <h5>{{ $text('Search and filters', 'البحث والفلاتر') }}</h5>
-                    <p>{{ $text('Search products and use quick filters to scan vendor inventory faster.', 'ابحث في المنتجات واستخدم الفلاتر السريعة لمراجعة مخزون البائع بسرعة.') }}</p>
+                    <p>{{ $text('Search products and use quick filters to scan vendor inventory faster.', 'ابحث في المنتجات واستخدم الفلاتر السريعة لمراجعة مخزون المورد بسرعة.') }}</p>
                 </div>
 
                 @if(request('search') || request('status') || request('stock'))
@@ -364,7 +364,7 @@
                     <p>
                         {{ request('search')
                             ? $text('No products match your current search.', 'لا توجد منتجات مطابقة للبحث الحالي.')
-                            : $text("This vendor hasn't added any products yet.", 'هذا البائع لم يضف أي منتجات حتى الآن.')
+                            : $text("This vendor hasn't added any products yet.", 'هذا المورد لم يضف أي منتجات حتى الآن.')
                         }}
                     </p>
 

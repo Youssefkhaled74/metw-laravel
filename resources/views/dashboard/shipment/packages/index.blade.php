@@ -91,7 +91,7 @@
                                                     <ul class="list-unstyled mb-0 small">
                                                         @foreach($package->trackings as $tracking)
                                                             <li>
-                                                                <strong>{{ ucfirst($tracking->status->value) }}</strong>
+                                                                <strong>{{ __('shipment-dashboard.' . $tracking->status->value) !== 'shipment-dashboard.' . $tracking->status->value ? __('shipment-dashboard.' . $tracking->status->value) : ucfirst($tracking->status->value) }}</strong>
                                                                 ({{ $tracking->occurred_at?->format('Y-m-d H:i') }})<br>
                                                                 {{ $tracking->location }} - {{ $tracking->description }}
                                                             </li>

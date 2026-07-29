@@ -3,6 +3,12 @@
 @section('title', 'تفاصيل الشكوى')
 @section('page-title', 'تفاصيل الشكوى')
 
+@section('page-actions')
+    <a href="{{ route('admin.complaints.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-right me-1"></i> {{ $text('Back to List', 'العودة للقائمة') }}
+    </a>
+@endsection
+
 @section('content')
     <div class="row g-4">
         <div class="col-lg-8">
@@ -23,7 +29,7 @@
                                         'shipping_cancellation' => 'إلغاء الشحن',
                                         'return' => 'المرتجعات',
                                         'user' => 'المستخدمين',
-                                        'vendor' => 'البائعين',
+                                        'vendor' => 'الموردين',
                                         'warehouse' => 'المستودعات',
                                         'representative' => 'المناديب',
                                         default => $typeValue,
