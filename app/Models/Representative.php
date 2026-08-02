@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\CourierRole;
 use App\Enum\RepresentativeAccountType;
 use App\Enum\RepresentativeStatus;
 use App\Models\Concerns\GeneratesPrefixedNumber;
@@ -115,5 +116,133 @@ class Representative extends Model
     public function documents()
     {
         return $this->mediaFiles()->where('collection_name', 'representative_documents');
+    }
+
+    /**
+     * Work-type codes held by this courier (e.g. local_delivery, inter_governorate_shipping, bus_driver).
+     *
+     * @return array<int, string>
+     */
+    public function workTypeCodes(): array
+    {
+        if ($this->relationLoaded('workTypes')) {
+            return $this->workTypes->pluck('work_type')->values()->all();
+        }
+
+        return $this->workTypes()->pluck('work_type')->values()->all();
+    }
+
+    public function hasWorkType(string $code): bool
+    {
+        return in_array($code, $this->workTypeCodes(), true);
+    }
+
+    /**
+     * Courier roles derived from the work-type combinations (Section 1).
+     *
+     * @return array<int, CourierRole>
+     */
+    public function courierRoles(): array
+    {
+        return CourierRole::fromWorkTypes($this->workTypeCodes());
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function courierRoleValues(): array
+    {
+        return array_map(
+            static fn (CourierRole $role) => $role->value,
+            $this->courierRoles()
+        );
+    }
+
+    /**
+     * Maximum payload weight this courier can carry (from their vehicle's transport type).
+     */
+    public function maxCarryWeight(): ?float
+    {
+        $transport = $this->vehicle?->transportType;
+
+        if (! $transport) {
+            return $this->vehicle ? (float) $this->vehicle->max_weight : null;
+        }
+
+        return (float) $transport->max_weight;
+    }
+
+    /**
+     * Maximum payload volume this courier can carry.
+     */
+    public function maxCarryVolume(): ?float
+    {
+        $transport = $this->vehicle?->transportType;
+
+        if (! $transport) {
+            return $this->vehicle ? (float) $this->vehicle->max_volume : null;
+        }
+
+        return (float) $transport->max_volume;
+    }
+
+    /**
+     * Courier categories the courier's transport type supports.
+     *
+     * @return array<int, string>
+     */
+    public function supportedCategories(): array
+    {
+        $transport = $this->vehicle?->transportType;
+
+        if (! $transport) {
+            return [];
+        }
+
+        $categories = [];
+
+        if ($transport->category_1_available) {
+            $categories[] = 'category_1';
+        }
+        if ($transport->category_2_available) {
+            $categories[] = 'category_2';
+        }
+        if ($transport->category_3_available) {
+            $categories[] = 'category_3';
+        }
+
+        return $categories;
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public function serviceGovernorateIds(): array
+    {
+        if ($this->relationLoaded('governorates')) {
+            return $this->governorates->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
+        }
+
+        return $this->governorates()->pluck('governorate_id')->map(fn ($id) => (int) $id)->values()->all();
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public function serviceCityIds(): array
+    {
+        if ($this->relationLoaded('cities')) {
+            return $this->cities->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
+        }
+
+        return $this->cities()->pluck('city_id')->map(fn ($id) => (int) $id)->values()->all();
+    }
+
+    public function isApproved(): bool
+    {
+        return in_array($this->status?->value ?? $this->status, [
+            RepresentativeStatus::ACTIVE->value,
+            RepresentativeStatus::APPROVED->value,
+        ], true);
     }
 }

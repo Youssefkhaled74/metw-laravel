@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enum\CourierCategory;
+use App\Enum\ShippingType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,6 +16,10 @@ class ConsignmentType extends Model
         'name',
         'name_ar',
         'code',
+        'shipping_type',
+        'courier_category',
+        'max_weight',
+        'max_volume',
         'description',
         'description_ar',
         'is_active'
@@ -21,6 +27,10 @@ class ConsignmentType extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'shipping_type' => ShippingType::class,
+        'courier_category' => CourierCategory::class,
+        'max_weight' => 'decimal:2',
+        'max_volume' => 'decimal:2',
     ];
 
     /* OPTIONAL but VERY useful */

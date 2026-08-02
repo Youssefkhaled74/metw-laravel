@@ -1960,6 +1960,9 @@
 </head>
 
 <body>
+    @php
+        $employee = auth('employee')->user();
+    @endphp
     @if (auth('admin')->check() || auth('employee')->check())
         <nav class="sidebar" id="adminSidebar">
             <div class="sidebar-inner">
@@ -2160,7 +2163,7 @@
                                         </a>
                                     </li>
                                     @endif
-                                    @if($employee->can('admin.settings.return-reasons.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.return-reasons.index'))
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.settings.return-reasons.*') ? 'active' : '' }}"
                                            href="{{ route('admin.settings.return-reasons.index') }}">
@@ -2169,7 +2172,7 @@
                                         </a>
                                     </li>
                                     @endif
-                                    @if($employee->can('admin.settings.brands.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.brands.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.brands.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.brands.index') }}">
@@ -2178,7 +2181,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.main-categories.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.main-categories.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.main-categories.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.main-categories.index') }}">
@@ -2187,7 +2190,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.categories.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.categories.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.categories.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.categories.index') }}">
@@ -2196,7 +2199,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.promo_codes.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.promo_codes.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.promo_codes.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.promo_codes.index') }}">
@@ -2205,7 +2208,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.countries.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.countries.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.countries.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.countries.index') }}">
@@ -2214,7 +2217,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.governorates.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.governorates.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.governorates.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.governorates.index') }}">
@@ -2223,7 +2226,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.cities.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.cities.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.cities.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.cities.index') }}">
@@ -2232,7 +2235,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.zones.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.zones.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.zones.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.zones.index') }}">
@@ -2241,7 +2244,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.consignment-types.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.consignment-types.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.consignment-types.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.consignment-types.index') }}">
@@ -2250,7 +2253,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.delivery-types.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.delivery-types.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.delivery-types.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.delivery-types.index') }}">
@@ -2259,7 +2262,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.transport-types.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.transport-types.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.transport-types.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.transport-types.index') }}">
@@ -2268,7 +2271,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.representative-work-types.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.representative-work-types.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.representative-work-types.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.representative-work-types.index') }}">
@@ -2284,7 +2287,7 @@
                                                 <span class="link-text">{{ app()->getLocale() === 'ar' ? 'المناديب' : 'Representatives' }}</span>
                                         </a>
                                     </li>
-                                    @if($employee->can('admin.settings.pages.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.pages.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.pages.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.pages.index') }}">
@@ -2293,7 +2296,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.whatsapp-templates.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.whatsapp-templates.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.whatsapp-templates.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.whatsapp-templates.index') }}">
@@ -2302,7 +2305,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.product-sizes.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.product-sizes.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.product-sizes.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.product-sizes.index') }}">
@@ -2311,7 +2314,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.sizes.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.sizes.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.sizes.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.sizes.index') }}">
@@ -2320,7 +2323,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($employee->can('admin.settings.colors.index'))
+                                    @if(auth('admin')->check() || $employee->can('admin.settings.colors.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.colors.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.colors.index') }}">
@@ -2329,7 +2332,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                    {{-- @if($employee->can('admin.settings.price-per-km.index'))
+                                    {{-- @if(auth('admin')->check() || $employee->can('admin.settings.price-per-km.index'))
                                         <li class="nav-item">
                                             <a class="nav-link {{ request()->routeIs('admin.settings.price-per-km.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.price-per-km.index') }}">

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enum\DispatchState;
+use App\Enum\ShippingType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -19,12 +21,21 @@ class OrderItem extends Model
         'status',
         'parent_id',
         'is_split',
+        'shipping_type',
+        'courier_category',
+        'has_village',
+        'dispatch_state',
+        'dispatch_note',
         'rejection_reason_id',
         'rejection_note',
         'rejected_at',
     ];
     protected $casts = [
         'est_date' => 'date',
+        'shipping_type' => ShippingType::class,
+        'courier_category' => \App\Enum\CourierCategory::class,
+        'has_village' => 'boolean',
+        'dispatch_state' => DispatchState::class,
         'rejected_at' => 'datetime',
     ];
     public function rejectionReason()
@@ -70,6 +81,16 @@ class OrderItem extends Model
     public function route()
     {
         return $this->hasOne(OrderItemRoute::class);
+    }
+
+    public function assignments()
+    {
+        return $this->morphMany(CourierAssignment::class, 'assignable');
+    }
+
+    public function activeAssignments()
+    {
+        return $this->assignments()->active();
     }
 
     /**

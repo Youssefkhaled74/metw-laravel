@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
             GovernoratesAndCitiesExcelSeeder::class,
             CityGovernorateBackfillSeeder::class,
             RepresentativeWorkTypeOptionsSeeder::class,
+            CourierSystemConfigSeeder::class,
             ZonesTableSeeder::class,
             LocationSeeder::class,      // locations table
             WarehouseSeeder::class,

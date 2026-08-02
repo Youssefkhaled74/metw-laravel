@@ -14,6 +14,7 @@ class ShipmentRequestPackage extends Model
         'shipment_request_id',
         'package_name',
         'package_type',
+        'consignment_type_id',
         'quantity',
         'weight',
         'length',
@@ -37,6 +38,11 @@ class ShipmentRequestPackage extends Model
     public function shipmentRequest()
     {
         return $this->belongsTo(ShipmentRequest::class);
+    }
+
+    public function consignmentType()
+    {
+        return $this->belongsTo(ConsignmentType::class);
     }
 
     public function mediaFiles()

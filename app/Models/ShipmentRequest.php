@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enum\DispatchState;
 use App\Enum\ShipmentRequestStatus;
+use App\Enum\ShippingType;
 use App\Models\Concerns\GeneratesPrefixedNumber;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +20,13 @@ class ShipmentRequest extends Model
         'sender_contact_id',
         'receiver_contact_id',
         'status',
+        'shipping_type',
+        'courier_category',
+        'total_weight',
+        'total_volume',
+        'has_village',
+        'dispatch_state',
+        'dispatch_note',
         'notes',
         'submitted_at',
         'metadata',
@@ -30,6 +39,12 @@ class ShipmentRequest extends Model
 
     protected $casts = [
         'status' => ShipmentRequestStatus::class,
+        'shipping_type' => ShippingType::class,
+        'courier_category' => \App\Enum\CourierCategory::class,
+        'dispatch_state' => DispatchState::class,
+        'total_weight' => 'decimal:2',
+        'total_volume' => 'decimal:2',
+        'has_village' => 'boolean',
         'submitted_at' => 'datetime',
         'metadata' => 'array',
         'accepted_at' => 'datetime',
@@ -64,6 +79,16 @@ class ShipmentRequest extends Model
     public function rejectionReason()
     {
         return $this->belongsTo(RejectionReason::class);
+    }
+
+    public function assignments()
+    {
+        return $this->morphMany(CourierAssignment::class, 'assignable');
+    }
+
+    public function activeAssignments()
+    {
+        return $this->assignments()->active();
     }
 
     protected static function booted()

@@ -8,6 +8,7 @@ use App\Models\ShipmentContact;
 use App\Models\ShipmentRequest;
 use App\Models\ShipmentRequestPackage;
 use App\Models\User;
+use App\Services\CourierSystem\CourierDispatchService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,10 @@ use Illuminate\Validation\ValidationException;
 
 class ShipmentRequestService
 {
+    public function __construct(
+        protected CourierDispatchService $dispatchService
+    ) {}
+
     public function listForUser(User $user)
     {
         return ShipmentRequest::query()
@@ -63,6 +68,7 @@ class ShipmentRequestService
             $package = $shipmentRequest->packages()->create([
                 'package_name' => $data['package_name'],
                 'package_type' => $data['package_type'] ?? null,
+                'consignment_type_id' => $data['consignment_type_id'] ?? null,
                 'quantity' => $data['quantity'] ?? 1,
                 'weight' => $data['weight'] ?? null,
                 'length' => $data['length'] ?? null,
@@ -112,7 +118,11 @@ class ShipmentRequestService
             'submitted_at' => now(),
         ]);
 
-        return $shipmentRequest->fresh($this->relations())->loadCount('packages');
+        $fresh = $shipmentRequest->fresh($this->relations())->loadCount('packages');
+
+        $this->dispatchService->dispatch($fresh);
+
+        return $fresh;
     }
 
     protected function getDraftForUserOrFail(User $user, int $requestId): ShipmentRequest
