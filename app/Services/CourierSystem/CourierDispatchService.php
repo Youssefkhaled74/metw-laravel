@@ -2,97 +2,151 @@
 
 namespace App\Services\CourierSystem;
 
-use App\Enum\CourierCategory;
+use App\Enum\CourierAssignmentStatus;
 use App\Enum\DispatchState;
 use App\Enum\RequestLegType;
-use App\Enum\ShippingType;
+use App\Enum\RequestPathStatus;
+use App\Enum\RequestPathType;
+use App\Enum\ShipmentRequestStatus;
 use App\Models\OrderItem;
+use App\Models\RequestPath;
 use App\Models\ShipmentRequest;
 use App\Models\ShipmentRequestPackage;
 use Illuminate\Support\Collection;
 
 /**
- * Distributes requests to couriers (Section 2): builds a matching profile from
- * the request, derives the required legs, matches eligible couriers and records
- * the resulting assignments.
+ * Distributes requests to couriers (Sections 2–5): detects the request type,
+ * creates the parallel paths, and records the per-leg courier offers.
  */
 class CourierDispatchService
 {
     public function __construct(
         protected CourierMatchService $matchService,
         protected CourierSystemConfigService $config,
-        protected WorkingHoursService $workingHours
+        protected WorkingHoursService $workingHours,
+        protected CourierRequestTypeDetector $typeDetector
     ) {}
 
+    /**
+     * Backward-compatible entry point used by the auto-assign-next timeout action.
+     */
     public function dispatch(ShipmentRequest|OrderItem $assignable): DispatchResult
     {
+        return $this->dispatchPathsFor($assignable);
+    }
+
+    public function dispatchPathsFor(ShipmentRequest|OrderItem $assignable): DispatchResult
+    {
         $profile = $this->buildProfile($assignable);
+        $type = $this->typeDetector->detect($profile);
 
-        $legs = $this->legsFor($assignable, $profile);
-
+        $paths = collect();
         $assignments = collect();
 
-        foreach ($legs as $legType) {
+        foreach ($type->paths() as $pathType) {
+            $path = $this->createPath($assignable, $pathType, $type);
+            $paths->push($path);
+
             $excluded = $this->alreadyOfferedRepresentativeIds($assignable);
 
+            foreach ($pathType->legs() as $legType) {
+                $couriers = $this->matchService->eligibleCouriers($legType, $profile, $excluded);
+
+                foreach ($couriers as $courier) {
+                    $assignments->push(
+                        $assignable->assignments()->create([
+                            'request_path_id' => $path->id,
+                            'leg_type' => $legType->value,
+                            'representative_id' => $courier->id,
+                            'status' => CourierAssignmentStatus::PENDING->value,
+                            'offered_at' => now(),
+                            'response_deadline_at' => $this->workingHours->addWorkingHours(
+                                now(),
+                                $this->config->autoRejectWorkingHours(),
+                            ),
+                            'metadata' => array_merge($profile->toArray(), [
+                                'offered_to' => trim(implode(' ', array_filter([
+                                    $courier->first_name,
+                                    $courier->father_name,
+                                    $courier->last_name,
+                                ]))),
+                            ]),
+                        ])
+                    );
+                }
+            }
+        }
+
+        $this->markDispatched($assignable, $type, $profile);
+
+        return new DispatchResult($profile, $type, $paths, $assignments);
+    }
+
+    /**
+     * Dispatch a single path (used when re-matching one failed path).
+     */
+    public function dispatchPath(ShipmentRequest|OrderItem $assignable, RequestPathType $pathType): DispatchResult
+    {
+        $profile = $this->buildProfile($assignable);
+        $type = $this->typeDetector->detect($profile);
+
+        $path = $this->createPath($assignable, $pathType, $type);
+
+        $excluded = $this->alreadyOfferedRepresentativeIds($assignable);
+        $assignments = collect();
+
+        foreach ($pathType->legs() as $legType) {
             $couriers = $this->matchService->eligibleCouriers($legType, $profile, $excluded);
 
             foreach ($couriers as $courier) {
                 $assignments->push(
                     $assignable->assignments()->create([
-                        'representative_id' => $courier->id,
+                        'request_path_id' => $path->id,
                         'leg_type' => $legType->value,
-                        'status' => 'pending',
+                        'representative_id' => $courier->id,
+                        'status' => CourierAssignmentStatus::PENDING->value,
                         'offered_at' => now(),
                         'response_deadline_at' => $this->workingHours->addWorkingHours(
                             now(),
                             $this->config->autoRejectWorkingHours(),
                         ),
-                        'metadata' => array_merge($profile->toArray(), [
-                            'offered_to' => trim(implode(' ', array_filter([
-                                $courier->first_name,
-                                $courier->father_name,
-                                $courier->last_name,
-                            ]))),
-                        ]),
+                        'metadata' => $profile->toArray(),
                     ])
                 );
             }
         }
 
-        if ($assignments->isNotEmpty()) {
-            $assignable->update([
-                'dispatch_state' => DispatchState::DISPATCHED->value,
-                'dispatch_state_at' => now(),
-            ]);
-        }
-
-        return new DispatchResult($profile, $legs, $assignments);
+        return new DispatchResult($profile, $type, collect([$path]), $assignments);
     }
 
-    /**
-     * @return array<int, RequestLegType>
-     */
-    public function legsFor(ShipmentRequest|OrderItem $assignable, CourierRequestProfile $profile): array
+    protected function createPath($assignable, RequestPathType $pathType, $type): RequestPath
     {
-        if (! $profile->isInterGovernorate()) {
-            return [RequestLegType::DIRECT_DELIVERY];
+        return $assignable->requestPaths()->create([
+            'type' => $pathType->value,
+            'request_type' => $type->value,
+            'status' => RequestPathStatus::MATCHING->value,
+            'legs' => array_map(
+                static fn (RequestLegType $leg) => $leg->value,
+                $pathType->legs()
+            ),
+            'total_cost' => 0,
+        ]);
+    }
+
+    protected function markDispatched($assignable, $type, CourierRequestProfile $profile): void
+    {
+        $payload = [
+            'dispatch_state' => DispatchState::DISPATCHED->value,
+            'dispatch_state_at' => now(),
+            'request_type' => $type->value,
+            'is_fast_delivery' => $type === \App\Enum\CourierRequestType::FAST_DELIVERY,
+        ];
+
+        if ($assignable instanceof ShipmentRequest) {
+            $payload['status'] = ShipmentRequestStatus::MATCHING->value;
         }
 
-        $legs = [RequestLegType::DIRECT_SHIPPING];
-
-        if ($profile->shippingType === ShippingType::DIRECT_AND_MULTI) {
-            $legs = array_merge($legs, [
-                RequestLegType::DELIVERY_TO_WAREHOUSE,
-                RequestLegType::WAREHOUSE_TO_WAREHOUSE,
-                RequestLegType::DELIVERY_FROM_WAREHOUSE,
-                RequestLegType::DELIVERY_TO_BUS,
-                RequestLegType::BUS_SEGMENT,
-                RequestLegType::DELIVERY_FROM_BUS,
-            ]);
-        }
-
-        return $legs;
+        $assignable->update($payload);
     }
 
     public function buildProfile(ShipmentRequest|OrderItem $assignable): CourierRequestProfile
@@ -152,7 +206,7 @@ class CourierDispatchService
             volume: (float) data_get($package, 'metadata.volume', 0),
             hasVillage: $this->addressIsVillage($package?->pickupAddress)
                 || $this->addressIsVillage($package?->dropoffAddress),
-            shippingType: $consignmentType?->shippingType ?? ShippingType::DIRECT_AND_MULTI,
+            shippingType: $consignmentType?->shippingType ?? \App\Enum\ShippingType::DIRECT_AND_MULTI,
             courierCategory: $consignmentType?->courierCategory,
         );
     }
@@ -188,9 +242,12 @@ class CourierDispatchService
     protected function alreadyOfferedRepresentativeIds(ShipmentRequest|OrderItem $assignable): array
     {
         return $assignable->assignments()
-            ->whereIn('status', ['pending', 'accepted'])
+            ->whereIn('status', [
+                CourierAssignmentStatus::PENDING->value,
+                CourierAssignmentStatus::ACCEPTED->value,
+                CourierAssignmentStatus::CONFIRMED->value,
+            ])
             ->pluck('representative_id')
             ->all();
     }
 }
-

@@ -114,6 +114,9 @@ class ShipmentRequestController extends Controller
             'receiverContact.primaryAddress.governorate',
             'receiverContact.primaryAddress.city',
             'packages.mediaFiles',
+            'requestPaths.assignments.representative',
+            'advancePayments.confirmer',
+            'selectedPath',
         ])->findOrFail($id);
 
         return view('dashboard.admin.shipment-requests.show', compact('shipmentRequest'));

@@ -16,6 +16,7 @@ class CourierAssignment extends Model
     protected $fillable = [
         'assignable_type',
         'assignable_id',
+        'request_path_id',
         'leg_type',
         'representative_id',
         'status',
@@ -51,6 +52,11 @@ class CourierAssignment extends Model
     public function assignable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function requestPath(): BelongsTo
+    {
+        return $this->belongsTo(RequestPath::class);
     }
 
     public function representative(): BelongsTo

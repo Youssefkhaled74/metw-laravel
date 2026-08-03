@@ -563,6 +563,106 @@
                 </div>
             </div>
         </section>
+
+        <section class="srd-card srd-paths-card">
+            <div class="srd-section-head">
+                <div>
+                    <h5>{{ $text('Courier paths & advance payments', 'مسارات المندوبين والدفعات المقدمة') }}</h5>
+                    <p>{{ $text('Offered parallel paths, confirmed couriers per leg, and advance payments.', 'المسارات المتوازية المقدمة والمندوبون المؤكدون لكل محطة والدفعات المقدمة.') }}</p>
+                </div>
+
+                @if ($shipmentRequest->request_type)
+                    <span class="srd-count-pill">
+                        {{ $shipmentRequest->request_type->value ?? $shipmentRequest->request_type }}
+                    </span>
+                @endif
+            </div>
+
+            @if ($shipmentRequest->requestPaths->count())
+                <div class="srd-paths-grid">
+                    @foreach ($shipmentRequest->requestPaths as $path)
+                        @php
+                            $pathStatus = $path->status?->value ?? $path->status;
+                            $pathTone = in_array($pathStatus, ['courier_confirmed', 'submitted_to_client', 'client_selected', 'executing', 'executed'], true)
+                                ? 'success'
+                                : (in_array($pathStatus, ['failed', 'cancelled'], true) ? 'danger' : 'muted');
+                        @endphp
+
+                        <article class="srd-path">
+                            <div class="srd-path-head">
+                                <strong>{{ $path->type?->value ?? $path->type }}</strong>
+                                <span class="srd-status srd-status-{{ $pathTone }}">{{ $pathStatus }}</span>
+                            </div>
+
+                            <div class="srd-path-meta">
+                                <span>{{ $text('Legs', 'المحطات') }}: {{ implode(' / ', $path->legs ?? []) }}</span>
+                                <span>{{ $text('Cost', 'التكلفة') }}: {{ $path->total_cost !== null ? (float) $path->total_cost : '--' }} {{ $path->currency ?? 'EGP' }}</span>
+                            </div>
+
+                            @if (($path->assignments ?? collect())->count())
+                                <ul class="srd-path-assignments">
+                                    @foreach ($path->assignments as $assignment)
+                                        @php
+                                            $rep = $assignment->representative;
+                                            $repName = $rep
+                                                ? trim(implode(' ', array_filter([$rep->first_name, $rep->father_name, $rep->last_name])))
+                                                : ($text('Courier #', 'مندوب #') . $assignment->representative_id);
+                                            $fee = $assignment->metadata['accepted_fee'] ?? null;
+                                        @endphp
+                                        <li>
+                                            <span>{{ $assignment->leg_type?->value ?? $assignment->leg_type }}</span>
+                                            <strong>{{ $repName }}</strong>
+                                            <em>{{ $assignment->status?->value ?? $assignment->status }}</em>
+                                            @if ($fee !== null)
+                                                <b>{{ $text('Fee', 'الأجر') }}: {{ (float) $fee }}</b>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+
+                            @if ($path->failure_reason)
+                                <p class="srd-path-failure">{{ $text('Reason', 'السبب') }}: {{ $path->failure_reason }}</p>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @else
+                <div class="srd-assignment-empty">
+                    <div><i class="fas fa-route"></i></div>
+                    <strong>{{ $text('No paths have been created yet.', 'لم يتم إنشاء أي مسارات بعد.') }}</strong>
+                </div>
+            @endif
+
+            @if ($shipmentRequest->advancePayments->count())
+                <div class="srd-advance-payments">
+                    @foreach ($shipmentRequest->advancePayments as $payment)
+                        @php
+                            $paymentStatus = $payment->status?->value ?? $payment->status;
+                            $paymentTone = $paymentStatus === 'confirmed'
+                                ? 'success'
+                                : ($paymentStatus === 'paid' ? 'muted' : 'danger');
+                        @endphp
+
+                        <div class="srd-path">
+                            <div class="srd-path-head">
+                                <strong>{{ $text('Advance payment', 'دفعة مقدمة') }} #{{ $payment->id }}</strong>
+                                <span class="srd-status srd-status-{{ $paymentTone }}">{{ $paymentStatus }}</span>
+                            </div>
+
+                            <div class="srd-path-meta">
+                                <span>{{ (float) $payment->amount }} {{ $payment->currency ?? 'EGP' }}</span>
+                                <span>{{ $text('Method', 'الطريقة') }}: {{ $payment->payment_method ?? '--' }}</span>
+                                <span>{{ $text('Reference', 'المرجع') }}: {{ $payment->reference ?? '--' }}</span>
+                                @if ($payment->confirmed_at)
+                                    <span>{{ $text('Confirmed at', 'تم التأكيد في') }}: {{ $payment->confirmed_at }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </section>
     </div>
 
     <script>
@@ -1236,6 +1336,106 @@
 
         .srd-note-box li + li {
             margin-top: .35rem;
+        }
+
+        .srd-paths-card {
+            margin-top: 1.25rem;
+        }
+
+        .srd-paths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1rem;
+            margin-top: .25rem;
+        }
+
+        .srd-path {
+            padding: 1rem;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            background: #fcfdff;
+        }
+
+        .srd-path-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            margin-bottom: .6rem;
+        }
+
+        .srd-path-head strong {
+            color: #111827;
+            font-size: .95rem;
+            font-weight: 900;
+            text-transform: capitalize;
+        }
+
+        .srd-path-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .4rem .9rem;
+            margin-bottom: .6rem;
+            color: #64748b;
+            font-size: .8rem;
+        }
+
+        .srd-path-assignments {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: .4rem;
+        }
+
+        .srd-path-assignments li {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: .45rem .6rem;
+            border-radius: 12px;
+            background: #fff;
+            border: 1px solid #eef2f7;
+            font-size: .82rem;
+        }
+
+        .srd-path-assignments li span {
+            min-width: 92px;
+            color: #475569;
+            font-weight: 800;
+            text-transform: capitalize;
+        }
+
+        .srd-path-assignments li strong {
+            flex: 1;
+            color: #111827;
+            font-weight: 800;
+        }
+
+        .srd-path-assignments li em {
+            font-style: normal;
+            color: #2563eb;
+            font-weight: 900;
+        }
+
+        .srd-path-assignments li b {
+            color: #059669;
+            font-weight: 900;
+        }
+
+        .srd-path-failure {
+            margin: .6rem 0 0;
+            color: #b91c1c;
+            font-size: .8rem;
+            font-weight: 700;
+        }
+
+        .srd-advance-payments {
+            display: grid;
+            gap: .75rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #e5e7eb;
         }
 
         @media (max-width: 1199.98px) {

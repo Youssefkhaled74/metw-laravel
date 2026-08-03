@@ -2,18 +2,20 @@
 
 namespace App\Services\CourierSystem;
 
-use App\Enum\RequestLegType;
+use App\Enum\CourierRequestType;
+use App\Models\RequestPath;
 use Illuminate\Support\Collection;
 
 class DispatchResult
 {
     /**
-     * @param  array<int, RequestLegType>  $legs
+     * @param  Collection<int, RequestPath>  $paths
      * @param  Collection<int, \App\Models\CourierAssignment>  $assignments
      */
     public function __construct(
         public readonly CourierRequestProfile $profile,
-        public readonly array $legs,
+        public readonly CourierRequestType $type,
+        public readonly Collection $paths,
         public readonly Collection $assignments,
     ) {}
 

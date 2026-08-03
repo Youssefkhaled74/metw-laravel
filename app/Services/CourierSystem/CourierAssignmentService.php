@@ -17,7 +17,8 @@ class CourierAssignmentService
     public function __construct(
         protected CourierSystemConfigService $config,
         protected WorkingHoursService $workingHours,
-        protected CourierDispatchService $dispatchService
+        protected CourierDispatchService $dispatchService,
+        protected CourierRequestWorkflowService $workflow
     ) {}
 
     public function accept(CourierAssignment $assignment, Representative $representative, ?float $acceptedFee = null): CourierAssignment
@@ -29,7 +30,9 @@ class CourierAssignmentService
 
         return \DB::transaction(function () use ($assignment, $assignable, $acceptedFee) {
             // Another courier already took the request before this courier responded.
-            if ($assignable->representative_id !== null) {
+            if ($assignable->representative_id !== null
+                && $this->assignableExecutionStarted($assignable)
+            ) {
                 $assignment->update([
                     'status' => CourierAssignmentStatus::EXPIRED->value,
                     'responded_at' => now(),
@@ -48,29 +51,12 @@ class CourierAssignmentService
                 ]),
             ]);
 
-            $assignable->update($this->acceptedAssignableAttributes($assignable, $assignment->representative_id, $acceptedFee));
-
             $this->openResponseWindow($assignment, $assignable);
 
-            return $assignment->fresh(['assignable', 'representative']);
+            $this->workflow->evaluate($assignable);
+
+            return $assignment->fresh(['assignable', 'representative', 'requestPath']);
         });
-    }
-
-    protected function acceptedAssignableAttributes($assignable, int $representativeId, ?float $acceptedFee): array
-    {
-        $attributes = [
-            'representative_id' => $representativeId,
-            'accepted_at' => now(),
-        ];
-
-        if ($assignable instanceof \App\Models\OrderItem) {
-            $attributes['status'] = 'accepted';
-            $attributes['accepted_fee'] = $acceptedFee;
-        } elseif ($assignable instanceof \App\Models\ShipmentRequest) {
-            $attributes['status'] = \App\Enum\ShipmentRequestStatus::ASSIGNED->value;
-        }
-
-        return $attributes;
     }
 
     public function reject(
@@ -127,7 +113,30 @@ class CourierAssignmentService
             return;
         }
 
+        // Path-based flow: let the workflow fail the affected path and finalize the request.
+        if ($assignable->requestPaths()->exists()) {
+            $this->workflow->evaluate($assignable);
+
+            return;
+        }
+
         $this->executeAutoAction($assignment);
+    }
+
+    protected function assignableExecutionStarted($assignable): bool
+    {
+        if ($assignable instanceof \App\Models\OrderItem) {
+            return ($assignable->status?->value ?? $assignable->status) === 'accepted';
+        }
+
+        if ($assignable instanceof \App\Models\ShipmentRequest) {
+            return in_array($assignable->status?->value ?? $assignable->status, [
+                \App\Enum\ShipmentRequestStatus::EXECUTING->value,
+                \App\Enum\ShipmentRequestStatus::COMPLETED->value,
+            ], true);
+        }
+
+        return false;
     }
 
     public function executeAutoAction(CourierAssignment $assignment): void

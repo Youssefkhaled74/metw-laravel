@@ -81,6 +81,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('/companies/{id}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\ShipmentController::class, 'toggleCompanyStatus'])->name('companies.toggle-status');
         });
 
+        // Phase 3 - Advance Payments (admin confirm/reject)
+        Route::prefix('advance-payments')->name('advance-payments.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Dashboard\Admin\AdvancePaymentController::class, 'index'])->name('index');
+            Route::post('/{advancePayment}/confirm', [\App\Http\Controllers\Dashboard\Admin\AdvancePaymentController::class, 'confirm'])->name('confirm');
+            Route::post('/{advancePayment}/reject', [\App\Http\Controllers\Dashboard\Admin\AdvancePaymentController::class, 'reject'])->name('reject');
+        });
+
         Route::post(
             '/shipments/{shipmentCompany}/commission',
             [CommissionController::class, 'CustomShipmentStore']
@@ -454,6 +461,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // WhatsApp Templates Management
             Route::get('/whatsapp-templates', [\App\Http\Controllers\Dashboard\Admin\Settings\WhatsappTemplateController::class, 'index'])->name('whatsapp-templates.index');
             Route::patch('/whatsapp-templates', [\App\Http\Controllers\Dashboard\Admin\Settings\WhatsappTemplateController::class, 'update'])->name('whatsapp-templates.update');
+
+            // Courier Failure Messages (Sections 3 & 4)
+            Route::get('/courier-failure-messages', [\App\Http\Controllers\Dashboard\Admin\Settings\CourierFailureMessageController::class, 'index'])->name('courier-failure-messages.index');
+            Route::patch('/courier-failure-messages', [\App\Http\Controllers\Dashboard\Admin\Settings\CourierFailureMessageController::class, 'update'])->name('courier-failure-messages.update');
 
             // Product Size Management
             Route::get('/product-sizes', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'index'])->name('product-sizes.index');

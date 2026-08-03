@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Ecommerce\Product\ProductSizeController;
 use App\Http\Controllers\Api\V1\Shipment\FavouriteController;
 use App\Http\Controllers\Api\V1\Shipment\ShipmentContactController;
 use App\Http\Controllers\Api\V1\Shipment\ShipmentRequestController;
+use App\Http\Controllers\Api\V1\Shipment\ShipmentRequestPathController;
 use App\Http\Controllers\Api\V1\Shipment\ConsignmentTypeController;
 use App\Http\Controllers\Api\V1\Shipment\DeliveryTypeController;
 use App\Http\Controllers\Api\V1\Shipment\Order\CartController;
@@ -151,6 +152,12 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::post('{id}/submit', [ShipmentRequestController::class, 'submit']);
         Route::get('/', [ShipmentRequestController::class, 'index']);
         Route::get('{id}', [ShipmentRequestController::class, 'show']);
+
+        // Courier parallel paths flow (Sections 3–4)
+        Route::get('{id}/paths', [ShipmentRequestPathController::class, 'paths']);
+        Route::get('{id}/tracking', [ShipmentRequestPathController::class, 'tracking']);
+        Route::post('{id}/select-path', [ShipmentRequestPathController::class, 'select']);
+        Route::post('{id}/pay-advance', [ShipmentRequestPathController::class, 'pay']);
     });
 
     // Cart

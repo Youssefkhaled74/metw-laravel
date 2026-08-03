@@ -29,6 +29,9 @@ class OrderItem extends Model
         'rejection_reason_id',
         'rejection_note',
         'rejected_at',
+        'representative_id',
+        'accepted_fee',
+        'accepted_at',
     ];
     protected $casts = [
         'est_date' => 'date',
@@ -37,6 +40,8 @@ class OrderItem extends Model
         'has_village' => 'boolean',
         'dispatch_state' => DispatchState::class,
         'rejected_at' => 'datetime',
+        'accepted_at' => 'datetime',
+        'accepted_fee' => 'decimal:2',
     ];
     public function rejectionReason()
     {
@@ -86,6 +91,11 @@ class OrderItem extends Model
     public function assignments()
     {
         return $this->morphMany(CourierAssignment::class, 'assignable');
+    }
+
+    public function requestPaths()
+    {
+        return $this->morphMany(RequestPath::class, 'pathable');
     }
 
     public function activeAssignments()

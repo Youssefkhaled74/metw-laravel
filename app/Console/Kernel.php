@@ -18,6 +18,11 @@ class Kernel extends ConsoleKernel
         ->everyFiveMinutes()
         ->withoutOverlapping()
         ->runInBackground();
+
+        // Courier offers timeout (Sections 3 & 4): auto-reject overdue offers.
+        $schedule->call(function () {
+            app(\App\Services\CourierSystem\CourierTimeoutProcessor::class)->process();
+        })->everyMinute()->name('courier-offers-timeout');
     }
 
     /**

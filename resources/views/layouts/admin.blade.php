@@ -2021,6 +2021,20 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.advance-payments*') ? 'active' : '' }}"
+                                href="{{ route('admin.advance-payments.index') }}">
+                                    <i class="fas fa-money-check-alt"></i>
+                                    <span class="link-text">{{ __('admin-dashboard.advance_payments') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.settings.courier-failure-messages*') ? 'active' : '' }}"
+                                href="{{ route('admin.settings.courier-failure-messages.index') }}">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span class="link-text">{{ __('admin-dashboard.courier_failure_messages') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.return-orders.*') ? 'active' : '' }}"
                                 href="{{ route('admin.return-orders.pending') }}">
                                     <i class="fas fa-undo-alt"></i>

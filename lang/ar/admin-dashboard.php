@@ -1582,4 +1582,31 @@ return [
     'display_order' => 'ترتيب العرض',
     'display_order_help' => 'الترتيب الرقمي لعرض التصنيفات. الأرقام الأصغر تظهر أولاً.',
 
+    // Courier failure messages (Sections 3 & 4)
+    'courier_failure_messages' => 'رسائل فشل التوصيل',
+    'failure_message_shipping' => 'رسالة الفشل (طلب شحن)',
+    'failure_message_shipping_hint' => 'تُرسل لمقدم الطلب عند عدم قبول أي مندوب لأي مسار في طلب شحن.',
+    'failure_message_delivery' => 'رسالة الفشل (توصيل سريع)',
+    'failure_message_delivery_hint' => 'تُرسل لمقدم الطلب عند عدم قبول أي مندوب لأي مسار في طلب توصيل سريع.',
+    'courier_failure_messages_note' => 'هذه النصوص القابلة للتعديل تظهر لمقدم الطلب عند إغلاق الطلب على أنه غير متاح (لم يقبل أي مندوب أي مسار).',
+
+    // Advance payments
+    'advance_payments' => 'الدفعات المقدمة',
+    'all' => 'الكل',
+    'request' => 'الطلب',
+    'path' => 'المسار',
+    'submitter' => 'مقدم الطلب',
+    'amount' => 'المبلغ',
+    'method' => 'الطريقة',
+    'reference' => 'المرجع',
+    'status' => 'الحالة',
+    'actions' => 'إجراءات',
+    'confirm' => 'تأكيد',
+    'reject' => 'رفض',
+    'search' => 'بحث',
+    'rejection_note' => 'ملاحظة الرفض',
+    'confirm_advance_payment_confirm' => 'تأكيد هذه الدفعة المقدمة وبدء تنفيذ الطلب؟',
+    'reject_advance_payment' => 'رفض الدفعة المقدمة',
+    'no_advance_payments_found' => 'لا توجد دفعات مقدمة.',
+
 ];

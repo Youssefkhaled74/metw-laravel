@@ -13,6 +13,12 @@ class CourierSystemConfigService
     public const TIMEOUT_AUTO_ACTION = 'courier_timeout_auto_action';
     public const MAX_OFFERS_PER_LEG = 'courier_max_offers_per_leg';
 
+    /** Failure notification text when no shipping courier accepts (Sections 3 & 4). */
+    public const FAILURE_SHIPPING_MESSAGE = 'courier_failure_message_shipping';
+
+    /** Failure notification text when no delivery courier accepts (Section 4). */
+    public const FAILURE_DELIVERY_MESSAGE = 'courier_failure_message_delivery';
+
     /**
      * @return array<string, string>
      */
@@ -61,6 +67,22 @@ class CourierSystemConfigService
     public function maxOffersPerLeg(): int
     {
         return max(1, (int) $this->get(self::MAX_OFFERS_PER_LEG, 5));
+    }
+
+    public function failureShippingMessage(): string
+    {
+        return (string) $this->get(
+            self::FAILURE_SHIPPING_MESSAGE,
+            'Shipping service is currently unavailable according to the required shipping path'
+        );
+    }
+
+    public function failureDeliveryMessage(): string
+    {
+        return (string) $this->get(
+            self::FAILURE_DELIVERY_MESSAGE,
+            'Delivery service is currently unavailable according to the required delivery path'
+        );
     }
 
     /**

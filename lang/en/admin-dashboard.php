@@ -1556,4 +1556,31 @@ return [
     'display_order' => 'Display Order',
     'display_order_help' => 'Numeric order for displaying categories. Lower numbers appear first.',
 
+    // Courier failure messages (Sections 3 & 4)
+    'courier_failure_messages' => 'Courier Failure Messages',
+    'failure_message_shipping' => 'Failure message (shipping request)',
+    'failure_message_shipping_hint' => 'Sent to the submitter when no courier accepted any path for a shipping request.',
+    'failure_message_delivery' => 'Failure message (fast delivery)',
+    'failure_message_delivery_hint' => 'Sent to the submitter when no courier accepted any path for a fast-delivery request.',
+    'courier_failure_messages_note' => 'These editable texts are shown to the submitter when the request is closed as unavailable (no courier accepted any path).',
+
+    // Advance payments
+    'advance_payments' => 'Advance Payments',
+    'all' => 'All',
+    'request' => 'Request',
+    'path' => 'Path',
+    'submitter' => 'Submitter',
+    'amount' => 'Amount',
+    'method' => 'Method',
+    'reference' => 'Reference',
+    'status' => 'Status',
+    'actions' => 'Actions',
+    'confirm' => 'Confirm',
+    'reject' => 'Reject',
+    'search' => 'Search',
+    'rejection_note' => 'Rejection note',
+    'confirm_advance_payment_confirm' => 'Confirm this advance payment and start execution of the request?',
+    'reject_advance_payment' => 'Reject advance payment',
+    'no_advance_payments_found' => 'No advance payments found.',
+
 ];
