@@ -128,6 +128,9 @@
 
         .main-content {
             margin-inline-start: var(--sidebar-width);
+            margin-inline-end: 0;
+            width: auto;
+            min-width: 0;
             height: 100vh;
             height: 100dvh;
             overflow-y: auto;
@@ -176,6 +179,18 @@
 
         body.sidebar-collapsed .main-content {
             margin-inline-start: var(--sidebar-collapsed-width);
+            margin-inline-end: 0;
+            width: auto;
+        }
+
+        html[dir="rtl"] .main-content {
+            margin-inline-start: 0;
+            margin-inline-end: var(--sidebar-width);
+        }
+
+        html[dir="rtl"] body.sidebar-collapsed .main-content {
+            margin-inline-start: 0;
+            margin-inline-end: var(--sidebar-collapsed-width);
         }
 
         body::-webkit-scrollbar {
@@ -1273,6 +1288,8 @@
 
             .main-content {
                 margin-inline-start: 0 !important;
+                margin-inline-end: 0 !important;
+                width: 100% !important;
                 padding: 0.8rem !important;
                 height: 100vh;
                 height: 100dvh;
@@ -1982,7 +1999,7 @@
                         </div>
                 <div class="sidebar-menu">
                     <ul class="nav flex-column">
-                        {{-- ✅ Admin sees everything --}}
+                        {{-- âœ… Admin sees everything --}}
                         @if (auth('admin')->check())
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
@@ -2156,20 +2173,6 @@
                                 <ul class="nav flex-column collapse {{ request()->routeIs('admin.settings.*') ? 'show' : '' }}"
                                     id="settingsSubmenu">
                                     <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('admin.settings.banners.*') ? 'active' : '' }}"
-                                           href="{{ route('admin.settings.banners.index') }}">
-                                            <i class="fas fa-images"></i>
-                                            <span class="link-text">صور الموقع</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('admin.settings.website-videos.*') ? 'active' : '' }}"
-                                           href="{{ route('admin.settings.website-videos.index') }}">
-                                            <i class="fas fa-video"></i>
-                                            <span class="link-text">فيديوهات الموقع</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.settings.contact-admins.*') ? 'active' : '' }}"
                                            href="{{ route('admin.settings.contact-admins.index') }}">
                                             <i class="fas fa-wallet"></i>
@@ -2312,16 +2315,23 @@
                                         <a class="nav-link {{ request()->routeIs('admin.representatives.*') ? 'active' : '' }}"
                                         href="{{ route('admin.representatives.index') }}">
                                                 <i class="fas fa-id-card"></i>
-                                                <span class="link-text">{{ app()->getLocale() === 'ar' ? 'المناديب' : 'Representatives' }}</span>
+                                                <span class="link-text">{{ app()->getLocale() === 'ar' ? 'المندوبين' : 'Representatives' }}</span>
                                         </a>
                                     </li>
                                     @if(auth('admin')->check() || $employee->can('admin.settings.pages.index'))
-                                        <li class="nav-item">
-                                            <a class="nav-link {{ request()->routeIs('admin.settings.pages.*') ? 'active' : '' }}"
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.settings.website-content') ? 'active' : '' }}"
+                                           href="{{ route('admin.settings.website-content') }}">
+                                            <i class="fas fa-globe"></i>
+                                            <span class="link-text">إدارة محتوى الموقع</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.settings.pages.*') ? 'active' : '' }}"
                                             href="{{ route('admin.settings.pages.index') }}">
-                                                    <i class="fas fa-file-alt"></i>
-                                                    <span class="link-text">محتوى الموقع</span>
-                                            </a>
+                                                <i class="fas fa-file-alt"></i>
+                                                <span class="link-text">محتوى الموقع</span>
+                                        </a>
                                         </li>
                                     @endif
                                     @if(auth('admin')->check() || $employee->can('admin.settings.whatsapp-templates.index'))
@@ -3444,3 +3454,4 @@ document.addEventListener('DOMContentLoaded', function () {
 </body>
 
 </html>
+

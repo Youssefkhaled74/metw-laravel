@@ -66,7 +66,6 @@
             font-size: 32px;
             font-weight: bold;
             flex-shrink: 0;
-            /* Prevents logo from getting squished */
         }
 
         .logo .orange {
@@ -77,16 +76,32 @@
             color: var(--dark-purple);
         }
 
-        /* Fixed Links to prevent aggressive wrapping */
+        /* --- Top Links: One line with Arrows --- */
+        .top-links-wrapper {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            gap: 8px;
+            min-width: 0;
+        }
+
         .top-links {
             display: flex;
             align-items: center;
             gap: 6px;
             font-size: 13px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            /* Pushes links to the left in RTL */
             flex: 1;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 0 5px;
+            -webkit-overflow-scrolling: touch;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .top-links::-webkit-scrollbar {
+            display: none;
         }
 
         .top-links a {
@@ -97,6 +112,7 @@
             color: #555;
             transition: 0.2s;
             white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .top-links a.active {
@@ -114,22 +130,70 @@
             gap: 5px;
         }
 
-        /* Sub Navigation */
-        .sub-nav {
+        /* --- Shared Arrow Button Styling --- */
+        .nav-btn {
+            background: #fff;
+            border: 1px solid #eee;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: 0.2s;
+            z-index: 2;
+        }
+
+        .nav-btn:hover {
+            background: var(--bg-light-orange);
+            border-color: var(--orange);
+        }
+
+        .nav-btn svg {
+            fill: var(--orange);
+            width: 18px;
+            height: 18px;
+        }
+
+        /* --- Sub Navigation Wrapper (With Arrows) --- */
+        .sub-nav-wrapper {
             background-color: var(--bg-light-orange);
             padding: 12px 20px;
             border-radius: 6px;
             display: flex;
-            gap: 30px;
             align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .sub-nav-inner {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex: 1;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .sub-nav-inner::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sub-nav-inner a {
+            white-space: nowrap;
+            flex-shrink: 0;
             color: var(--orange);
             font-weight: 700;
             font-size: 15px;
-            margin-top: 5px;
-            flex-wrap: wrap;
         }
 
-        .sub-nav a:hover {
+        .sub-nav-inner a:hover {
             color: #cc6f13;
         }
 
@@ -214,7 +278,6 @@
             border-color: transparent transparent transparent #fff;
         }
 
-        /* --- Fixed Carousel Styling (Fixes missing arrows and alignment) --- */
         .carousel-section {
             padding: 0 20px 40px 20px;
             display: flex;
@@ -293,8 +356,8 @@
                 max-width: 100%;
             }
 
-            .sub-nav {
-                justify-content: center;
+            .sub-nav-wrapper {
+                justify-content: flex-start;
             }
         }
     </style>
@@ -309,37 +372,149 @@
                     <span class="orange">metw</span>
                     <span class="purple">ميتو</span>
                 </div>
-                <div class="top-links">
-                    <a href="#" class="lang-toggle"><span class="globe-icon">🌐</span> العربية</a>
-                    <a href="#" class="active">إدارة ميتو</a>
-                    <a href="#">دخول المتاجر</a>
-                    <a href="#">دخول المستودعات</a>
-                    <a href="#">تواصل معنا</a>
-                    <a href="#">نحن</a>
-                    <a href="#">السياسات والشروط</a>
-                    <a href="#">تطبيقات ميتو</a>
-                    <a href="#">خدمات ميتو</a>
-                    <a href="#">منشورات الموقع</a>
-                    <a href="{{ route('website.images') }}">صور الموقع</a> <a href="#">فيديوهات الموقع</a>
+
+                {{-- TOP LINKS WITH ARROWS --}}
+                <div class="top-links-wrapper">
+                    <button class="nav-btn" onclick="scrollTopNav(-150)" aria-label="Scroll top menu left">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                        </svg>
+                    </button>
+
+                    <div class="top-links" id="topLinksContainer">
+                        <a href="#" class="lang-toggle"><span class="globe-icon">🌐</span> العربية</a>
+                        
+                        {{-- Updated Admin Link --}}
+                        <a href="{{ route('admin.login') }}" class="{{ request()->routeIs('admin.login') ? 'active' : '' }}">إدارة ميتو</a>
+                        
+                        {{-- Updated Vendor Link --}}
+                        <a href="{{ route('vendor.login') }}" class="{{ request()->routeIs('vendor.login') ? 'active' : '' }}">دخول المتاجر</a>
+                        
+                        {{-- Updated Shipment/Warehouse Link --}}
+                        <a href="{{ route('shipment.login') }}" class="{{ request()->routeIs('shipment.login') ? 'active' : '' }}">دخول المستودعات</a>
+
+                        <a href="{{ route('website.contact') }}" class="{{ request()->routeIs('website.contact') ? 'active' : '' }}">تواصل معنا</a>
+                        <a href="{{ route('website.about') }}" class="{{ request()->routeIs('website.about') ? 'active' : '' }}">نحن</a>
+                        <a href="{{ route('website.policies.list') }}" class="{{ request()->routeIs('website.policies.list') ? 'active' : '' }}">السياسات والشروط</a>
+                        <a href="{{ route('website.apps') }}" class="{{ request()->routeIs('website.apps') ? 'active' : '' }}">تطبيقات ميتو</a>
+                        <a href="{{ route('website.metwservices') }}" class="{{ request()->routeIs('website.metwservices') ? 'active' : '' }}">خدمات ميتو</a>
+                        <a href="{{ route('website.content') }}" class="{{ request()->routeIs('website.content') ? 'active' : '' }}">منشورات الموقع</a>
+                        <a href="{{ route('website.images') }}">صور الموقع</a>
+                        <a href="{{ route('website.videos') }}" class="{{ request()->routeIs('website.videos') ? 'active' : '' }}">فيديوهات الموقع</a>
+                    </div>
+
+                    <button class="nav-btn" onclick="scrollTopNav(150)" aria-label="Scroll top menu right">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z" />
+                        </svg>
+                    </button>
                 </div>
+
             </div>
-            <nav class="sub-nav">
-                <a href="#">منصة ميتو</a>
-                <a href="#">للتجارة والخدمات اللوجستية</a>
-                <a href="#">ماركت إلكتروني مالي ستور</a>
-                <a href="#">خدمات التخزين للتجار</a>
-                <a href="#">خدمات شحن بين محافظات ومدن وقرى مصر</a>
-                <a href="#">دليفري سريع وآمن</a>
-                <a href="#">فوالف المندوبين من الباب للباب</a>
+
+            {{-- SUB NAV (BEIGE) WITH ARROWS --}}
+            <nav class="sub-nav-wrapper">
+                <button class="nav-btn" onclick="scrollSubNav(-150)" aria-label="Scroll sub menu left">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                    </svg>
+                </button>
+
+                <div class="sub-nav-inner" id="subNavContainer">
+                    <a href="#">منصة ميتو</a>
+                    <a href="#">للتجارة والخدمات اللوجستية</a>
+                    <a href="#">ماركت إلكتروني مالي ستور</a>
+                    <a href="#">خدمات التخزين للتجار</a>
+                    <a href="#">خدمات شحن بين محافظات ومدن وقرى مصر</a>
+                    <a href="#">دليفري سريع وآمن</a>
+                    <a href="#">فوالف المندوبين من الباب للباب</a>
+                </div>
+
+                <button class="nav-btn" onclick="scrollSubNav(150)" aria-label="Scroll sub menu right">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z" />
+                    </svg>
+                </button>
             </nav>
         </div>
     </header>
 
     <main>
+        {{-- Hero & Carousel will ONLY appear if the user is on the Homepage --}}
+        @if(request()->routeIs('home'))
+        <div class="hero-section">
+            <div class="hero-text">
+                <h1>منصة <span style="color: var(--orange);">metw</span> للتجارة الإلكترونية</h1>
+                <h2>خدمات شحن وتوصيل سريع وآمن</h2>
+                <p>منصة متكاملة تربط التجار والمستودعات والعملاء بأفضل خدمات الشحن واللوجستيات في مصر.</p>
+            </div>
+            <div class="hero-video-wrapper">
+                <div class="main-video">
+                    <div class="video-badge">فيديو تعريفي</div>
+                    <div class="play-btn"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="carousel-section">
+            <div class="carousel-arrow">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+            </div>
+            <div class="carousel-items">
+                <div class="thumb-video">
+                    <div class="video-badge">فيديو 1</div>
+                    <div class="play-btn"></div>
+                </div>
+                <div class="thumb-video">
+                    <div class="video-badge">فيديو 2</div>
+                    <div class="play-btn"></div>
+                </div>
+                <div class="thumb-video">
+                    <div class="video-badge">فيديو 3</div>
+                    <div class="play-btn"></div>
+                </div>
+                <div class="thumb-video">
+                    <div class="video-badge">فيديو 4</div>
+                    <div class="play-btn"></div>
+                </div>
+                <div class="thumb-video">
+                    <div class="video-badge">فيديو 5</div>
+                    <div class="play-btn"></div>
+                </div>
+            </div>
+            <div class="carousel-arrow">
+                <svg viewBox="0 0 24 24">
+                    <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z" />
+                </svg>
+            </div>
+        </div>
+        @endif
+
         @yield('content')
     </main>
 
     @stack('scripts')
+
+    {{-- JS TO CONTROL THE ARROWS --}}
+    <script>
+        function scrollTopNav(direction) {
+            const container = document.getElementById('topLinksContainer');
+            if (container) container.scrollBy({
+                left: direction,
+                behavior: 'smooth'
+            });
+        }
+
+        function scrollSubNav(direction) {
+            const container = document.getElementById('subNavContainer');
+            if (container) container.scrollBy({
+                left: direction,
+                behavior: 'smooth'
+            });
+        }
+    </script>
 </body>
 
 </html>

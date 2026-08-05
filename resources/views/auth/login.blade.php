@@ -1,192 +1,347 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول - MetwLogistic</title>
+@extends('website.layout') {{-- Uses the main site layout --}}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+@section('title', 'تسجيل الدخول - إدارة ميتو')
 
-    <style>
-        :root {
-            --metw-orange: #FF7043;
-            --metw-purple: #7B00A8;
-        }
+@push('styles')
+<style>
+    /* Specific CSS to match the Admin Login Screenshot */
+    .admin-login-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 85vh; /* Leaves room for the top navigation */
+        background: linear-gradient(135deg, #8c2d93 0%, #c7356d 100%); /* Purple to Pink gradient */
+        padding: 20px;
+    }
 
-        * {
-            font-family: 'Cairo', system-ui, sans-serif;
-        }
+    .login-container {
+        display: flex;
+        background: transparent;
+        width: 100%;
+        max-width: 1100px;
+        gap: 30px;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 
-        body {
-            background: linear-gradient(135deg, #5D008B 0%, #FF7043 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
+    /* --- Left Side: Video Section --- */
+    .login-video-section {
+        flex: 1.2;
+        min-width: 300px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .main-video-box {
+        width: 100%;
+        aspect-ratio: 16/9;
+        background-color: #3b1855; /* Dark Purple Video Bg */
+        border-radius: 20px;
+        position: relative;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+
+    .video-box-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    .video-play-btn {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 55px;
+        height: 55px;
+        background-color: #f57c22; /* Orange Play Button */
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        box-shadow: 0 5px 10px rgba(245, 124, 34, 0.4);
+    }
+
+    .video-play-btn::after {
+        content: '';
+        display: block;
+        margin-left: 4px;
+        border-style: solid;
+        border-width: 10px 0 10px 15px;
+        border-color: transparent transparent transparent #ffffff;
+    }
+
+    .thumb-video-row {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-start;
+    }
+
+    .thumb-video-box {
+        flex: 1;
+        aspect-ratio: 16/9;
+        background-color: #3b1855;
+        border-radius: 12px;
+        position: relative;
+        max-width: 200px;
+    }
+
+    .thumb-video-box .video-box-badge {
+        top: 8px;
+        right: 10px;
+        font-size: 12px;
+    }
+
+    .thumb-video-box .video-play-btn {
+        width: 30px;
+        height: 30px;
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .thumb-video-box .video-play-btn::after {
+        border-width: 6px 0 6px 10px;
+        margin-left: 2px;
+    }
+
+    /* --- Right Side: Login Card --- */
+    .login-card-wrapper {
+        flex: 0.8;
+        min-width: 350px;
+        display: flex;
+        justify-content: flex-end; /* Pushes card to the right in RTL layout */
+    }
+
+    .login-card {
+        background: #ffffff;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        overflow: hidden;
+    }
+
+    .login-card-header {
+        background: linear-gradient(135deg, #a72baf 0%, #f57c22 100%);
+        padding: 30px 20px;
+        text-align: center;
+        color: #fff;
+    }
+
+    .login-card-header svg {
+        width: 50px;
+        height: 50px;
+        fill: #fff;
+        margin-bottom: 10px;
+    }
+
+    .login-card-header h2 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .login-card-header p {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .login-card-body {
+        padding: 30px 25px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+        text-align: right;
+    }
+
+    .input-wrapper {
+        display: flex;
+        align-items: center;
+        background-color: #ebf2f9; /* Light blue/gray input background */
+        border-radius: 8px;
+        padding: 0 15px;
+    }
+
+    .input-wrapper svg {
+        width: 20px;
+        height: 20px;
+        fill: #777;
+    }
+
+    .input-wrapper input {
+        width: 100%;
+        padding: 14px 10px;
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 15px;
+        font-family: inherit;
+        text-align: right;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        justify-content: flex-end;
+    }
+
+    .form-check input {
+        accent-color: #f57c22;
+        width: 18px;
+        height: 18px;
+    }
+
+    .form-check label {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #f57c22 0%, #e46b12 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        font-family: inherit;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(245, 124, 34, 0.4);
+    }
+
+    .forgot-pass {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .forgot-pass a {
+        color: #777;
+        font-size: 14px;
+        text-decoration: none;
+    }
+
+    .forgot-pass a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 800px) {
+        .login-card-wrapper {
             justify-content: center;
-            padding: 20px;
         }
+        .thumb-video-box {
+            max-width: 120px;
+        }
+    }
+</style>
+@endpush
 
-        .login-card {
-            background: #FFFFFF;
-            border-radius: 28px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            max-width: 420px;
-            width: 100%;
-            overflow: hidden;
-        }
+@section('content')
+<div class="admin-login-wrapper">
+    <div class="login-container">
 
-        .login-header {
-            background: linear-gradient(135deg, var(--metw-purple), var(--metw-orange));
-            color: white;
-            padding: 2.8rem 2rem 2rem;
-            text-align: center;
-        }
-
-        .brand-icon {
-            font-size: 3.8rem;
-            margin-bottom: 1rem;
-        }
-
-        .card-body {
-            padding: 2.5rem 2.25rem;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #2B2430;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control {
-            background-color: #f8f9fa;
-            border: none;
-            border-radius: 12px;
-            padding: 14px 16px;
-            font-size: 1rem;
-        }
-
-        .form-control:focus {
-            background-color: #ffffff;
-            box-shadow: 0 0 0 4px rgba(255, 112, 67, 0.15);
-        }
-
-        .input-group-text {
-            background-color: #f8f9fa;
-            border: none;
-            border-radius: 12px;
-        }
-
-        .btn-login {
-            background: linear-gradient(135deg, var(--metw-orange), #FF5A3C);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            padding: 15px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            box-shadow: 0 8px 20px rgba(255, 112, 67, 0.3);
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(255, 112, 67, 0.4);
-        }
-    </style>
-</head>
-<body>
-    <div class="login-card">
-        
-        <!-- Header -->
-        <div class="login-header">
-            <i class="fas fa-{{ $type === 'admin' ? 'shield-halved' : 'truck-fast' }} brand-icon"></i>
-            <h3 class="fw-bold mb-1">تسجيل الدخول</h3>
-            <p class="mb-0 opacity-90">MetwLogistic - {{ ucfirst($type) }}</p>
+        {{-- Left Side: Video Section --}}
+        <div class="login-video-section">
+            <div class="main-video-box">
+                <div class="video-box-badge">فيديو</div>
+                <div class="video-play-btn"></div>
+            </div>
+            <div class="thumb-video-row">
+                <div class="thumb-video-box">
+                    <div class="video-box-badge">فيديو 1</div>
+                    <div class="video-play-btn"></div>
+                </div>
+                <div class="thumb-video-box">
+                    <div class="video-box-badge">فيديو 2</div>
+                    <div class="video-play-btn"></div>
+                </div>
+                <div class="thumb-video-box">
+                    <div class="video-box-badge">فيديو 3</div>
+                    <div class="video-play-btn"></div>
+                </div>
+            </div>
         </div>
 
-        <div class="card-body">
-            @if(session('error'))
-                <div class="alert alert-danger rounded-3 mb-4">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    {{ session('error') }}
+        {{-- Right Side: Login Card --}}
+        <div class="login-card-wrapper">
+            <div class="login-card">
+                <div class="login-card-header">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                    </svg>
+                    <h2>تسجيل الدخول</h2>
+                    <p>Metw - Admin</p>
                 </div>
-            @endif
+                
+                <div class="login-card-body">
+                    {{-- Based on your web.php, the POST route is named admin.login --}}
+                    <form method="POST" action="{{ route('admin.login') }}">
+                        @csrf
+                        
+                        {{-- Mobile Number Field --}}
+                        <div class="form-group">
+                            <label>رقم الموبايل</label>
+                            <div class="input-wrapper">
+                                <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+                                <input type="text" name="mobile" placeholder="" required>
+                            </div>
+                        </div>
 
-            <form method="POST" action="{{ route($type . '.login') }}">
-                @csrf
+                        {{-- Password Field --}}
+                        <div class="form-group">
+                            <label>كلمة المرور</label>
+                            <div class="input-wrapper">
+                                <svg viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10z"/></svg>
+                                <input type="password" name="password" placeholder="" required>
+                            </div>
+                        </div>
 
-                <!-- البريد الإلكتروني -->
-                <div class="mb-4">
-                    <label class="form-label">البريد الإلكتروني</label>
-                    <div class="input-group">
-                        <input type="email" 
-                               class="form-control @error('email') is-invalid @enderror"
-                               name="email" 
-                               value="{{ old('email') }}" 
-                               placeholder="example@domain.com"
-                               required autofocus>
-                        <span class="input-group-text">
-                            <i class="fas fa-envelope text-muted"></i>
-                        </span>
-                    </div>
-                    @error('email')
-                        <div class="text-danger small mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
+                        <div class="form-check">
+                            <label for="remember">تذكرني</label>
+                            <input type="checkbox" id="remember" name="remember">
+                        </div>
 
-                <!-- كلمة المرور -->
-                <div class="mb-4">
-                    <label class="form-label">كلمة المرور</label>
-                    <div class="input-group">
-                        <input type="password" 
-                               id="password"
-                               class="form-control @error('password') is-invalid @enderror"
-                               name="password" 
-                               placeholder="••••••••"
-                               required>
-                        <button type="button" class="input-group-text" onclick="togglePassword()">
-                            <i class="fas fa-eye text-muted" id="toggleIcon"></i>
+                        <button type="submit" class="btn-submit">
+                            <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor;transform:rotate(180deg);">
+                                <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                            </svg>
+                            تسجيل الدخول
                         </button>
-                    </div>
-                    @error('password')
-                        <div class="text-danger small mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
 
-                <!-- Links -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <a href="#" class="text-muted text-decoration-none small">نسيت كلمة المرور؟</a>
-                    
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                        <label class="form-check-label small" for="remember">تذكرني</label>
-                    </div>
+                        <div class="forgot-pass">
+                            <a href="#">نسيت كلمة المرور ؟</a>
+                        </div>
+                    </form>
                 </div>
-
-                <!-- Button -->
-                <button type="submit" class="btn btn-login w-100">
-                    <i class="fas fa-sign-in-alt me-2"></i>
-                    تسجيل الدخول
-                </button>
-            </form>
+            </div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function togglePassword() {
-            const password = document.getElementById('password');
-            const icon = document.getElementById('toggleIcon');
-            
-            if (password.type === 'password') {
-                password.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                password.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        }
-    </script>
-</body>
-</html>
+    </div>
+</div>
+@endsection

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,12 +21,36 @@ class AdminAuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $credentials = $request->only('username', 'password');
-        if (Auth::guard('admin')->attempt($credentials, $request->filled('remember'))) {
-            $request->session()->regenerate();
-            return $this->redirectToDashboard('admin');
+        $identifier = trim((string) $request->input('username'));
+        $password = (string) $request->input('password');
+        $remember = $request->boolean('remember');
+
+        $credentialSets = [
+            ['username' => $identifier, 'password' => $password],
+            ['email' => $identifier, 'password' => $password],
+            ['phone' => $identifier, 'password' => $password],
+        ];
+
+        foreach ($credentialSets as $credentials) {
+            if (Auth::guard('admin')->attempt($credentials, $remember)) {
+                $request->session()->regenerate();
+                return $this->redirectToDashboard('admin');
+            }
         }
-        return back()->withErrors(['username' => 'Invalid credentials'])->withInput();
+
+        $admin = Admin::query()
+            ->where('username', $identifier)
+            ->orWhere('email', $identifier)
+            ->orWhere('phone', $identifier)
+            ->first();
+
+        if ($admin && ! $admin->is_active) {
+            return back()
+                ->withErrors(['username' => 'This admin account is inactive.'])
+                ->withInput($request->except('password'));
+        }
+
+        return back()->withErrors(['username' => 'Invalid credentials'])->withInput($request->except('password'));
     }
 
     public function logout(Request $request)

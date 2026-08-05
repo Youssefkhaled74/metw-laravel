@@ -15,7 +15,7 @@ class ShipmentAuthController extends Controller
     public function showLoginForm(Request $request)
     {
         $type = $request->segment(1);
-        return view('auth.shipment.login' , compact('type'));
+        return view('auth.shipment.login', compact('type'));
     }
 
     public function login(Request $request)

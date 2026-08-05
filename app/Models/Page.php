@@ -49,6 +49,12 @@ class Page extends Model
         $locale = app()->getLocale();
         return $locale === 'ar' ? ($this->title_ar ?? $this->title) : $this->title;
     }
+
+    public function getTranslatedTitleAttribute()
+    {
+        return $this->transelated_title;
+    }
+
     public function getTranslatedContentAttribute()
     {
         $locale = app()->getLocale();

@@ -12,6 +12,105 @@ use Illuminate\Validation\ValidationException;
 
 class PageController extends Controller
 {
+    public function websiteContentPage()
+    {
+        $permissions = [
+            'admin.settings.pages.index',
+            'admin.settings.banners.index',
+            'admin.settings.website-videos.index',
+            'admin.settings.metw-services.index',
+            'admin.settings.metw-apps.index',
+            'admin.settings.metw-galleries.index',
+            'admin.settings.metw-contacts.index',
+            'admin.settings.metw-policy-links.index',
+            'admin.settings.configs.index',
+            'admin.settings.contact-admins.index',
+        ];
+
+        if (Auth::guard('employee')->check()) {
+            $employee = Auth::guard('employee')->user();
+            $canOpen = false;
+
+            foreach ($permissions as $permission) {
+                if ($employee->can($permission)) {
+                    $canOpen = true;
+                    break;
+                }
+            }
+
+            if (! $canOpen) {
+                return view('dashboard.admin.no-permission');
+            }
+        }
+
+        $sections = [
+            [
+                'title' => 'محتوى الصفحات',
+                'description' => 'إدارة صفحات الموقع العامة مثل نحن، السياسات، الشروط، والخصوصية.',
+                'route' => route('admin.settings.pages.index'),
+                'icon' => 'fas fa-file-alt',
+                'permission' => 'admin.settings.pages.index',
+            ],
+            [
+                'title' => 'البنرات',
+                'description' => 'إضافة وإدارة صور الهيدر والبنرات المعروضة في الصفحة الرئيسية.',
+                'route' => route('admin.settings.banners.index'),
+                'icon' => 'fas fa-images',
+                'permission' => 'admin.settings.banners.index',
+            ],
+            [
+                'title' => 'فيديوهات الموقع',
+                'description' => 'رفع الفيديوهات التي تظهر في الصفحة العامة ومعاينة محتواها.',
+                'route' => route('admin.settings.website-videos.index'),
+                'icon' => 'fas fa-video',
+                'permission' => 'admin.settings.website-videos.index',
+            ],
+            [
+                'title' => 'خدمات ميتو',
+                'description' => 'تحديث خدمات المنصة الظاهرة للمستخدمين من الموقع العام.',
+                'route' => route('admin.settings.metw-services.index'),
+                'icon' => 'fas fa-layer-group',
+                'permission' => 'admin.settings.metw-services.index',
+            ],
+            [
+                'title' => 'تطبيقات ميتو',
+                'description' => 'إدارة تطبيقات Metw وروابط المتاجر الخاصة بها.',
+                'route' => route('admin.settings.metw-apps.index'),
+                'icon' => 'fas fa-mobile-screen',
+                'permission' => 'admin.settings.metw-apps.index',
+            ],
+            [
+                'title' => 'صور الموقع',
+                'description' => 'رفع ومعالجة صور الجاليري الخاصة بالموقع العام.',
+                'route' => route('admin.settings.metw-galleries.index'),
+                'icon' => 'fas fa-photo-film',
+                'permission' => 'admin.settings.metw-galleries.index',
+            ],
+            [
+                'title' => 'بيانات التواصل',
+                'description' => 'إدارة أرقام الهاتف والبريد والعنوان وواتساب الموقع.',
+                'route' => route('admin.settings.metw-contacts.index'),
+                'icon' => 'fas fa-address-book',
+                'permission' => 'admin.settings.metw-contacts.index',
+            ],
+            [
+                'title' => 'روابط السياسات',
+                'description' => 'ترتيب روابط السياسات والشروط المعروضة للزوار.',
+                'route' => route('admin.settings.metw-policy-links.index'),
+                'icon' => 'fas fa-link',
+                'permission' => 'admin.settings.metw-policy-links.index',
+            ],
+            [
+                'title' => 'الإعدادات العامة',
+                'description' => 'تعديل القيم العامة مثل اسم الموقع والرسائل والعدادات.',
+                'route' => route('admin.configs.index'),
+                'icon' => 'fas fa-gear',
+                'permission' => 'admin.config.index',
+            ],
+        ];
+
+        return view('dashboard.admin.settings.website-content', compact('sections'));
+    }
     public function index()
     {
         if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.settings.pages.index')) {
@@ -244,7 +343,7 @@ class PageController extends Controller
             if ($newStart <= $rowEnd && $rowStart <= $newEnd) {
                 throw ValidationException::withMessages([
                     'active_from' => app()->getLocale() === 'ar'
-                        ? 'الفترة الزمنية متعارضة مع سجل تاريخ آخر لنفس نوع الصفحة.'
+                        ? 'Ø§Ù„ÙØªØ±Ø© Ø§Ù„Ø²Ù…Ù†ÙŠØ© Ù…ØªØ¹Ø§Ø±Ø¶Ø© Ù…Ø¹ Ø³Ø¬Ù„ ØªØ§Ø±ÙŠØ® Ø¢Ø®Ø± Ù„Ù†ÙØ³ Ù†ÙˆØ¹ Ø§Ù„ØµÙØ­Ø©.'
                         : 'This date range conflicts with another history record for the selected page type.',
                 ]);
             }

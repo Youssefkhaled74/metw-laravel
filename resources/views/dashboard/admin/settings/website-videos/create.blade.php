@@ -4,15 +4,16 @@
 @section('page-title', 'إضافة فيديو للموقع')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">إضافة فيديو للموقع</h1>
-        <a href="{{ route('admin.settings.website-videos.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> العودة للخلف
-        </a>
-    </div>
-
-    <div class="card shadow-sm border-0">
+@component('dashboard.admin.settings.partials.module-shell', [
+    'kicker' => 'إدارة محتوى الموقع',
+    'title' => 'إضافة فيديو للموقع',
+    'description' => 'أضف فيديو جديد ليظهر في الصفحة العامة بنفس أسلوب بقية صفحات الإدارة.',
+    'actions' => [
+        ['label' => 'محتوى الموقع', 'url' => route('admin.settings.website-content'), 'icon' => 'fas fa-arrow-right', 'class' => 'btn-outline-secondary'],
+        ['label' => 'قائمة الفيديوهات', 'url' => route('admin.settings.website-videos.index'), 'icon' => 'fas fa-list', 'class' => 'btn-primary'],
+    ],
+])
+    <div class="settings-content-card">
         <div class="card-body p-4">
             <form action="{{ route('admin.settings.website-videos.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -62,11 +63,11 @@
                 </div>
 
                 <div class="mt-4 d-flex gap-2 justify-content-end">
-                    <a href="{{ route('admin.settings.website-videos.index') }}" class="btn btn-outline-secondary">عدم الحفظ</a>
+                    <a href="{{ route('admin.settings.website-videos.index') }}" class="btn btn-outline-secondary">إلغاء</a>
                     <button type="submit" class="btn btn-primary">حفظ الفيديو</button>
                 </div>
             </form>
         </div>
     </div>
-</div>
+@endcomponent
 @endsection

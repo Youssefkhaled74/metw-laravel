@@ -10,6 +10,11 @@ use App\Http\Controllers\Dashboard\Admin\Settings\GovernorateController;
 use App\Http\Controllers\Dashboard\Admin\Settings\RepresentativeWorkTypeController;
 use App\Http\Controllers\Dashboard\Admin\Settings\WebsiteVideoController;
 use App\Http\Controllers\Dashboard\Admin\Settings\TransportTypeController;
+use App\Http\Controllers\Dashboard\Admin\Settings\MetwServiceController;
+use App\Http\Controllers\Dashboard\Admin\Settings\MetwAppController;
+use App\Http\Controllers\Dashboard\Admin\Settings\MetwGalleryController;
+use App\Http\Controllers\Dashboard\Admin\Settings\MetwContactController;
+use App\Http\Controllers\Dashboard\Admin\Settings\MetwPolicyLinkController;
 use App\Http\Controllers\Dashboard\Admin\ShipmentController;
 use App\Http\Controllers\Dashboard\Admin\RoleController;
 use App\Http\Controllers\Dashboard\Admin\PermissionController;
@@ -38,8 +43,15 @@ Route::get('/about', [WebsiteController::class, 'about'])->name('website.about')
 Route::get('/policies', [WebsiteController::class, 'policies'])->name('website.policies');
 Route::get('/terms', [WebsiteController::class, 'terms'])->name('website.terms');
 Route::get('/privacy', [WebsiteController::class, 'privacy'])->name('website.privacy');
-Route::get('/images', [WebsiteController::class, 'images'])->name('website.images');
-// Language switcher
+Route::get('/gallery', [WebsiteController::class, 'images'])->name('website.images');
+Route::get('/services-content', [WebsiteController::class, 'services'])->name('website.content');    // Language switcher
+Route::get('/videos', [WebsiteController::class, 'videos'])->name('website.videos');
+Route::get('/services', [WebsiteController::class, 'showServices'])->name('website.metwservices');
+Route::get('/apps', [WebsiteController::class, 'apps'])->name('website.apps');
+Route::get('/policies-list', [WebsiteController::class, 'policiesIndex'])->name('website.policies.list');
+Route::get('/contact', [WebsiteController::class, 'contact'])->name('website.contact');
+
+
 Route::get('/lang/{locale}', function (Request $request, string $locale) {
     if (!in_array($locale, ['en', 'ar'])) {
         $locale = config('app.locale', 'en');
@@ -51,9 +63,9 @@ Route::get('/lang/{locale}', function (Request $request, string $locale) {
 // Admin Dashboard Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     // Admin Authentication Routes
-    Route::get('/login', [\App\Http\Controllers\Auth\AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [\App\Http\Controllers\Auth\AuthController::class, 'login']);
-    Route::post('/logout', [\App\Http\Controllers\Auth\AuthController::class, 'logout'])->name('logout');
+    Route::get('/login', [\App\Http\Controllers\Auth\AdminAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [\App\Http\Controllers\Auth\AdminAuthController::class, 'login']);
+    Route::post('/logout', [\App\Http\Controllers\Auth\AdminAuthController::class, 'logout'])->name('logout');
 
     // Admin Dashboard Routes
     Route::middleware('admin')->group(function () {
@@ -252,283 +264,292 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/management-contact', [\App\Http\Controllers\Dashboard\Admin\ManagementContactController::class, 'index'])->name('management-contact.index');
 
         // Settings Management
-        Route::prefix('settings')->name('settings.')->group(function () {
-            // Banner Management
-            Route::get('/banners', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'index'])->name('banners.index');
-            Route::get('/banners/create', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'create'])->name('banners.create');
-            Route::post('/banners', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'store'])->name('banners.store');
-            Route::get('/banners/{banner}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'edit'])->name('banners.edit');
-            Route::patch('/banners/{banner}', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'update'])->name('banners.update');
-            Route::delete('/banners/{banner}', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'destroy'])->name('banners.destroy');
-            Route::patch('/banners/{banner}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'toggleStatus'])->name('banners.toggle-status');
+            // Settings Management
+            Route::prefix('settings')->name('settings.')->group(function () {
+                // Banner Management
+                Route::get('/banners', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'index'])->name('banners.index');
+                Route::get('/banners/create', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'create'])->name('banners.create');
+                Route::post('/banners', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'store'])->name('banners.store');
+                Route::get('/banners/{banner}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'edit'])->name('banners.edit');
+                Route::patch('/banners/{banner}', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'update'])->name('banners.update');
+                Route::delete('/banners/{banner}', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'destroy'])->name('banners.destroy');
+                Route::patch('/banners/{banner}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\BannerController::class, 'toggleStatus'])->name('banners.toggle-status');
 
-            Route::get('/website-videos', [WebsiteVideoController::class, 'index'])->name('website-videos.index');
-            Route::get('/website-videos/create', [WebsiteVideoController::class, 'create'])->name('website-videos.create');
-            Route::post('/website-videos', [WebsiteVideoController::class, 'store'])->name('website-videos.store');
-            Route::get('/website-videos/{websiteVideo}/edit', [WebsiteVideoController::class, 'edit'])->name('website-videos.edit');
-            Route::patch('/website-videos/{websiteVideo}', [WebsiteVideoController::class, 'update'])->name('website-videos.update');
-            Route::delete('/website-videos/{websiteVideo}', [WebsiteVideoController::class, 'destroy'])->name('website-videos.destroy');
-            Route::patch('/website-videos/{websiteVideo}/toggle-status', [WebsiteVideoController::class, 'toggleStatus'])->name('website-videos.toggle-status');
+                Route::get('/website-videos', [WebsiteVideoController::class, 'index'])->name('website-videos.index');
+                Route::get('/website-videos/create', [WebsiteVideoController::class, 'create'])->name('website-videos.create');
+                Route::post('/website-videos', [WebsiteVideoController::class, 'store'])->name('website-videos.store');
+                Route::get('/website-videos/{websiteVideo}/edit', [WebsiteVideoController::class, 'edit'])->name('website-videos.edit');
+                Route::patch('/website-videos/{websiteVideo}', [WebsiteVideoController::class, 'update'])->name('website-videos.update');
+                Route::delete('/website-videos/{websiteVideo}', [WebsiteVideoController::class, 'destroy'])->name('website-videos.destroy');
+                Route::patch('/website-videos/{websiteVideo}/toggle-status', [WebsiteVideoController::class, 'toggleStatus'])->name('website-videos.toggle-status');
 
-            // Contact Admin Management
-            Route::get('/contact-admins', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'index'])->name('contact-admins.index');
-            Route::get('/contact-admins/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'create'])->name('contact-admins.create');
-            Route::post('/contact-admins', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'store'])->name('contact-admins.store');
-            Route::get('/contact-admins/{contactAdmin}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'edit'])->name('contact-admins.edit');
-            Route::patch('/contact-admins/{contactAdmin}', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'update'])->name('contact-admins.update');
-            Route::delete('/contact-admins/{contactAdmin}', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'destroy'])->name('contact-admins.destroy');
-            Route::patch('/contact-admins/{contactAdmin}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'toggleStatus'])->name('contact-admins.toggle-status');
+                // Contact Admin Management
+                Route::get('/contact-admins', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'index'])->name('contact-admins.index');
+                Route::get('/contact-admins/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'create'])->name('contact-admins.create');
+                Route::post('/contact-admins', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'store'])->name('contact-admins.store');
+                Route::get('/contact-admins/{contactAdmin}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'edit'])->name('contact-admins.edit');
+                Route::patch('/contact-admins/{contactAdmin}', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'update'])->name('contact-admins.update');
+                Route::delete('/contact-admins/{contactAdmin}', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'destroy'])->name('contact-admins.destroy');
+                Route::patch('/contact-admins/{contactAdmin}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ContactAdminController::class, 'toggleStatus'])->name('contact-admins.toggle-status');
 
-            // Banner Management
-            Route::get('/brands', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'index'])->name('brands.index');
-            Route::get('/brands/create', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'create'])->name('brands.create');
-            Route::post('/brands', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'store'])->name('brands.store');
-            Route::get('/brands/{brand}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'edit'])->name('brands.edit');
-            Route::patch('/brands/{brand}', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'update'])->name('brands.update');
-            Route::delete('/brands/{brand}', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'destroy'])->name('brands.destroy');
-            Route::patch('/brands/{brand}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
+                // Banner Management
+                Route::get('/brands', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'index'])->name('brands.index');
+                Route::get('/brands/create', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'create'])->name('brands.create');
+                Route::post('/brands', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'store'])->name('brands.store');
+                Route::get('/brands/{brand}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'edit'])->name('brands.edit');
+                Route::patch('/brands/{brand}', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'update'])->name('brands.update');
+                Route::delete('/brands/{brand}', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'destroy'])->name('brands.destroy');
+                Route::patch('/brands/{brand}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
 
-            // Main Category Management
-            Route::get('/main-categories', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'index'])->name('main-categories.index');
-            Route::get('/main-categories/create', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'create'])->name('main-categories.create');
-            Route::post('/main-categories', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'store'])->name('main-categories.store');
-            Route::get('/main-categories/{mainCategory}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'edit'])->name('main-categories.edit');
-            Route::patch('/main-categories/{mainCategory}', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'update'])->name('main-categories.update');
-            Route::delete('/main-categories/{mainCategory}', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'destroy'])->name('main-categories.destroy');
-            Route::patch('/main-categories/{mainCategory}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'toggleStatus'])->name('main-categories.toggle-status');
+                // Main Category Management
+                Route::get('/main-categories', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'index'])->name('main-categories.index');
+                Route::get('/main-categories/create', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'create'])->name('main-categories.create');
+                Route::post('/main-categories', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'store'])->name('main-categories.store');
+                Route::get('/main-categories/{mainCategory}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'edit'])->name('main-categories.edit');
+                Route::patch('/main-categories/{mainCategory}', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'update'])->name('main-categories.update');
+                Route::delete('/main-categories/{mainCategory}', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'destroy'])->name('main-categories.destroy');
+                Route::patch('/main-categories/{mainCategory}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\MainCategoryController::class, 'toggleStatus'])->name('main-categories.toggle-status');
 
 
-            // Category Management
-            Route::get('/categories', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'index'])->name('categories.index');
-            Route::get('/categories/create', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'create'])->name('categories.create');
-            Route::post('/categories', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'store'])->name('categories.store');
-            Route::get('/categories/{category}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'edit'])->name('categories.edit');
-            Route::patch('/categories/{category}', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'update'])->name('categories.update');
-            Route::delete('/categories/{category}', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'destroy'])->name('categories.destroy');
-            Route::patch('/categories/{category}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+                // Category Management
+                Route::get('/categories', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'index'])->name('categories.index');
+                Route::get('/categories/create', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'create'])->name('categories.create');
+                Route::post('/categories', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'store'])->name('categories.store');
+                Route::get('/categories/{category}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'edit'])->name('categories.edit');
+                Route::patch('/categories/{category}', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'update'])->name('categories.update');
+                Route::delete('/categories/{category}', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'destroy'])->name('categories.destroy');
+                Route::patch('/categories/{category}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
 
-            Route::get('/promo_codes', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'index'])->name('promo_codes.index');
-            Route::get('/promo_codes/create', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'create'])->name('promo_codes.create');
-            Route::post('/promo_codes', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'store'])->name('promo_codes.store');
-            Route::get('/promo_codes/{promo_code}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'edit'])->name('promo_codes.edit');
-            Route::patch('/promo_codes/{promo_code}', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'update'])->name('promo_codes.update');
-            Route::delete('/promo_codes/{promo_code}', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'destroy'])->name('promo_codes.destroy');
-            Route::patch('/promo_codes/{promo_code}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'toggleStatus'])->name('promo_codes.toggle-status');
+                Route::get('/promo_codes', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'index'])->name('promo_codes.index');
+                Route::get('/promo_codes/create', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'create'])->name('promo_codes.create');
+                Route::post('/promo_codes', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'store'])->name('promo_codes.store');
+                Route::get('/promo_codes/{promo_code}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'edit'])->name('promo_codes.edit');
+                Route::patch('/promo_codes/{promo_code}', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'update'])->name('promo_codes.update');
+                Route::delete('/promo_codes/{promo_code}', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'destroy'])->name('promo_codes.destroy');
+                Route::patch('/promo_codes/{promo_code}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\PromoCodeController::class, 'toggleStatus'])->name('promo_codes.toggle-status');
 
-            Route::prefix('governorates')->name('governorates.')->group(function () {
-                Route::get('/', [GovernorateController::class, 'index'])->name('index');
-                Route::get('/create', [GovernorateController::class, 'create'])->name('create');
-                Route::post('/', [GovernorateController::class, 'store'])->name('store');
-                Route::get('/{governorate}/edit', [GovernorateController::class, 'edit'])->name('edit');
-                Route::patch('/{governorate}', [GovernorateController::class, 'update'])->name('update');
-                Route::delete('/{governorate}', [GovernorateController::class, 'destroy'])->name('destroy');
-                Route::patch('/{governorate}/toggle', [GovernorateController::class, 'toggle'])->name('toggle-status');
+                Route::prefix('governorates')->name('governorates.')->group(function () {
+                    Route::get('/', [GovernorateController::class, 'index'])->name('index');
+                    Route::get('/create', [GovernorateController::class, 'create'])->name('create');
+                    Route::post('/', [GovernorateController::class, 'store'])->name('store');
+                    Route::get('/{governorate}/edit', [GovernorateController::class, 'edit'])->name('edit');
+                    Route::patch('/{governorate}', [GovernorateController::class, 'update'])->name('update');
+                    Route::delete('/{governorate}', [GovernorateController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{governorate}/toggle', [GovernorateController::class, 'toggle'])->name('toggle-status');
+                });
+
+                Route::prefix('cities')->name('cities.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'index'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'create'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'store'])->name('store');
+                    Route::get('/{city}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'edit'])->name('edit');
+                    Route::patch('/{city}', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'update'])->name('update');
+                    Route::delete('/{city}', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{city}/toggle', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'toggle'])->name('toggle-status');
+                });
+
+
+                Route::prefix('countries')->name('countries.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'index'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'create'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'store'])->name('store');
+                    Route::get('/{country}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'edit'])->name('edit');
+                    Route::patch('/{country}', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'update'])->name('update');
+                    Route::delete('/{country}', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{country}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'toggleStatus'])->name('toggle-status');
+                });
+
+                Route::prefix('cancel-reasons')->name('cancel-reasons.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'index'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'create'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'store'])->name('store');
+                    Route::get('/{cancel_reason}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'edit'])->name('edit');
+                    Route::patch('/{cancel_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'update'])->name('update');
+                    Route::delete('/{cancel_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{cancel_reason}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'toggleStatus'])->name('toggle-status');
+                });
+
+                Route::prefix('rejection-reasons')->name('rejection-reasons.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'index'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'create'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'store'])->name('store');
+                    Route::get('/{rejection_reason}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'edit'])->name('edit');
+                    Route::patch('/{rejection_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'update'])->name('update');
+                    Route::delete('/{rejection_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{rejection_reason}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'toggleStatus'])->name('toggle-status');
+                });
+
+                Route::prefix('return-reasons')->name('return-reasons.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'index'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'create'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'store'])->name('store');
+                    Route::get('/{return_reason}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'edit'])->name('edit');
+                    Route::patch('/{return_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'update'])->name('update');
+                    Route::delete('/{return_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{return_reason}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'toggleStatus'])->name('toggle-status');
+                });
+
+                Route::prefix('states')->name('states.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'index'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'create'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'store'])->name('store');
+                    Route::get('/{state}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'edit'])->name('edit');
+                    Route::patch('/{state}', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'update'])->name('update');
+                    Route::delete('/{state}', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{state}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'toggle'])->name('toggle-status');
+                });
+
+                // routes/admin.php (أو اللي عندك بتسجل فيه routes بتاعت الـ admin)
+                Route::prefix('zones')->name('zones.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'index'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'create'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'store'])->name('store');
+                    Route::get('/{zone}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'edit'])->name('edit');
+                    Route::patch('/{zone}', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'update'])->name('update');
+                    Route::delete('/{zone}', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{zone}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'toggle'])->name('toggle-status');
+                });
+
+
+
+                // Company Coverage Management
+                Route::get('/company-coverages', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'index'])->name('company-coverages.index');
+                Route::get('/company-coverages/create', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'create'])->name('company-coverages.create');
+                Route::post('/company-coverages', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'store'])->name('company-coverages.store');
+                Route::get('/company-coverages/{companyCoverage}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'edit'])->name('company-coverages.edit');
+                Route::patch('/company-coverages/{companyCoverage}', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'update'])->name('company-coverages.update');
+                Route::delete('/company-coverages/{companyCoverage}', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'destroy'])->name('company-coverages.destroy');
+                Route::patch('/company-coverages/{companyCoverage}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'toggleStatus'])->name('company-coverages.toggle-status');
+
+                // Consignment Type Management
+                Route::get('/consignment-types', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'index'])->name('consignment-types.index');
+                Route::get('/consignment-types/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'create'])->name('consignment-types.create');
+                Route::post('/consignment-types', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'store'])->name('consignment-types.store');
+                Route::get('/consignment-types/{consignmentType}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'edit'])->name('consignment-types.edit');
+                Route::patch('/consignment-types/{consignmentType}', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'update'])->name('consignment-types.update');
+                Route::delete('/consignment-types/{consignmentType}', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'destroy'])->name('consignment-types.destroy');
+                Route::patch('/consignment-types/{consignmentType}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'toggleStatus'])->name('consignment-types.toggle-status');
+
+                // Delivery Type Management
+                Route::get('/delivery-types', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'index'])->name('delivery-types.index');
+                Route::get('/delivery-types/create', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'create'])->name('delivery-types.create');
+                Route::post('/delivery-types', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'store'])->name('delivery-types.store');
+                Route::get('/delivery-types/{deliveryType}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'edit'])->name('delivery-types.edit');
+                Route::patch('/delivery-types/{deliveryType}', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'update'])->name('delivery-types.update');
+                Route::delete('/delivery-types/{deliveryType}', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'destroy'])->name('delivery-types.destroy');
+                Route::patch('/delivery-types/{deliveryType}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'toggleStatus'])->name('delivery-types.toggle-status');
+
+                Route::prefix('transport-types')->name('transport-types.')->group(function () {
+                    Route::get('/', [TransportTypeController::class, 'index'])->name('index');
+                    Route::get('/create', [TransportTypeController::class, 'create'])->name('create');
+                    Route::post('/', [TransportTypeController::class, 'store'])->name('store');
+                    Route::get('/{transportType}/edit', [TransportTypeController::class, 'edit'])->name('edit');
+                    Route::patch('/{transportType}', [TransportTypeController::class, 'update'])->name('update');
+                    Route::delete('/{transportType}', [TransportTypeController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{transportType}/toggle-status', [TransportTypeController::class, 'toggleStatus'])->name('toggle-status');
+                });
+
+                Route::prefix('representative-work-types')->name('representative-work-types.')->group(function () {
+                    Route::get('/', [RepresentativeWorkTypeController::class, 'index'])->name('index');
+                    Route::get('/create', [RepresentativeWorkTypeController::class, 'create'])->name('create');
+                    Route::post('/', [RepresentativeWorkTypeController::class, 'store'])->name('store');
+                    Route::get('/{representativeWorkType}/edit', [RepresentativeWorkTypeController::class, 'edit'])->name('edit');
+                    Route::patch('/{representativeWorkType}', [RepresentativeWorkTypeController::class, 'update'])->name('update');
+                    Route::delete('/{representativeWorkType}', [RepresentativeWorkTypeController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{representativeWorkType}/toggle-status', [RepresentativeWorkTypeController::class, 'toggleStatus'])->name('toggle-status');
+                });
+
+                Route::prefix('representatives')->name('representatives.')->group(function () {
+                    Route::get('/', [RepresentativeController::class, 'index'])->name('index');
+                    Route::get('/{representative}', [RepresentativeController::class, 'show'])->name('show');
+                    Route::post('/{representative}/approve', [RepresentativeController::class, 'approve'])->name('approve');
+                    Route::post('/{representative}/reject', [RepresentativeController::class, 'reject'])->name('reject');
+                    Route::post('/{representative}/suspend', [RepresentativeController::class, 'suspend'])->name('suspend');
+                    Route::post('/{representative}/reactivate', [RepresentativeController::class, 'reactivate'])->name('reactivate');
+                });
+
+                // Page Management
+                Route::get('/pages', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'index'])->name('pages.index');
+                Route::get('/pages/create', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'create'])->name('pages.create');
+                Route::post('/pages', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'store'])->name('pages.store');
+                Route::get('/pages/types/{type}/history', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'history'])->name('pages.history');
+                Route::get('/pages/{page}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'edit'])->name('pages.edit');
+                Route::patch('/pages/{page}', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'update'])->name('pages.update');
+                Route::delete('/pages/{page}', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'destroy'])->name('pages.destroy');
+                Route::patch('/pages/{page}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'toggleStatus'])->name('pages.toggle-status');
+
+                // WhatsApp Templates Management
+                Route::get('/whatsapp-templates', [\App\Http\Controllers\Dashboard\Admin\Settings\WhatsappTemplateController::class, 'index'])->name('whatsapp-templates.index');
+                Route::patch('/whatsapp-templates', [\App\Http\Controllers\Dashboard\Admin\Settings\WhatsappTemplateController::class, 'update'])->name('whatsapp-templates.update');
+
+                // Courier Failure Messages (Sections 3 & 4)
+                Route::get('/courier-failure-messages', [\App\Http\Controllers\Dashboard\Admin\Settings\CourierFailureMessageController::class, 'index'])->name('courier-failure-messages.index');
+                Route::patch('/courier-failure-messages', [\App\Http\Controllers\Dashboard\Admin\Settings\CourierFailureMessageController::class, 'update'])->name('courier-failure-messages.update');
+
+                // Shipping Timers (cron jobs X/Y/Z/N/W)
+                Route::get('/shipping-timers', [\App\Http\Controllers\Dashboard\Admin\Settings\ShippingTimerSettingController::class, 'index'])->name('shipping-timers.index');
+                Route::patch('/shipping-timers', [\App\Http\Controllers\Dashboard\Admin\Settings\ShippingTimerSettingController::class, 'update'])->name('shipping-timers.update');
+                Route::post('/shipping-timers/reset', [\App\Http\Controllers\Dashboard\Admin\Settings\ShippingTimerSettingController::class, 'reset'])->name('shipping-timers.reset');
+
+                // Product Size Management
+                Route::get('/product-sizes', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'index'])->name('product-sizes.index');
+                Route::get('/product-sizes/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'create'])->name('product-sizes.create');
+                Route::post('/product-sizes', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'store'])->name('product-sizes.store');
+                Route::get('/product-sizes/{productSize}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'edit'])->name('product-sizes.edit');
+                Route::patch('/product-sizes/{productSize}', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'update'])->name('product-sizes.update');
+                Route::delete('/product-sizes/{productSize}', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'destroy'])->name('product-sizes.destroy');
+                Route::patch('/product-sizes/{productSize}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'toggleStatus'])->name('product-sizes.toggle-status');
+
+                // Size Management
+                Route::get('/sizes', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'index'])->name('sizes.index');
+                Route::get('/sizes/create', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'create'])->name('sizes.create');
+                Route::post('/sizes', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'store'])->name('sizes.store');
+                Route::get('/sizes/{size}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'edit'])->name('sizes.edit');
+                Route::patch('/sizes/{size}', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'update'])->name('sizes.update');
+                Route::delete('/sizes/{size}', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'destroy'])->name('sizes.destroy');
+                Route::patch('/sizes/{size}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'toggleStatus'])->name('sizes.toggle-status');
+
+                // Colors Management
+                Route::get('/colors', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'index'])->name('colors.index');
+                Route::get('/colors/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'create'])->name('colors.create');
+                Route::post('/colors', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'store'])->name('colors.store');
+                Route::get('/colors/{color}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'edit'])->name('colors.edit');
+                Route::patch('/colors/{color}', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'update'])->name('colors.update');
+                Route::delete('/colors/{color}', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'destroy'])->name('colors.destroy');
+                Route::patch('/colors/{color}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'toggleStatus'])->name('colors.toggle-status');
+
+
+                // Price Per KM Settings Management
+                Route::prefix('price-per-km')->name('price-per-km.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\SettingController::class, 'index'])->name('index');
+                    Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\SettingController::class, 'store'])->name('store');
+                    Route::patch('/{setting}', [\App\Http\Controllers\Dashboard\Admin\Settings\SettingController::class, 'update'])->name('update');
+                });
+                // routes/admin.php أو web.php داخل مجموعة admin
+                Route::prefix('warehouses')->name('warehouses.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'index'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'create'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'store'])->name('store');
+                    Route::get('/{warehouse}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'edit'])->name('edit');
+                    Route::patch('/{warehouse}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'update'])->name('update');
+                    Route::patch('/{warehouse}/business-profile', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseBusinessProfileController::class, 'upsert'])->name('business-profile.upsert');
+                    Route::patch('/{warehouse}/business-profile/approve', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseBusinessProfileController::class, 'approve'])->name('business-profile.approve');
+                    Route::patch('/{warehouse}/business-profile/reject', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseBusinessProfileController::class, 'reject'])->name('business-profile.reject');
+                    Route::delete('/{warehouse}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'destroy'])->name('destroy');
+                    Route::patch('/{warehouse}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'toggleStatus'])->name('toggle-status');
+                });
+                Route::get('/get-states/{country}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getStates'])->name('get-states');
+                Route::get('/get-cities/{governorate}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getCities'])->name('get-cities');
+                Route::get('/get-zones/{city}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getZones'])->name('get-zones');
+                
+                // 👇 YOUR NEW 5 ROUTES HAVE BEEN ADDED HERE 👇
+                Route::get('/website-content', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'websiteContentPage'])->name('website-content');
+                Route::resource('metw-services', MetwServiceController::class)->names('metw-services');
+                Route::resource('metw-apps', MetwAppController::class)->names('metw-apps');
+                Route::resource('metw-galleries', MetwGalleryController::class)->names('metw-galleries');
+                Route::resource('metw-contacts', MetwContactController::class)->names('metw-contacts');
+                Route::resource('metw-policy-links', MetwPolicyLinkController::class)->names('metw-policy-links');
             });
-
-            Route::prefix('cities')->name('cities.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'store'])->name('store');
-                Route::get('/{city}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'edit'])->name('edit');
-                Route::patch('/{city}', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'update'])->name('update');
-                Route::delete('/{city}', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'destroy'])->name('destroy');
-                Route::patch('/{city}/toggle', [\App\Http\Controllers\Dashboard\Admin\Settings\CityController::class, 'toggle'])->name('toggle-status');
-            });
-
-
-            Route::prefix('countries')->name('countries.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'store'])->name('store');
-                Route::get('/{country}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'edit'])->name('edit');
-                Route::patch('/{country}', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'update'])->name('update');
-                Route::delete('/{country}', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'destroy'])->name('destroy');
-                Route::patch('/{country}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\CountryController::class, 'toggleStatus'])->name('toggle-status');
-            });
-
-            Route::prefix('cancel-reasons')->name('cancel-reasons.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'store'])->name('store');
-                Route::get('/{cancel_reason}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'edit'])->name('edit');
-                Route::patch('/{cancel_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'update'])->name('update');
-                Route::delete('/{cancel_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'destroy'])->name('destroy');
-                Route::patch('/{cancel_reason}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\CancelReasonsController::class, 'toggleStatus'])->name('toggle-status');
-            });
-
-            Route::prefix('rejection-reasons')->name('rejection-reasons.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'store'])->name('store');
-                Route::get('/{rejection_reason}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'edit'])->name('edit');
-                Route::patch('/{rejection_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'update'])->name('update');
-                Route::delete('/{rejection_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'destroy'])->name('destroy');
-                Route::patch('/{rejection_reason}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\RejectionReasonsController::class, 'toggleStatus'])->name('toggle-status');
-            });
-
-            Route::prefix('return-reasons')->name('return-reasons.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'store'])->name('store');
-                Route::get('/{return_reason}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'edit'])->name('edit');
-                Route::patch('/{return_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'update'])->name('update');
-                Route::delete('/{return_reason}', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'destroy'])->name('destroy');
-                Route::patch('/{return_reason}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ReturnReasonsController::class, 'toggleStatus'])->name('toggle-status');
-            });
-
-            Route::prefix('states')->name('states.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'store'])->name('store');
-                Route::get('/{state}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'edit'])->name('edit');
-                Route::patch('/{state}', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'update'])->name('update');
-                Route::delete('/{state}', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'destroy'])->name('destroy');
-                Route::patch('/{state}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\StateController::class, 'toggle'])->name('toggle-status');
-            });
-
-            // routes/admin.php (أو اللي عندك بتسجل فيه routes بتاعت الـ admin)
-            Route::prefix('zones')->name('zones.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'store'])->name('store');
-                Route::get('/{zone}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'edit'])->name('edit');
-                Route::patch('/{zone}', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'update'])->name('update');
-                Route::delete('/{zone}', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'destroy'])->name('destroy');
-                Route::patch('/{zone}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ZoneController::class, 'toggle'])->name('toggle-status');
-            });
-
-
-
-            // Company Coverage Management
-            Route::get('/company-coverages', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'index'])->name('company-coverages.index');
-            Route::get('/company-coverages/create', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'create'])->name('company-coverages.create');
-            Route::post('/company-coverages', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'store'])->name('company-coverages.store');
-            Route::get('/company-coverages/{companyCoverage}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'edit'])->name('company-coverages.edit');
-            Route::patch('/company-coverages/{companyCoverage}', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'update'])->name('company-coverages.update');
-            Route::delete('/company-coverages/{companyCoverage}', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'destroy'])->name('company-coverages.destroy');
-            Route::patch('/company-coverages/{companyCoverage}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\CompanyCoverageController::class, 'toggleStatus'])->name('company-coverages.toggle-status');
-
-            // Consignment Type Management
-            Route::get('/consignment-types', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'index'])->name('consignment-types.index');
-            Route::get('/consignment-types/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'create'])->name('consignment-types.create');
-            Route::post('/consignment-types', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'store'])->name('consignment-types.store');
-            Route::get('/consignment-types/{consignmentType}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'edit'])->name('consignment-types.edit');
-            Route::patch('/consignment-types/{consignmentType}', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'update'])->name('consignment-types.update');
-            Route::delete('/consignment-types/{consignmentType}', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'destroy'])->name('consignment-types.destroy');
-            Route::patch('/consignment-types/{consignmentType}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ConsignmentTypeController::class, 'toggleStatus'])->name('consignment-types.toggle-status');
-
-            // Delivery Type Management
-            Route::get('/delivery-types', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'index'])->name('delivery-types.index');
-            Route::get('/delivery-types/create', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'create'])->name('delivery-types.create');
-            Route::post('/delivery-types', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'store'])->name('delivery-types.store');
-            Route::get('/delivery-types/{deliveryType}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'edit'])->name('delivery-types.edit');
-            Route::patch('/delivery-types/{deliveryType}', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'update'])->name('delivery-types.update');
-            Route::delete('/delivery-types/{deliveryType}', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'destroy'])->name('delivery-types.destroy');
-            Route::patch('/delivery-types/{deliveryType}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\DeliveryTypeController::class, 'toggleStatus'])->name('delivery-types.toggle-status');
-
-            Route::prefix('transport-types')->name('transport-types.')->group(function () {
-                Route::get('/', [TransportTypeController::class, 'index'])->name('index');
-                Route::get('/create', [TransportTypeController::class, 'create'])->name('create');
-                Route::post('/', [TransportTypeController::class, 'store'])->name('store');
-                Route::get('/{transportType}/edit', [TransportTypeController::class, 'edit'])->name('edit');
-                Route::patch('/{transportType}', [TransportTypeController::class, 'update'])->name('update');
-                Route::delete('/{transportType}', [TransportTypeController::class, 'destroy'])->name('destroy');
-                Route::patch('/{transportType}/toggle-status', [TransportTypeController::class, 'toggleStatus'])->name('toggle-status');
-            });
-
-            Route::prefix('representative-work-types')->name('representative-work-types.')->group(function () {
-                Route::get('/', [RepresentativeWorkTypeController::class, 'index'])->name('index');
-                Route::get('/create', [RepresentativeWorkTypeController::class, 'create'])->name('create');
-                Route::post('/', [RepresentativeWorkTypeController::class, 'store'])->name('store');
-                Route::get('/{representativeWorkType}/edit', [RepresentativeWorkTypeController::class, 'edit'])->name('edit');
-                Route::patch('/{representativeWorkType}', [RepresentativeWorkTypeController::class, 'update'])->name('update');
-                Route::delete('/{representativeWorkType}', [RepresentativeWorkTypeController::class, 'destroy'])->name('destroy');
-                Route::patch('/{representativeWorkType}/toggle-status', [RepresentativeWorkTypeController::class, 'toggleStatus'])->name('toggle-status');
-            });
-
-            Route::prefix('representatives')->name('representatives.')->group(function () {
-                Route::get('/', [RepresentativeController::class, 'index'])->name('index');
-                Route::get('/{representative}', [RepresentativeController::class, 'show'])->name('show');
-                Route::post('/{representative}/approve', [RepresentativeController::class, 'approve'])->name('approve');
-                Route::post('/{representative}/reject', [RepresentativeController::class, 'reject'])->name('reject');
-                Route::post('/{representative}/suspend', [RepresentativeController::class, 'suspend'])->name('suspend');
-                Route::post('/{representative}/reactivate', [RepresentativeController::class, 'reactivate'])->name('reactivate');
-            });
-
-            // Page Management
-            Route::get('/pages', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'index'])->name('pages.index');
-            Route::get('/pages/create', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'create'])->name('pages.create');
-            Route::post('/pages', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'store'])->name('pages.store');
-            Route::get('/pages/types/{type}/history', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'history'])->name('pages.history');
-            Route::get('/pages/{page}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'edit'])->name('pages.edit');
-            Route::patch('/pages/{page}', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'update'])->name('pages.update');
-            Route::delete('/pages/{page}', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'destroy'])->name('pages.destroy');
-            Route::patch('/pages/{page}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\PageController::class, 'toggleStatus'])->name('pages.toggle-status');
-
-            // WhatsApp Templates Management
-            Route::get('/whatsapp-templates', [\App\Http\Controllers\Dashboard\Admin\Settings\WhatsappTemplateController::class, 'index'])->name('whatsapp-templates.index');
-            Route::patch('/whatsapp-templates', [\App\Http\Controllers\Dashboard\Admin\Settings\WhatsappTemplateController::class, 'update'])->name('whatsapp-templates.update');
-
-            // Courier Failure Messages (Sections 3 & 4)
-            Route::get('/courier-failure-messages', [\App\Http\Controllers\Dashboard\Admin\Settings\CourierFailureMessageController::class, 'index'])->name('courier-failure-messages.index');
-            Route::patch('/courier-failure-messages', [\App\Http\Controllers\Dashboard\Admin\Settings\CourierFailureMessageController::class, 'update'])->name('courier-failure-messages.update');
-
-            // Shipping Timers (cron jobs X/Y/Z/N/W)
-            Route::get('/shipping-timers', [\App\Http\Controllers\Dashboard\Admin\Settings\ShippingTimerSettingController::class, 'index'])->name('shipping-timers.index');
-            Route::patch('/shipping-timers', [\App\Http\Controllers\Dashboard\Admin\Settings\ShippingTimerSettingController::class, 'update'])->name('shipping-timers.update');
-            Route::post('/shipping-timers/reset', [\App\Http\Controllers\Dashboard\Admin\Settings\ShippingTimerSettingController::class, 'reset'])->name('shipping-timers.reset');
-
-            // Product Size Management
-            Route::get('/product-sizes', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'index'])->name('product-sizes.index');
-            Route::get('/product-sizes/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'create'])->name('product-sizes.create');
-            Route::post('/product-sizes', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'store'])->name('product-sizes.store');
-            Route::get('/product-sizes/{productSize}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'edit'])->name('product-sizes.edit');
-            Route::patch('/product-sizes/{productSize}', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'update'])->name('product-sizes.update');
-            Route::delete('/product-sizes/{productSize}', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'destroy'])->name('product-sizes.destroy');
-            Route::patch('/product-sizes/{productSize}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'toggleStatus'])->name('product-sizes.toggle-status');
-
-            // Size Management
-            Route::get('/sizes', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'index'])->name('sizes.index');
-            Route::get('/sizes/create', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'create'])->name('sizes.create');
-            Route::post('/sizes', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'store'])->name('sizes.store');
-            Route::get('/sizes/{size}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'edit'])->name('sizes.edit');
-            Route::patch('/sizes/{size}', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'update'])->name('sizes.update');
-            Route::delete('/sizes/{size}', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'destroy'])->name('sizes.destroy');
-            Route::patch('/sizes/{size}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\SizeController::class, 'toggleStatus'])->name('sizes.toggle-status');
-
-            // Colors Management
-            Route::get('/colors', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'index'])->name('colors.index');
-            Route::get('/colors/create', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'create'])->name('colors.create');
-            Route::post('/colors', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'store'])->name('colors.store');
-            Route::get('/colors/{color}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'edit'])->name('colors.edit');
-            Route::patch('/colors/{color}', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'update'])->name('colors.update');
-            Route::delete('/colors/{color}', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'destroy'])->name('colors.destroy');
-            Route::patch('/colors/{color}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductColorController::class, 'toggleStatus'])->name('colors.toggle-status');
-
-
-            // Price Per KM Settings Management
-            Route::prefix('price-per-km')->name('price-per-km.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\SettingController::class, 'index'])->name('index');
-                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\SettingController::class, 'store'])->name('store');
-                Route::patch('/{setting}', [\App\Http\Controllers\Dashboard\Admin\Settings\SettingController::class, 'update'])->name('update');
-            });
-            // routes/admin.php أو web.php داخل مجموعة admin
-            Route::prefix('warehouses')->name('warehouses.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'store'])->name('store');
-                Route::get('/{warehouse}/edit', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'edit'])->name('edit');
-                Route::patch('/{warehouse}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'update'])->name('update');
-                Route::patch('/{warehouse}/business-profile', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseBusinessProfileController::class, 'upsert'])->name('business-profile.upsert');
-                Route::patch('/{warehouse}/business-profile/approve', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseBusinessProfileController::class, 'approve'])->name('business-profile.approve');
-                Route::patch('/{warehouse}/business-profile/reject', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseBusinessProfileController::class, 'reject'])->name('business-profile.reject');
-                Route::delete('/{warehouse}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'destroy'])->name('destroy');
-                Route::patch('/{warehouse}/toggle-status', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'toggleStatus'])->name('toggle-status');
-            });
-            Route::get('/get-states/{country}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getStates'])->name('get-states');
-            Route::get('/get-cities/{governorate}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getCities'])->name('get-cities');
-            Route::get('/get-zones/{city}', [\App\Http\Controllers\Dashboard\Admin\Settings\WarehouseController::class, 'getZones'])->name('get-zones');
-        });
 
         Route::prefix('representatives')->name('representatives.')->group(function () {
             Route::get('/', [RepresentativeController::class, 'index'])->name('index');

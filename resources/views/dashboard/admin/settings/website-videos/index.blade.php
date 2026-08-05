@@ -3,14 +3,17 @@
 @section('title', 'فيديوهات الموقع')
 @section('page-title', 'فيديوهات الموقع')
 
-@section('page-actions')
-    <a href="{{ route('admin.settings.website-videos.create') }}" class="btn btn-primary">
-        <i class="fas fa-plus"></i> إضافة فيديو جديد
-    </a>
-@endsection
-
 @section('content')
-    <div class="card shadow-sm border-0 data-card">
+@component('dashboard.admin.settings.partials.module-shell', [
+    'kicker' => 'إدارة محتوى الموقع',
+    'title' => 'فيديوهات الموقع',
+    'description' => 'إدارة الفيديوهات التي تظهر في الصفحة العامة بأسلوب موحد وواضح.',
+    'actions' => [
+        ['label' => 'محتوى الموقع', 'url' => route('admin.settings.website-content'), 'icon' => 'fas fa-arrow-right', 'class' => 'btn-outline-secondary'],
+        ['label' => 'إضافة فيديو جديد', 'url' => route('admin.settings.website-videos.create'), 'icon' => 'fas fa-plus', 'class' => 'btn-primary'],
+    ],
+])
+    <div class="settings-content-card">
         <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">فيديوهات الموقع</h5>
             <span class="badge rounded-pill text-bg-light border text-muted px-3 py-2">
@@ -103,4 +106,5 @@
             @endif
         </div>
     </div>
+@endcomponent
 @endsection
