@@ -196,6 +196,34 @@
                 'url' => $routeOrNull('admin.settings.cities.index'),
             ],
         ];
+
+        $monthlyRevenueRows = collect($monthly_revenue['shipment'] ?? [])
+            ->merge($monthly_revenue['ecommerce'] ?? [])
+            ->filter(fn ($item) => isset($item->year, $item->month))
+            ->map(fn ($item) => ['y' => (int) $item->year, 'm' => (int) $item->month, 'total' => (float) ($item->total ?? 0)]);
+
+        $revenueMonths = collect(range(11, 0))->map(fn ($i) => now()->subMonths($i))->values();
+
+        $revenueShipment = $revenueMonths->map(function ($date) use ($monthlyRevenueRows) {
+            return $monthlyRevenueRows->firstWhere(fn ($r) => $r['y'] === (int) $date->year && $r['m'] === (int) $date->month)['total'] ?? 0;
+        });
+
+        $revenueEcommerce = $revenueMonths->map(function ($date) use ($monthlyRevenueRows) {
+            return $monthlyRevenueRows->firstWhere(fn ($r) => $r['y'] === (int) $date->year && $r['m'] === (int) $date->month)['total'] ?? 0;
+        });
+
+        $revenueLabels = $revenueMonths->map(fn ($date) => $date->translatedFormat('M y'));
+
+        $charts = $charts ?? [];
+
+        $chartSeries = fn (string $key, string $fallbackLabel) => collect($charts[$key] ?? [])
+            ->map(fn ($item) => [
+                'label' => $label('admin-dashboard.status_' . ($item['label'] ?? 'unknown'), $fallbackLabel . ': ' . ($item['label'] ?? 'unknown')),
+                'value' => (int) ($item['value'] ?? 0),
+            ])
+            ->filter(fn ($item) => $item['value'] > 0)
+            ->values()
+            ->all();
     @endphp
 
     <div class="admin-dashboard-page">
@@ -315,6 +343,102 @@
         </section>
 
         <section class="dashboard-section mb-4">
+            <div class="section-heading section-heading-inline">
+                <div>
+                    <span class="section-kicker">{{ $text('Analytics', 'التحليلات') }}</span>
+                    <h2>{{ $text('Charts & Insights', 'الرسوم البيانية والمؤشرات') }}</h2>
+                    <p>{{ $text('Revenue over the last 12 months and the current distribution of orders and requests.', 'الإيرادات خلال آخر 12 شهرًا والتوزيع الحالي للطلبات وطلبات الشحن.') }}</p>
+                </div>
+            </div>
+
+            <div class="dashboard-charts-grid">
+                <div class="chart-panel chart-panel-lg">
+                    <div class="chart-panel-head">
+                        <div>
+                            <span class="chart-panel-title">{{ $text('Monthly Revenue', 'الإيرادات الشهرية') }}</span>
+                            <small>{{ $text('Shipment vs ecommerce revenue', 'إيرادات الشحن مقابل إيرادات المتجر') }}</small>
+                        </div>
+                    </div>
+                    <div class="chart-panel-body">
+                        <canvas id="adminRevenueChart"
+                            data-shipment='@json($revenueShipment)'
+                            data-ecommerce='@json($revenueEcommerce)'
+                            data-labels='@json($revenueLabels)'
+                            data-shipment-label="{{ $text('Shipment Revenue', 'إيرادات الشحن') }}"
+                            data-ecommerce-label="{{ $text('Ecommerce Revenue', 'إيرادات المتجر') }}"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-panel">
+                    <div class="chart-panel-head">
+                        <div>
+                            <span class="chart-panel-title">{{ $text('Orders by Status', 'الطلبات حسب الحالة') }}</span>
+                            <small>{{ $text('Shipping orders', 'طلبات الشحن') }}</small>
+                        </div>
+                    </div>
+                    <div class="chart-panel-body chart-panel-doughnut">
+                        <canvas id="adminOrdersStatusChart" data-series='@json($chartSeries('orders_by_status', 'Order'))'></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-charts-grid">
+                <div class="chart-panel">
+                    <div class="chart-panel-head">
+                        <div>
+                            <span class="chart-panel-title">{{ $text('Ecommerce Orders', 'طلبات المتجر') }}</span>
+                            <small>{{ $text('By status', 'حسب الحالة') }}</small>
+                        </div>
+                    </div>
+                    <div class="chart-panel-body chart-panel-doughnut">
+                        <canvas id="adminEcommerceStatusChart" data-series='@json($chartSeries('ecommerce_orders_by_status', 'Ecommerce'))'></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-panel">
+                    <div class="chart-panel-head">
+                        <div>
+                            <span class="chart-panel-title">{{ $text('Shipment Requests', 'طلبات الشحن') }}</span>
+                            <small>{{ $text('By status', 'حسب الحالة') }}</small>
+                        </div>
+                    </div>
+                    <div class="chart-panel-body chart-panel-doughnut">
+                        <canvas id="adminShipmentRequestsStatusChart" data-series='@json($chartSeries('shipment_requests_by_status', 'Shipment request'))'></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-panel">
+                    <div class="chart-panel-head">
+                        <div>
+                            <span class="chart-panel-title">{{ $text('Representatives', 'المندوبون') }}</span>
+                            <small>{{ $text('By status', 'حسب الحالة') }}</small>
+                        </div>
+                    </div>
+                    <div class="chart-panel-body chart-panel-doughnut">
+                        <canvas id="adminRepresentativesStatusChart" data-series='@json($chartSeries('representatives_by_status', 'Representative'))'></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-panel chart-panel-lg">
+                <div class="chart-panel-head">
+                    <div>
+                        <span class="chart-panel-title">{{ $text('Last 7 Days Activity', 'نشاط آخر 7 أيام') }}</span>
+                        <small>{{ $text('New users, orders, ecommerce orders and shipment requests per day.', 'المستخدمون والطلبات وطلبات المتجر وطلبات الشحن الجديدة يوميًا.') }}</small>
+                    </div>
+                </div>
+                <div class="chart-panel-body">
+                    <canvas id="adminDailyChart"
+                        data-users='@json($charts['daily_users']['values'] ?? [])'
+                        data-orders='@json($charts['daily_orders']['values'] ?? [])'
+                        data-ecommerce='@json($charts['daily_ecommerce_orders']['values'] ?? [])'
+                        data-shipments='@json($charts['daily_shipment_requests']['values'] ?? [])'
+                        data-labels='@json($charts['daily_users']['labels'] ?? [])'></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-section mb-4">
             <div class="section-heading">
                 <div>
                     <span class="section-kicker">{{ $text('Navigation', 'التنقل') }}</span>
@@ -350,9 +474,9 @@
         <section class="dashboard-section mb-4">
             <div class="section-heading section-heading-inline">
                 <div>
-                    <span class="section-kicker">{{ $text('Warehouse control', 'Ø§Ù„ØªØ­ÙƒÙ… ÙÙŠ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª') }}</span>
-                    <h2>{{ $text('Warehouse Command Center', 'Ù…Ø±ÙƒØ² Ø§Ù„ØªØ­ÙƒÙ… ÙÙŠ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª') }}</h2>
-                    <p>{{ $text('Create warehouses, open the management page, and keep the main warehouse under control from one place.', 'Ø£Ù†Ø´Ø¦ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§ØªØŒ ÙˆØ§ÙØªØ­ ØµÙØ­Ø© Ø§Ù„Ø¥Ø¯Ø§Ø±Ø©ØŒ ÙˆØªØ­ÙƒÙ… ÙÙŠ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ Ù…Ù† Ù…ÙƒØ§Ù† ÙˆØ§Ø­Ø¯.') }}</p>
+                    <span class="section-kicker">{{ $text('Warehouse control', 'التحكم في المستودعات') }}</span>
+                    <h2>{{ $text('Warehouse Command Center', 'مركز التحكم في المستودعات') }}</h2>
+                    <p>{{ $text('Create warehouses, open the management page, and keep the main warehouse under control from one place.', 'أنشئ المستودعات، وافتح صفحة الإدارة، وتحكم في المستودع الرئيسي من مكان واحد.') }}</p>
                 </div>
             </div>
 
@@ -360,13 +484,13 @@
                 <div class="warehouse-control-panel">
                     <div class="warehouse-control-panel-top">
                         <div>
-                            <span class="warehouse-control-eyebrow">{{ $text('Operations', 'Ø§Ù„Ø¹Ù…Ù„ÙŠØ§Øª') }}</span>
-                            <h3 class="warehouse-control-title">{{ $text('Manage the active warehouse footprint', 'Ø¥Ø¯Ø§Ø±Ø© ÙØ·Ø§Ù‚ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª Ø§Ù„Ù†Ø´Ø·Ø©') }}</h3>
-                            <p class="warehouse-control-text">{{ $text('Review the current warehouse setup, promote the main warehouse, and jump straight to create or edit flows.', 'Ø±Ø§Ø¬Ø¹ Ù…Ø¹Ø¯Ù„ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§ØªØŒ ÙˆØ±Ù‚Ù‘ Ù„Ù„Ù…Ø³ØªÙˆØ¯Ø¹ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØŒ ÙˆØ§Ù†ØªÙ‚Ù„ Ù…Ø¨Ø§Ø´Ø±Ø© Ø¥Ù„Ù‰ Ø¥Ù†Ø´Ø§Ø¡ Ø£Ùˆ ØªØ¹Ø¯ÙŠÙ„ Ù…Ø³ØªÙˆØ¯Ø¹.') }}</p>
+                            <span class="warehouse-control-eyebrow">{{ $text('Operations', 'العمليات') }}</span>
+                            <h3 class="warehouse-control-title">{{ $text('Manage the active warehouse footprint', 'إدارة نطاق المستودعات النشطة') }}</h3>
+                            <p class="warehouse-control-text">{{ $text('Review the current warehouse setup, promote the main warehouse, and jump straight to create or edit flows.', 'راجع معدل المستودعات، ورقّ للمستودع الرئيسي، وانتقل مباشرة إلى إنشاء أو تعديل مستودع.') }}</p>
                         </div>
                         <div class="warehouse-control-badge">
                             <i class="fas fa-warehouse"></i>
-                            <span>{{ $text('Dashboard ready', 'Ø¬Ø§Ù‡Ø² ÙÙŠ Ø§Ù„Ù„ÙˆØ­Ø©') }}</span>
+                            <span>{{ $text('Dashboard ready', 'جاهز في اللوحة') }}</span>
                         </div>
                     </div>
 
@@ -374,21 +498,21 @@
                         @if (!empty($warehouseControl['manage_url']))
                             <a href="{{ $warehouseControl['manage_url'] }}" class="btn btn-dark warehouse-action-btn">
                                 <i class="fas fa-sliders-h"></i>
-                                <span>{{ $text('Manage warehouses', 'Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª') }}</span>
+                                <span>{{ $text('Manage warehouses', 'إدارة المستودعات') }}</span>
                             </a>
                         @endif
 
                         @if (!empty($warehouseControl['create_url']))
                             <a href="{{ $warehouseControl['create_url'] }}" class="btn btn-primary warehouse-action-btn">
                                 <i class="fas fa-plus"></i>
-                                <span>{{ $text('Add warehouse', 'Ø¥Ø¶Ø§ÙØ© Ù…Ø³ØªÙˆØ¯Ø¹') }}</span>
+                                <span>{{ $text('Add warehouse', 'إضافة مستودع') }}</span>
                             </a>
                         @endif
 
                         @if (!empty($warehouseControl['focus_url']))
                             <a href="{{ $warehouseControl['focus_url'] }}" class="btn btn-outline-primary warehouse-action-btn">
                                 <i class="fas fa-pen"></i>
-                                <span>{{ $text('Edit main warehouse', 'ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ') }}</span>
+                                <span>{{ $text('Edit main warehouse', 'تعديل المستودع الرئيسي') }}</span>
                             </a>
                         @endif
                     </div>
@@ -396,42 +520,42 @@
 
                 <div class="warehouse-control-stack">
                     <div class="warehouse-mini-card warehouse-mini-card-primary">
-                        <span>{{ $text('Total warehouses', 'Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª') }}</span>
+                        <span>{{ $text('Total warehouses', 'إجمالي المستودعات') }}</span>
                         <strong>{{ $safeNumber($warehouseControl['total'] ?? 0) }}</strong>
                     </div>
                     <div class="warehouse-mini-card warehouse-mini-card-success">
-                        <span>{{ $text('Main warehouses', 'Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹Ø§Øª Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©') }}</span>
+                        <span>{{ $text('Main warehouses', 'المستودعات الرئيسية') }}</span>
                         <strong>{{ $safeNumber($warehouseControl['main'] ?? 0) }}</strong>
                     </div>
                     <div class="warehouse-mini-card warehouse-mini-card-warning">
-                        <span>{{ $text('Profiles pending review', 'Ø§Ù„Ù…Ù„ÙØ§Øª ÙÙŠ Ø§Ù†ØªØ¸Ø§Ø± Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©') }}</span>
+                        <span>{{ $text('Profiles pending review', 'الملفات في انتظار المراجعة') }}</span>
                         <strong>{{ $safeNumber($warehouseControl['pending_profiles'] ?? 0) }}</strong>
                     </div>
                     <div class="warehouse-mini-card warehouse-mini-card-info">
-                        <span>{{ $text('Profiles approved', 'Ø§Ù„Ù…Ù„ÙØ§Øª Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø©') }}</span>
+                        <span>{{ $text('Profiles approved', 'الملفات المعتمدة') }}</span>
                         <strong>{{ $safeNumber($warehouseControl['approved_profiles'] ?? 0) }}</strong>
                     </div>
                 </div>
 
                 <div class="warehouse-control-focus">
                     <div class="warehouse-control-focus-header">
-                        <span class="warehouse-control-eyebrow">{{ $text('Current focus', 'Ø§Ù„ØªØ±ÙƒÙŠØ² Ø§Ù„Ø­Ø§Ù„ÙŠ') }}</span>
-                        <span class="warehouse-control-status">{{ !empty($warehouseControl['focus_name']) ? $text('Main warehouse', 'Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ') : $text('No main warehouse yet', 'Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ù…Ø³ØªÙˆØ¯Ø¹ Ø±Ø¦ÙŠØ³ÙŠ Ø¨Ø¹Ø¯') }}</span>
+                        <span class="warehouse-control-eyebrow">{{ $text('Current focus', 'التركيز الحالي') }}</span>
+                        <span class="warehouse-control-status">{{ !empty($warehouseControl['focus_name']) ? $text('Main warehouse', 'المستودع الرئيسي') : $text('No main warehouse yet', 'لا يوجد مستودع رئيسي بعد') }}</span>
                     </div>
                     @if (!empty($warehouseControl['focus_name']))
                         <h3 class="warehouse-control-focus-title">{{ $warehouseControl['focus_name'] }}</h3>
-                        <p class="warehouse-control-focus-text">{{ $warehouseControl['focus_location'] ?? $text('Location is not set yet.', 'Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…ÙˆÙ‚Ø¹ Ù…Ø­Ø¯Ø¯Ø© Ø¨Ø¹Ø¯.') }}</p>
+                        <p class="warehouse-control-focus-text">{{ $warehouseControl['focus_location'] ?? $text('Location is not set yet.', 'لا توجد موقع محدد بعد.') }}</p>
                         @if (!empty($warehouseControl['focus_url']))
                             <a href="{{ $warehouseControl['focus_url'] }}" class="btn btn-light warehouse-focus-btn">
                                 <i class="fas fa-location-arrow"></i>
-                                <span>{{ $text('Open warehouse profile', 'Ø§ÙØªØ­ Ù…Ù„Ù Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹') }}</span>
+                                <span>{{ $text('Open warehouse profile', 'افتح ملف المستودع') }}</span>
                             </a>
                         @endif
                     @else
                         <div class="empty-state-card warehouse-control-empty">
                             <i class="fas fa-warehouse"></i>
-                            <strong>{{ $text('No main warehouse is configured.', 'Ù„Ù… ÙŠØªÙ… ØªØ¹ÙŠÙŠÙ† Ù…Ø³ØªÙˆØ¯Ø¹ Ø±Ø¦ÙŠØ³ÙŠ Ø¨Ø¹Ø¯.') }}</strong>
-                            <span>{{ $text('Create a warehouse and mark it as main to keep order and shipment flows centered.', 'Ø£Ù†Ø´Ø¦ Ù…Ø³ØªÙˆØ¯Ø¹Ø§Ù‹ ÙˆØ§Ø¬Ø¹Ù„Ù‡ Ø±Ø¦ÙŠØ³ÙŠØ§Ù‹ Ù„ØªÙ†Ø¸ÙŠÙ… Ù…Ø³Ø§Ø± Ø§Ù„Ø·Ù„Ø¨Ø§Øª ÙˆØ§Ù„Ø´Ø­Ù†.') }}</span>
+                            <strong>{{ $text('No main warehouse is configured.', 'لم يتم تعيين مستودع رئيسي بعد.') }}</strong>
+                            <span>{{ $text('Create a warehouse and mark it as main to keep order and shipment flows centered.', 'أنشئ مستودعًا واجعله رئيسيًا لتنظيم مسار الطلبات والشحن.') }}</span>
                         </div>
                     @endif
                 </div>
@@ -1487,6 +1611,351 @@
                 height: 42px;
                 border-radius: 14px;
             }
+
+            .dashboard-charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dashboard-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .chart-panel {
+            background: var(--metw-surface);
+            border: 1px solid var(--metw-border);
+            border-radius: 20px;
+            box-shadow: var(--metw-shadow);
+            padding: 1.15rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .chart-panel-lg {
+            grid-column: span 2;
+        }
+
+        .chart-panel-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-panel-title {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--metw-text);
+        }
+
+        .chart-panel-head small {
+            display: block;
+            color: var(--metw-muted);
+            font-size: 0.78rem;
+            margin-top: 0.15rem;
+        }
+
+        .chart-panel-body {
+            position: relative;
+            flex: 1;
+            min-height: 240px;
+            height: 100%;
+        }
+
+        .chart-panel-lg .chart-panel-body {
+            min-height: 300px;
+        }
+
+        .chart-panel-doughnut {
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chart-panel canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
+        .chart-panel-doughnut canvas {
+            max-height: 200px;
+        }
+
+        @media (max-width: 768px) {
+            .chart-panel-lg {
+                grid-column: span 1;
+            }
         }
     </style>
+
+    <script data-page-script>
+        (function () {
+            if (typeof Chart === 'undefined') return;
+
+            var isRtl = (document.documentElement.getAttribute('dir') === 'rtl');
+            var baseColors = ['#2563eb', '#16a34a', '#f59e0b', '#dc2626', '#0891b2', '#7c3aed', '#db2777', '#65a30d', '#ea580c', '#0d9488', '#475569'];
+
+            function parseJson(value, fallback) {
+                try {
+                    var parsed = JSON.parse(value || '');
+                    return Array.isArray(parsed) ? parsed : fallback;
+                } catch (e) {
+                    return fallback;
+                }
+            }
+
+            function fillEmptyState(canvas) {
+                var parent = canvas.parentElement;
+                if (!parent || parent.querySelector('.chart-empty-state')) return;
+                var note = document.createElement('div');
+                note.className = 'chart-empty-state';
+                note.style.cssText = 'text-align:center;color:var(--metw-muted, #64748b);font-size:.85rem;padding:2rem 0;';
+                note.textContent = isRtl ? 'لا توجد بيانات كافية لعرض هذا الرسم.' : 'Not enough data to render this chart.';
+                canvas.style.display = 'none';
+                parent.appendChild(note);
+            }
+
+            function numberSeries(value, fallback) {
+                var arr = parseJson(value, fallback || []);
+                return arr.map(function (n) { return Number(n) || 0; });
+            }
+
+            function doughnutData(canvas) {
+                var rows = parseJson(canvas.dataset.series, []);
+                if (!rows.length) return null;
+                return {
+                    labels: rows.map(function (r) { return r.label || '—'; }),
+                    datasets: [{
+                        data: rows.map(function (r) { return Number(r.value) || 0; }),
+                        backgroundColor: rows.map(function (_, i) { return baseColors[i % baseColors.length]; }),
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                };
+            }
+
+            function doughnutOptions() {
+                return {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    rtl: isRtl,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            rtl: isRtl,
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                usePointStyle: true,
+                                padding: 12,
+                                color: '#475569',
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            rtl: isRtl,
+                            backgroundColor: '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            padding: 10,
+                            cornerRadius: 8
+                        }
+                    }
+                };
+            }
+
+            function buildRevenueChart() {
+                var canvas = document.querySelector('#mainContent #adminRevenueChart');
+                if (!canvas || canvas.dataset.chartBound === '1') return;
+
+                var labels = parseJson(canvas.dataset.labels, []);
+                var shipment = numberSeries(canvas.dataset.shipment);
+                var ecommerce = numberSeries(canvas.dataset.ecommerce);
+                if (!labels.length) { fillEmptyState(canvas); return; }
+
+                new Chart(canvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: canvas.dataset.shipmentLabel || 'Shipment Revenue',
+                                data: shipment,
+                                borderColor: '#2563eb',
+                                backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                                fill: true,
+                                tension: 0.35,
+                                borderWidth: 2.5,
+                                pointRadius: 3,
+                                pointHoverRadius: 5,
+                                pointBackgroundColor: '#2563eb'
+                            },
+                            {
+                                label: canvas.dataset.ecommerceLabel || 'Ecommerce Revenue',
+                                data: ecommerce,
+                                borderColor: '#16a34a',
+                                backgroundColor: 'rgba(22, 163, 74, 0.10)',
+                                fill: true,
+                                tension: 0.35,
+                                borderWidth: 2.5,
+                                pointRadius: 3,
+                                pointHoverRadius: 5,
+                                pointBackgroundColor: '#16a34a'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        rtl: isRtl,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                rtl: isRtl,
+                                labels: {
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    boxWidth: 8,
+                                    padding: 14,
+                                    color: '#475569',
+                                    font: { size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                rtl: isRtl,
+                                backgroundColor: '#0f172a',
+                                titleColor: '#ffffff',
+                                bodyColor: '#e2e8f0',
+                                padding: 10,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    label: function (ctx) {
+                                        return ' ' + ctx.dataset.label + ': ' + Number(ctx.parsed.y || 0).toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 0, autoSkip: true }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(148, 163, 184, 0.15)' },
+                                border: { display: false },
+                                ticks: { color: '#94a3b8', font: { size: 10 }, callback: function (value) { return Number(value).toLocaleString(); } }
+                            }
+                        }
+                    }
+                });
+                canvas.dataset.chartBound = '1';
+            }
+
+            function buildDoughnutCharts() {
+                var ids = ['adminOrdersStatusChart', 'adminEcommerceStatusChart', 'adminShipmentRequestsStatusChart', 'adminRepresentativesStatusChart'];
+                ids.forEach(function (id) {
+                    var canvas = document.querySelector('#mainContent #' + id);
+                    if (!canvas || canvas.dataset.chartBound === '1') return;
+                    var data = doughnutData(canvas);
+                    if (!data) { fillEmptyState(canvas); return; }
+                    new Chart(canvas.getContext('2d'), {
+                        type: 'doughnut',
+                        data: data,
+                        options: doughnutOptions()
+                    });
+                    canvas.dataset.chartBound = '1';
+                });
+            }
+
+            function buildDailyChart() {
+                var canvas = document.querySelector('#mainContent #adminDailyChart');
+                if (!canvas || canvas.dataset.chartBound === '1') return;
+
+                var labels = parseJson(canvas.dataset.labels, []);
+                if (!labels.length) { fillEmptyState(canvas); return; }
+
+                var series = [
+                    { label: isRtl ? 'مستخدمون جدد' : 'New Users', data: numberSeries(canvas.dataset.users), color: '#2563eb' },
+                    { label: isRtl ? 'طلبات الشحن' : 'Shipping Orders', data: numberSeries(canvas.dataset.orders), color: '#f59e0b' },
+                    { label: isRtl ? 'طلبات المتجر' : 'Ecommerce Orders', data: numberSeries(canvas.dataset.ecommerce), color: '#16a34a' },
+                    { label: isRtl ? 'طلبات شحن المرحلة 2' : 'Shipment Requests', data: numberSeries(canvas.dataset.shipments), color: '#0891b2' }
+                ];
+
+                new Chart(canvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: series.map(function (s) {
+                            return {
+                                label: s.label,
+                                data: s.data,
+                                borderColor: s.color,
+                                backgroundColor: s.color,
+                                tension: 0.35,
+                                borderWidth: 2.5,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
+                            };
+                        })
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        rtl: isRtl,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                rtl: isRtl,
+                                labels: {
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    boxWidth: 8,
+                                    padding: 14,
+                                    color: '#475569',
+                                    font: { size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                rtl: isRtl,
+                                backgroundColor: '#0f172a',
+                                titleColor: '#ffffff',
+                                bodyColor: '#e2e8f0',
+                                padding: 10,
+                                cornerRadius: 8
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 0, autoSkip: true }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(148, 163, 184, 0.15)' },
+                                border: { display: false },
+                                ticks: { color: '#94a3b8', font: { size: 10 }, precision: 0 }
+                            }
+                        }
+                    }
+                });
+                canvas.dataset.chartBound = '1';
+            }
+
+            buildRevenueChart();
+            buildDoughnutCharts();
+            buildDailyChart();
+        })();
+    </script>
 @endsection

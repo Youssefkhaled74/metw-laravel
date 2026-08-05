@@ -38,7 +38,7 @@ Route::get('/about', [WebsiteController::class, 'about'])->name('website.about')
 Route::get('/policies', [WebsiteController::class, 'policies'])->name('website.policies');
 Route::get('/terms', [WebsiteController::class, 'terms'])->name('website.terms');
 Route::get('/privacy', [WebsiteController::class, 'privacy'])->name('website.privacy');
-
+Route::get('/images', [WebsiteController::class, 'images'])->name('website.images');
 // Language switcher
 Route::get('/lang/{locale}', function (Request $request, string $locale) {
     if (!in_array($locale, ['en', 'ar'])) {
@@ -61,6 +61,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard/overview', [\App\Http\Controllers\Dashboard\Admin\AdminDashboardController::class, 'dashboard2'])->name('dashboard.overview');
         Route::get('/urgent-tasks', [\App\Http\Controllers\Dashboard\Admin\AdminDashboardController::class, 'urgentTasks'])->name('urgent-tasks');
         Route::get('/dashboard/monthly-revenue', [\App\Http\Controllers\Dashboard\Admin\AdminDashboardController::class, 'monthlyRevenue'])->name('dashboard.monthly-revenue');
+
+        // Cron Jobs Monitoring
+        Route::prefix('cron-jobs')->name('cron-jobs.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Dashboard\Admin\CronJobMonitorController::class, 'index'])->name('index');
+            Route::get('/{job}', [\App\Http\Controllers\Dashboard\Admin\CronJobMonitorController::class, 'show'])->name('show');
+            Route::post('/{job}/run-now', [\App\Http\Controllers\Dashboard\Admin\CronJobMonitorController::class, 'runNow'])->name('run-now');
+        });
 
         // Shipment Management
         Route::prefix('shipment')->name('shipment-')->group(function () {
@@ -465,6 +472,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Courier Failure Messages (Sections 3 & 4)
             Route::get('/courier-failure-messages', [\App\Http\Controllers\Dashboard\Admin\Settings\CourierFailureMessageController::class, 'index'])->name('courier-failure-messages.index');
             Route::patch('/courier-failure-messages', [\App\Http\Controllers\Dashboard\Admin\Settings\CourierFailureMessageController::class, 'update'])->name('courier-failure-messages.update');
+
+            // Shipping Timers (cron jobs X/Y/Z/N/W)
+            Route::get('/shipping-timers', [\App\Http\Controllers\Dashboard\Admin\Settings\ShippingTimerSettingController::class, 'index'])->name('shipping-timers.index');
+            Route::patch('/shipping-timers', [\App\Http\Controllers\Dashboard\Admin\Settings\ShippingTimerSettingController::class, 'update'])->name('shipping-timers.update');
+            Route::post('/shipping-timers/reset', [\App\Http\Controllers\Dashboard\Admin\Settings\ShippingTimerSettingController::class, 'reset'])->name('shipping-timers.reset');
 
             // Product Size Management
             Route::get('/product-sizes', [\App\Http\Controllers\Dashboard\Admin\Settings\ProductSizeController::class, 'index'])->name('product-sizes.index');

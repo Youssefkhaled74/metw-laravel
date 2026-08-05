@@ -45,7 +45,19 @@ class AdminDashboardController extends Controller
         if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.dashboard')) {
             return view('dashboard.admin.no-permission');
         }
-        return redirect()->route('admin.urgent-tasks');
+
+        return $this->renderDashboard();
+    }
+
+    private function renderDashboard()
+    {
+        return view('dashboard.admin.dashboard.dashboard2', [
+            'stats' => $this->dashboardStats(),
+            'recent_shipment_orders' => Order::with(['user', 'shipmentCompany'])->latest()->limit(5)->get(),
+            'recent_ecommerce_orders' => EcommerceOrder::with(['user'])->latest()->limit(5)->get(),
+            'monthly_revenue' => $this->getMonthlyRevenue(),
+            'charts' => $this->dashboardCharts(),
+        ]);
     }
 
     public function dashboard2()
@@ -53,231 +65,8 @@ class AdminDashboardController extends Controller
         if (Auth::guard('employee')->check() && !Auth::guard('employee')->user()->can('admin.dashboard')) {
             return view('dashboard.admin.no-permission');
         }
-        return view('dashboard.admin.dashboard.dashboard2', [
-            'stats' => $this->dashboardStats(),
-            'recent_shipment_orders' => Order::with(['user', 'shipmentCompany'])->latest()->limit(5)->get(),
-            'recent_ecommerce_orders' => EcommerceOrder::with(['user'])->latest()->limit(5)->get(),
-            'monthly_revenue' => $this->getMonthlyRevenue(),
-        ]);
-        $route = fn (string $name, array $parameters = []) => Route::has($name) ? route($name, $parameters) : null;
-        $count = fn (string $modelClass, ?callable $callback = null): int => $this->countFor($modelClass, $callback);
 
-        $summaryItems = [
-            $count(User::class, fn ($query) => $query->whereNull('email_verified_at')),
-            $count(VendorBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::PENDING_REVIEW->value)),
-            $count(WarehouseBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::PENDING_REVIEW->value)),
-            $count(ShipmentCompany::class, fn ($query) => $query->withoutGlobalScope('active')->where('is_active', false)),
-            $count(Representative::class, fn ($query) => $query->where('status', RepresentativeStatus::PENDING_REVIEW->value)),
-            $count(User::class, fn ($query) => $query->onlyTrashed()),
-            $count(Vendor::class, fn ($query) => $query->withTrashed()->where(function ($subQuery) {
-                $subQuery->where('is_active', false)->orWhereNotNull('deleted_at');
-            })),
-            $count(WarehouseBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::REJECTED->value)),
-            $count(Representative::class, fn ($query) => $query->whereIn('status', [RepresentativeStatus::SUSPENDED->value, RepresentativeStatus::REJECTED->value])),
-            $count(EcommerceOrder::class, fn ($query) => $query->where('payment_status', PaymentStatus::PENDING->value)),
-            $count(EcommerceOrder::class, fn ($query) => $query->where('status', OrderStatus::CANCELLED->value)),
-            $count(ReturnRequest::class, fn ($query) => $query->where('status', ReturnStatus::APPROVED->value)),
-            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::PURCHASE_CANCELLATION->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
-            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::SHIPPING_CANCELLATION->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
-            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::RETURN->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
-            $count(ReturnRequest::class, fn ($query) => $query->where('refund_type', 'wallet')->where('status', ReturnStatus::REFUNDED->value)),
-            $count(EcommerceOrder::class, fn ($query) => $query->where('status', OrderStatus::PENDING->value)),
-            $count(ReturnRequest::class, fn ($query) => $query->cancellations()->where('status', ReturnStatus::REQUESTED->value)),
-            $count(ReturnRequest::class, fn ($query) => $query->where('status', ReturnStatus::REQUESTED->value)),
-            $count(ShipmentRequest::class, fn ($query) => $query->where('status', ShipmentRequestStatus::SUBMITTED->value)),
-            $count(Order::class, fn ($query) => $query->where('status', OrderStatus::PENDING->value)),
-            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::USER->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
-            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::VENDOR->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
-            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::WAREHOUSE->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
-            $count(Complaint::class, fn ($query) => $query->where('complaint_type', ComplaintType::REPRESENTATIVE->value)->whereIn('status', [ComplaintStatus::PENDING->value, ComplaintStatus::UNDER_REVIEW->value])),
-        ];
-
-        $sections = [
-            [
-                'title' => 'حسابات جديدة تحتاج موافقة',
-                'items' => [
-                    [
-                        'label' => 'حسابات المستخدمين غير الموثقة',
-                        'count' => $summaryItems[0],
-                        'note' => 'تحتاج مراجعة بيانات الدخول والتوثيق قبل الاعتماد.',
-                        'url' => $route('admin.users', ['verification_status' => 'unverified']),
-                    ],
-                    [
-                        'label' => 'حسابات الموردين قيد المراجعة',
-                        'count' => $summaryItems[1],
-                        'note' => 'ملفات النشاط التجاري بانتظار اعتماد الإدارة.',
-                        'url' => $route('admin.vendors', ['profile_status' => 'pending_review']),
-                    ],
-                    [
-                        'label' => 'حسابات المستودعات قيد المراجعة',
-                        'count' => $summaryItems[2],
-                        'note' => 'الملفات التجارية للمستودعات تحتاج موافقة.',
-                        'url' => $route('admin.settings.warehouses.index', ['profile_status' => 'pending_review']),
-                    ],
-                    [
-                        'label' => 'حسابات شركات الشحن غير المفعلة',
-                        'count' => $summaryItems[3],
-                        'note' => 'يمكن مراجعتها وتفعيلها من صفحة الشركات.',
-                        'url' => $route('admin.shipment-companies', ['status' => 'inactive']),
-                    ],
-                    [
-                        'label' => 'حسابات المناديب قيد المراجعة',
-                        'count' => $summaryItems[4],
-                        'note' => 'اختر المناديب بانتظار الاعتماد أو الرفض.',
-                        'url' => $route('admin.representatives.index', ['status' => 'pending_review']),
-                    ],
-                ],
-            ],
-            [
-                'title' => 'حسابات موقوفة أو ملغية',
-                'items' => [
-                    [
-                        'label' => 'المستخدمون المحذوفون',
-                        'count' => $summaryItems[5],
-                        'note' => 'الحسابات الملغية أو المحذوفة من النظام.',
-                        'url' => $route('admin.users'),
-                    ],
-                    [
-                        'label' => 'الموردون الموقوفون أو المحذوفون',
-                        'count' => $summaryItems[6],
-                        'note' => 'يشمل الحسابات غير النشطة والمرفوعة من النظام.',
-                        'url' => $route('admin.vendors', ['status' => 'inactive']),
-                    ],
-                    [
-                        'label' => 'المستودعات الملغية',
-                        'count' => $summaryItems[7],
-                        'note' => 'تعتمد هذه القيمة على حالة ملف الاعتماد للمستودع.',
-                        'url' => $route('admin.settings.warehouses.index', ['profile_status' => 'rejected']),
-                    ],
-                    [
-                        'label' => 'المناديب الموقوفون أو المرفوضون',
-                        'count' => $summaryItems[8],
-                        'note' => 'يمكن مراجعة الحالة من صفحة المناديب.',
-                        'url' => $route('admin.representatives.index'),
-                    ],
-                ],
-            ],
-            [
-                'title' => 'موافقات الأدمن',
-                'items' => [
-                    [
-                        'label' => 'طلبات الدفع المعلقة',
-                        'count' => $summaryItems[9],
-                        'note' => 'طلبات تحتاج اعتماد الدفع قبل المتابعة.',
-                        'url' => $route('admin.ecommerce-orders', ['payment_status' => 'pending']),
-                    ],
-                    [
-                        'label' => 'طلبات الإلغاء المعتمدة',
-                        'count' => $summaryItems[10],
-                        'note' => 'الطلبات التي تم إلغاؤها واعتماد الإلغاء لها.',
-                        'url' => $route('admin.ecommerce-orders', ['status' => 'cancelled']),
-                    ],
-                    [
-                        'label' => 'طلبات الإرجاع المعتمدة',
-                        'count' => $summaryItems[11],
-                        'note' => 'طلبات الإرجاع التي تمت الموافقة عليها.',
-                        'url' => $route('admin.return-requests', ['status' => 'approved']),
-                    ],
-                    [
-                        'label' => 'شكاوى إلغاء المشتريات',
-                        'count' => $summaryItems[12],
-                        'note' => 'الشكاوى الخاصة بإلغاء طلبات الشراء بحاجة لمتابعة.',
-                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::PURCHASE_CANCELLATION->value, 'status' => ComplaintStatus::PENDING->value]),
-                    ],
-                    [
-                        'label' => 'شكاوى إلغاء الشحن',
-                        'count' => $summaryItems[13],
-                        'note' => 'الشكاوى الخاصة بإلغاء طلبات الشحن بحاجة لمتابعة.',
-                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::SHIPPING_CANCELLATION->value, 'status' => ComplaintStatus::PENDING->value]),
-                    ],
-                    [
-                        'label' => 'شكاوى المرتجعات',
-                        'count' => $summaryItems[14],
-                        'note' => 'شكاوى المرتجعات المفتوحة أو قيد المراجعة.',
-                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::RETURN->value, 'status' => ComplaintStatus::PENDING->value]),
-                    ],
-                    [
-                        'label' => 'طلبات استرداد المحفظة',
-                        'count' => $summaryItems[15],
-                        'note' => 'طلبات استرداد Metwzon عبر المحفظة.',
-                        'url' => $route('admin.return-requests', ['status' => 'refunded', 'refund_type' => 'wallet']),
-                    ],
-                ],
-            ],
-            [
-                'title' => 'طلبات معلقة أو غير مكتملة',
-                'items' => [
-                    [
-                        'label' => 'طلبات الشراء المعلقة',
-                        'count' => $summaryItems[16],
-                        'note' => 'الطلبات التي لم تُعتمد بعد داخل المتجر الإلكتروني.',
-                        'url' => $route('admin.ecommerce-orders', ['status' => 'pending']),
-                    ],
-                    [
-                        'label' => 'طلبات الإلغاء المعلقة',
-                        'count' => $summaryItems[17],
-                        'note' => 'طلبات الإلغاء الجديدة بانتظار أول إجراء.',
-                        'url' => $route('admin.return-requests', ['request_type' => 'cancellation', 'status' => 'requested']),
-                    ],
-                    [
-                        'label' => 'طلبات الإرجاع المعلقة',
-                        'count' => $summaryItems[18],
-                        'note' => 'طلبات الإرجاع الجديدة بانتظار أول إجراء.',
-                        'url' => $route('admin.return-requests', ['status' => 'requested']),
-                    ],
-                    [
-                        'label' => 'طلبات الشحن المعلقة',
-                        'count' => $summaryItems[19],
-                        'note' => 'طلبات الشحن التي تم إرسالها ولم تُعالج بعد.',
-                        'url' => $route('admin.shipment-requests.index', ['status' => 'submitted']),
-                    ],
-                    [
-                        'label' => 'طلبات التوصيل المعلقة',
-                        'count' => $summaryItems[20],
-                        'note' => 'طلبات التوصيل داخل مسار الشحن العادي.',
-                        'url' => $route('admin.shipment-orders', ['status' => 'pending']),
-                    ],
-                ],
-            ],
-            [
-                'title' => 'شكاوى معلقة أو غير مغلقة',
-                'items' => [
-                    [
-                        'label' => 'شكاوى المستخدمين',
-                        'count' => $summaryItems[21],
-                        'note' => 'الشكاوى العامة للمستخدمين قيد المتابعة.',
-                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::USER->value, 'status' => ComplaintStatus::PENDING->value]),
-                    ],
-                    [
-                        'label' => 'شكاوى الموردين',
-                        'count' => $summaryItems[22],
-                        'note' => 'الشكاوى العامة للموردين قيد المتابعة.',
-                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::VENDOR->value, 'status' => ComplaintStatus::PENDING->value]),
-                    ],
-                    [
-                        'label' => 'شكاوى المستودعات',
-                        'count' => $summaryItems[23],
-                        'note' => 'الشكاوى العامة للمستودعات قيد المتابعة.',
-                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::WAREHOUSE->value, 'status' => ComplaintStatus::PENDING->value]),
-                    ],
-                    [
-                        'label' => 'شكاوى المناديب',
-                        'count' => $summaryItems[24],
-                        'note' => 'الشكاوى العامة للمناديب قيد المتابعة.',
-                        'url' => $route('admin.complaints.index', ['complaint_type' => ComplaintType::REPRESENTATIVE->value, 'status' => ComplaintStatus::PENDING->value]),
-                    ],
-                ],
-            ],
-        ];
-
-        $totalUrgentItems = collect($sections)->pluck('items')->flatten(1)->sum('count');
-
-        return view('dashboard.admin.dashboard.dashboard2', [
-            'stats' => $this->dashboardStats(),
-            'recent_shipment_orders' => Order::with(['user', 'shipmentCompany'])->latest()->limit(5)->get(),
-            'recent_ecommerce_orders' => EcommerceOrder::with(['user'])->latest()->limit(5)->get(),
-            'monthly_revenue' => $this->getMonthlyRevenue(),
-        ]);
+        return $this->renderDashboard();
     }
 
     private function countFor(string $modelClass, ?callable $callback = null): int
@@ -408,6 +197,74 @@ class AdminDashboardController extends Controller
             'approved_warehouses' => $count(WarehouseBusinessProfile::class, fn ($query) => $query->where('status', BusinessProfileStatus::APPROVED->value)),
             'active_representatives' => $count(Representative::class, fn ($query) => $query->where('status', RepresentativeStatus::APPROVED->value)),
         ];
+    }
+
+    private function dashboardCharts(): array
+    {
+        return [
+            'orders_by_status' => $this->statusCounts(Order::class, 'status'),
+            'ecommerce_orders_by_status' => $this->statusCounts(EcommerceOrder::class, 'status'),
+            'shipment_requests_by_status' => $this->statusCounts(ShipmentRequest::class, 'status'),
+            'representatives_by_status' => $this->statusCounts(Representative::class, 'status'),
+            'daily_users' => $this->dailyCounts(User::class),
+            'daily_orders' => $this->dailyCounts(Order::class),
+            'daily_ecommerce_orders' => $this->dailyCounts(EcommerceOrder::class),
+            'daily_shipment_requests' => $this->dailyCounts(ShipmentRequest::class),
+        ];
+    }
+
+    private function statusCounts(string $modelClass, string $column): array
+    {
+        try {
+            $model = new $modelClass();
+            if (! Schema::hasTable($model->getTable())) {
+                return [];
+            }
+
+            return $modelClass::query()
+                ->selectRaw("{$column} as label, count(*) as value")
+                ->groupBy($column)
+                ->get()
+                ->map(fn ($row) => [
+                    'label' => (string) ($row->label ?? 'unknown'),
+                    'value' => (int) ($row->value ?? 0),
+                ])
+                ->values()
+                ->all();
+        } catch (\Throwable $throwable) {
+            return [];
+        }
+    }
+
+    private function dailyCounts(string $modelClass, int $days = 7): array
+    {
+        try {
+            $model = new $modelClass();
+            if (! Schema::hasTable($model->getTable())) {
+                return ['labels' => [], 'values' => []];
+            }
+
+            $start = now()->subDays($days - 1)->startOfDay();
+
+            $rows = $modelClass::query()
+                ->where('created_at', '>=', $start)
+                ->selectRaw('DATE(created_at) as day, count(*) as total')
+                ->groupBy('day')
+                ->pluck('total', 'day');
+
+            $labels = [];
+            $values = [];
+
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $date = now()->subDays($i);
+                $labels[] = $date->format('m-d');
+                $values[] = (int) ($rows[$date->toDateString()] ?? 0);
+            }
+
+            return ['labels' => $labels, 'values' => $values];
+        } catch (\Throwable $throwable) {
+            return ['labels' => [], 'values' => []];
+        }
     }
 
     public function monthlyRevenue()

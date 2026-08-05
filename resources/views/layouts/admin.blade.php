@@ -2035,6 +2035,20 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.settings.shipping-timers*') ? 'active' : '' }}"
+                                href="{{ route('admin.settings.shipping-timers.index') }}">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span class="link-text">{{ __('admin-dashboard.shipping_timers') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.cron-jobs*') ? 'active' : '' }}"
+                                href="{{ route('admin.cron-jobs.index') }}">
+                                    <i class="fas fa-clock"></i>
+                                    <span class="link-text">{{ __('admin-dashboard.cron_jobs') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.return-orders.*') ? 'active' : '' }}"
                                 href="{{ route('admin.return-orders.pending') }}">
                                     <i class="fas fa-undo-alt"></i>

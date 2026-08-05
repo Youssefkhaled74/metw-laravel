@@ -21,6 +21,15 @@ class CourierSystemConfigSeeder extends Seeder
             // Sections 3 & 4 — editable failure notification texts
             ['key' => 'courier_failure_message_shipping', 'value' => 'Shipping service is currently unavailable according to the required shipping path'],
             ['key' => 'courier_failure_message_delivery', 'value' => 'Delivery service is currently unavailable according to the required delivery path'],
+            // Cron job 3: cancel a User request whose advance stays unpaid for this many real hours
+            ['key' => 'cancel_unpaid_advance_hours', 'value' => '12'],
+            // Cron job 4: aggregate open sub-shipments every this many days
+            ['key' => 'aggregate_sub_shipments_days', 'value' => '3'],
+            // Cron job 4: aggregation scope (all | warehouse | group) and its target id
+            ['key' => 'aggregate_sub_shipments_scope', 'value' => 'all'],
+            ['key' => 'aggregate_sub_shipments_target_id', 'value' => ''],
+            // Cron job 5: mark execution start for inter-governorate requests after this many real hours
+            ['key' => 'execution_start_hours', 'value' => '24'],
         ];
 
         foreach ($settings as $setting) {

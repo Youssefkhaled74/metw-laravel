@@ -1564,6 +1564,10 @@ return [
     'failure_message_delivery_hint' => 'Sent to the submitter when no courier accepted any path for a fast-delivery request.',
     'courier_failure_messages_note' => 'These editable texts are shown to the submitter when the request is closed as unavailable (no courier accepted any path).',
 
+    // Cron jobs monitor & shipping timers
+    'cron_jobs' => 'Scheduled Jobs',
+    'shipping_timers' => 'Shipping Timers',
+
     // Advance payments
     'advance_payments' => 'Advance Payments',
     'all' => 'All',

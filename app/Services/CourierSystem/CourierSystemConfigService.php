@@ -13,6 +13,21 @@ class CourierSystemConfigService
     public const TIMEOUT_AUTO_ACTION = 'courier_timeout_auto_action';
     public const MAX_OFFERS_PER_LEG = 'courier_max_offers_per_leg';
 
+    /** Job 3: cancel a User request whose advance stays unpaid for this many real hours. */
+    public const CANCEL_UNPAID_ADVANCE_HOURS = 'cancel_unpaid_advance_hours';
+
+    /** Job 4: aggregate open sub-shipments every this many days. */
+    public const AGGREGATE_SUB_SHIPMENTS_DAYS = 'aggregate_sub_shipments_days';
+
+    /** Job 4: aggregation scope – 'all', 'warehouse' or 'group'. */
+    public const AGGREGATE_SUB_SHIPMENTS_SCOPE = 'aggregate_sub_shipments_scope';
+
+    /** Job 4: target id for the scope (warehouse id for 'warehouse', governorate id for 'group'). */
+    public const AGGREGATE_SUB_SHIPMENTS_TARGET_ID = 'aggregate_sub_shipments_target_id';
+
+    /** Job 5: mark execution start for inter-governorate requests after this many real hours. */
+    public const EXECUTION_START_HOURS = 'execution_start_hours';
+
     /** Failure notification text when no shipping courier accepts (Sections 3 & 4). */
     public const FAILURE_SHIPPING_MESSAGE = 'courier_failure_message_shipping';
 
@@ -83,6 +98,35 @@ class CourierSystemConfigService
             self::FAILURE_DELIVERY_MESSAGE,
             'Delivery service is currently unavailable according to the required delivery path'
         );
+    }
+
+    public function cancelUnpaidAdvanceHours(): int
+    {
+        return max(1, (int) $this->get(self::CANCEL_UNPAID_ADVANCE_HOURS, 12));
+    }
+
+    public function aggregateSubShipmentsDays(): int
+    {
+        return max(1, (int) $this->get(self::AGGREGATE_SUB_SHIPMENTS_DAYS, 3));
+    }
+
+    public function aggregationScope(): string
+    {
+        $scope = (string) $this->get(self::AGGREGATE_SUB_SHIPMENTS_SCOPE, 'all');
+
+        return in_array($scope, ['all', 'warehouse', 'group'], true) ? $scope : 'all';
+    }
+
+    public function aggregationTargetId(): ?int
+    {
+        $id = (int) $this->get(self::AGGREGATE_SUB_SHIPMENTS_TARGET_ID, 0);
+
+        return $id > 0 ? $id : null;
+    }
+
+    public function executionStartHours(): int
+    {
+        return max(1, (int) $this->get(self::EXECUTION_START_HOURS, 24));
     }
 
     /**

@@ -215,4 +215,9 @@ class WebsiteController extends Controller
             ],
         };
     }
+
+    public function images()
+    {
+        return view('website.images');
+    }
 }

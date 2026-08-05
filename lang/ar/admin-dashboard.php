@@ -1590,6 +1590,10 @@ return [
     'failure_message_delivery_hint' => 'تُرسل لمقدم الطلب عند عدم قبول أي مندوب لأي مسار في طلب توصيل سريع.',
     'courier_failure_messages_note' => 'هذه النصوص القابلة للتعديل تظهر لمقدم الطلب عند إغلاق الطلب على أنه غير متاح (لم يقبل أي مندوب أي مسار).',
 
+    // Cron jobs monitor & shipping timers
+    'cron_jobs' => 'المهام المجدولة',
+    'shipping_timers' => 'مؤقتات الشحن',
+
     // Advance payments
     'advance_payments' => 'الدفعات المقدمة',
     'all' => 'الكل',
