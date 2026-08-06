@@ -395,6 +395,21 @@ class MetwGoCourierService
         ];
     }
 
+    public function findOrderForRepresentative(Representative $representative, int $orderId): OrderItem
+    {
+        $activeOrder = $this->activeOrderQuery($representative)
+            ->whereKey($orderId)
+            ->first();
+
+        if ($activeOrder) {
+            return $activeOrder;
+        }
+
+        return $this->incomingOrdersQuery($representative)
+            ->whereKey($orderId)
+            ->firstOrFail();
+    }
+
     public function incomingShippingRequestsQuery(Representative $representative): Builder
     {
         $query = ShipmentRequest::query()

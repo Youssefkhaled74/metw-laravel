@@ -546,9 +546,15 @@ class RegistrationController extends Controller
                 'suspended' => 'تم إيقاف الحساب. الرجاء التواصل مع الدعم.',
             ];
 
-            return responseJson(true, '', [
+            return responseJson(true, $messages[$status] ?? '', [
                 'status' => $status,
                 'message' => $messages[$status] ?? '',
+                'next_screen' => match ($status) {
+                    'pending_approval' => 'waiting_approval',
+                    'approved' => 'home',
+                    'incomplete' => 'sign_up',
+                    default => 'login',
+                },
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return responseJson(false, 'لم يتم العثور على حساب مندوب.', null, 404);

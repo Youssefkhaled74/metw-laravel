@@ -22,16 +22,18 @@ class HomeController extends Controller
             $this->metwGoCourierService->assertApproved($representative);
 
             $courier = $this->metwGoCourierService->formatCourier($representative);
-
             $wallet = $user->wallet;
-            $incomingOrders = $this->metwGoCourierService->incomingOrdersQuery($representative)
-                ->limit(10)
-                ->get()
-                ->map(fn ($order) => $this->metwGoCourierService->formatOrderItem($order))
-                ->values();
+            $availability = $this->metwGoCourierService->availabilityStatus($representative);
+            $activeOrder = $this->metwGoCourierService->activeOrderQuery($representative)->first();
+            $incomingOrders = collect();
 
-            $activeOrder = $this->metwGoCourierService->activeOrderQuery($representative)
-                ->first();
+            if ($availability === 'online' && ! $activeOrder) {
+                $incomingOrders = $this->metwGoCourierService->incomingOrdersQuery($representative)
+                    ->limit(10)
+                    ->get()
+                    ->map(fn ($order) => $this->metwGoCourierService->formatOrderItem($order))
+                    ->values();
+            }
 
             $unreadCount = $this->metwGoCourierService->unreadNotificationsCount($user);
 
@@ -56,6 +58,7 @@ class HomeController extends Controller
                 'rejected' => 'تم رفض الحساب.',
                 'suspended' => 'تم إيقاف الحساب.',
             ];
+
             return responseJson(false, $messages[$status] ?? 'الحساب غير مفعل.', [
                 'status' => $status,
             ], 403);
@@ -89,6 +92,7 @@ class HomeController extends Controller
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $status = $e->validator->errors()->first('approval_status');
+
             return responseJson(false, 'لا يمكن تفعيل الحساب قبل الموافقة عليه.', [
                 'status' => $status,
             ], 403);

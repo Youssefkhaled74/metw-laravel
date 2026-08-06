@@ -2,8 +2,8 @@
     "info": {
         "_postman_id": "2d2c5c1f-7d83-4f12-8d4f-9c2c7a8b51a1",
         "name": "MetwGo Courier App APIs",
-        "description": "MetwGo Courier App APIs - All routes implemented in Laravel under \/api\/metwgo. Every request includes tests for route existence (not 404), JSON response, and success field.",
-        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+        "description": "MetwGo Courier App APIs - All routes implemented in Laravel under /api/metwgo. Every request includes tests for route existence (not 404), JSON response, and success field.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
@@ -16,11 +16,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             }
                         ],
                         "body": {
@@ -28,7 +28,7 @@
                             "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"password\": \"12345678\",\n  \"device_token\": \"optional_fcm_token\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/login",
+                            "raw": "{{base_url}}/api/metwgo/auth/login",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -44,7 +44,7 @@
                             {
                                 "listen": "test",
                                 "script": {
-                                    "type": "text\/javascript",
+                                    "type": "text/javascript",
                                     "exec": [
                                         "if (pm.response.code === 200) {",
                                         "  const jsonData = pm.response.json();",
@@ -64,7 +64,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"status\": \"approved\",\n  \"message\": \"تم تسجيل الدخول بنجاح\",\n  \"data\": {\n    \"access_token\": \"ACCESS_TOKEN\",\n    \"courier\": {\n      \"id\": 1,\n      \"account_number\": \"CRR-00000001\",\n      \"approval_status\": \"approved\"\n    }\n  }\n}"
@@ -76,7 +76,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"status\": \"pending_approval\",\n  \"message\": \"حسابك قيد المراجعة، وسيتم تفعيل الدخول بعد الموافقة عليه.\"\n}"
@@ -88,7 +88,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"status\": \"suspended\",\n  \"message\": \"تم إيقاف الحساب. الرجاء التواصل مع الدعم.\"\n}"
@@ -100,7 +100,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"بيانات الدخول غير صحيحة.\"\n}"
@@ -112,7 +112,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"Unexpected error occurred.\"\n}"
@@ -127,7 +127,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -136,7 +136,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -149,7 +149,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -157,7 +157,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/logout",
+                            "raw": "{{base_url}}/api/metwgo/auth/logout",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -178,7 +178,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم تسجيل الخروج بنجاح\"\n}"
@@ -190,7 +190,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"Unauthenticated.\"\n}"
@@ -205,7 +205,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -214,7 +214,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -227,11 +227,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             }
                         ],
                         "body": {
@@ -239,7 +239,7 @@
                             "raw": "{\n  \"phone\": \"{{phone}}\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/forgot-password\/send-otp",
+                            "raw": "{{base_url}}/api/metwgo/auth/forgot-password/send-otp",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -260,7 +260,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم إرسال رمز التحقق\",\n  \"data\": {\n    \"masked_phone\": \"010*****00\"\n  }\n}"
@@ -272,7 +272,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"Please wait before requesting another OTP.\"\n}"
@@ -287,7 +287,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -296,7 +296,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -309,11 +309,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             }
                         ],
                         "body": {
@@ -321,7 +321,7 @@
                             "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"otp\": \"{{otp}}\",\n  \"purpose\": \"forgot_password\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/otp\/verify",
+                            "raw": "{{base_url}}/api/metwgo/auth/otp/verify",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -342,7 +342,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم التحقق من الرمز\",\n  \"data\": {\n    \"reset_token\": \"RESET_TOKEN\"\n  }\n}"
@@ -354,7 +354,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"otp\": [\"OTP is invalid or expired.\"]\n  }\n}"
@@ -369,7 +369,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -378,7 +378,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -391,11 +391,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             }
                         ],
                         "body": {
@@ -403,7 +403,7 @@
                             "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"purpose\": \"forgot_password\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/otp\/resend",
+                            "raw": "{{base_url}}/api/metwgo/auth/otp/resend",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -424,7 +424,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم إعادة إرسال الرمز\"\n}"
@@ -436,7 +436,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"Please wait before resending OTP.\"\n}"
@@ -451,7 +451,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -460,7 +460,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -473,11 +473,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             }
                         ],
                         "body": {
@@ -485,7 +485,7 @@
                             "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"reset_token\": \"{{reset_token}}\",\n  \"password\": \"12345678\",\n  \"password_confirmation\": \"12345678\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/password\/reset",
+                            "raw": "{{base_url}}/api/metwgo/auth/password/reset",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -506,7 +506,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم تحديث كلمة المرور بنجاح\"\n}"
@@ -518,7 +518,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"reset_token\": [\"The reset token field is required.\"],\n    \"password\": [\"The password confirmation does not match.\"]\n  }\n}"
@@ -533,7 +533,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -542,7 +542,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -555,11 +555,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -571,7 +571,7 @@
                             "raw": "{\n  \"password\": \"newPassword123\",\n  \"password_confirmation\": \"newPassword123\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/password\/change",
+                            "raw": "{{base_url}}/api/metwgo/auth/password/change",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -592,7 +592,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم تغيير كلمة المرور\"\n}"
@@ -604,7 +604,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"Unauthenticated.\"\n}"
@@ -619,7 +619,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -628,7 +628,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -646,7 +646,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             }
                         ],
                         "body": {
@@ -805,7 +805,7 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/register",
+                            "raw": "{{base_url}}/api/metwgo/auth/register",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -826,7 +826,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم التسجيل بنجاح\",\n  \"data\": {\n    \"access_token\": \"TOKEN\",\n    \"courier\": {\n      \"id\": 1,\n      \"account_number\": \"CRR-00000001\",\n      \"name\": \"أحمد محمد محمود\",\n      \"phone\": \"01000000001\",\n      \"approval_status\": \"pending_approval\"\n    }\n  }\n}"
@@ -838,7 +838,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"phone\": [\"The phone has already been taken.\"]\n  }\n}"
@@ -853,7 +853,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code === 201) {",
                                     "    pm.test(\"Registration successful - saves access token\", function () {",
@@ -872,7 +872,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -885,11 +885,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             }
                         ],
                         "body": {
@@ -897,7 +897,7 @@
                             "raw": "{\n  \"first_name\": \"أحمد\",\n  \"father_name\": \"محمد\",\n  \"last_name\": \"محمود\",\n  \"phone\": \"{{phone}}\",\n  \"secondary_phone\": \"012xxxxxxxx\",\n  \"email\": \"captain@metwgo.com\",\n  \"birth_date\": \"1995-01-01\",\n  \"gender\": \"male\",\n  \"address_details\": \"العنوان بالتفصيل\",\n  \"password\": \"12345678\",\n  \"password_confirmation\": \"12345678\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/register\/step-1",
+                            "raw": "{{base_url}}/api/metwgo/auth/register/step-1",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -914,7 +914,7 @@
                             {
                                 "listen": "test",
                                 "script": {
-                                    "type": "text\/javascript",
+                                    "type": "text/javascript",
                                     "exec": [
                                         "if (pm.response.code === 200 || pm.response.code === 201) {",
                                         "  const jsonData = pm.response.json();",
@@ -934,7 +934,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم حفظ المعلومات الشخصية\",\n  \"data\": {\n    \"registration_token\": \"TEMP_TOKEN\",\n    \"current_step\": 2\n  }\n}"
@@ -946,7 +946,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"phone\": [\"The phone has already been taken.\"],\n    \"email\": [\"The email has already been taken.\"]\n  }\n}"
@@ -961,7 +961,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -970,7 +970,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -983,11 +983,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -999,7 +999,7 @@
                             "raw": "{\n  \"courier_type\": \"freelance\",\n  \"warehouse_id\": null,\n  \"work_types\": [\"delivery_inside_governorate\", \"shipping_between_governorates\"]\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/register\/step-2",
+                            "raw": "{{base_url}}/api/metwgo/auth/register/step-2",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1020,7 +1020,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم حفظ معلومات المندوب\",\n  \"data\": {\n    \"registration_token\": \"TEMP_TOKEN\",\n    \"current_step\": 3\n  }\n}"
@@ -1032,7 +1032,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"warehouse_id\": [\"The warehouse id field is required when courier type is warehouse.\"]\n  }\n}"
@@ -1047,7 +1047,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1056,7 +1056,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1069,7 +1069,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1077,7 +1077,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/warehouses",
+                            "raw": "{{base_url}}/api/metwgo/warehouses",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1096,7 +1096,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"account_number\": \"WAR-00000001\",\n      \"name\": \"مستودع القاهرة\"\n    }\n  ]\n}"
@@ -1108,7 +1108,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"Unauthenticated.\"\n}"
@@ -1123,7 +1123,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1132,7 +1132,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1145,7 +1145,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1153,7 +1153,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/lookups\/transport-types",
+                            "raw": "{{base_url}}/api/metwgo/lookups/transport-types",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1173,7 +1173,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"01\",\n      \"name\": \"شنطة محمولة مع مواصلات\",\n      \"max_weight_kg\": 20,\n      \"max_volume_m3\": 0.05\n    }\n  ]\n}"
@@ -1188,7 +1188,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1197,7 +1197,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1210,7 +1210,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1238,7 +1238,7 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/register\/step-3",
+                            "raw": "{{base_url}}/api/metwgo/auth/register/step-3",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1259,7 +1259,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم حفظ معلومات المركبة\",\n  \"data\": {\n    \"registration_token\": \"TEMP_TOKEN\",\n    \"current_step\": 4\n  }\n}"
@@ -1271,7 +1271,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"transport_type_id\": [\"The transport type id field is required.\"],\n    \"vehicle_image\": [\"The vehicle image must be a file of type: jpg, png.\"]\n  }\n}"
@@ -1286,7 +1286,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1295,7 +1295,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1308,11 +1308,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/rejection-reasons",
+                            "raw": "{{base_url}}/api/metwgo/rejection-reasons",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1331,7 +1331,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"reason_text\": \"العميل طلب إلغاء\"\n    },\n    {\n      \"id\": 2,\n      \"reason_text\": \"مندوب آخر أقرب\"\n    }\n  ]\n}"
@@ -1346,7 +1346,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1355,7 +1355,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1368,7 +1368,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1376,7 +1376,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/lookups\/governorates",
+                            "raw": "{{base_url}}/api/metwgo/lookups/governorates",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1396,7 +1396,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": [\n    { \"id\": 1, \"name\": \"القاهرة\" }\n  ]\n}"
@@ -1411,7 +1411,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1420,7 +1420,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1433,7 +1433,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1441,7 +1441,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/lookups\/cities?governorate_ids[]=1&governorate_ids[]=2",
+                            "raw": "{{base_url}}/api/metwgo/lookups/cities?governorate_ids[]=1&governorate_ids[]=2",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1471,7 +1471,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": [\n    { \"id\": 10, \"name\": \"مدينة نصر\" }\n  ]\n}"
@@ -1486,7 +1486,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1495,7 +1495,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1508,11 +1508,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1524,7 +1524,7 @@
                             "raw": "{\n  \"governorate_ids\": [1, 2],\n  \"city_ids\": [10, 11],\n  \"villages_service_enabled\": true\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/register\/step-4",
+                            "raw": "{{base_url}}/api/metwgo/auth/register/step-4",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1545,7 +1545,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم حفظ مناطق الخدمة\",\n  \"data\": {\n    \"registration_token\": \"TEMP_TOKEN\",\n    \"current_step\": 5\n  }\n}"
@@ -1560,7 +1560,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1569,7 +1569,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1582,7 +1582,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1630,7 +1630,7 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/register\/step-5",
+                            "raw": "{{base_url}}/api/metwgo/auth/register/step-5",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1651,7 +1651,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم رفع المستندات وإرسال الحساب للمراجعة\",\n  \"data\": {\n    \"approval_status\": \"pending_approval\"\n  }\n}"
@@ -1663,7 +1663,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"profile_photo\": [\"The profile photo field is required.\"],\n    \"national_id_front\": [\"The national id front field is required.\"],\n    \"national_id_back\": [\"The national id back field is required.\"]\n  }\n}"
@@ -1678,7 +1678,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1687,7 +1687,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1700,7 +1700,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1708,7 +1708,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/auth\/registration\/status",
+                            "raw": "{{base_url}}/api/metwgo/auth/registration/status",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1729,7 +1729,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"status\": \"pending_approval\",\n  \"message\": \"حسابك قيد المراجعة، وسنبلغك بمجرد الموافقة عليه وجاهزيته للتفعيل.\"\n}"
@@ -1744,7 +1744,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1753,7 +1753,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1771,7 +1771,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1779,7 +1779,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/profile",
+                            "raw": "{{base_url}}/api/metwgo/profile",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1798,7 +1798,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": {\n    \"approval_status\": \"approved\",\n    \"first_name\": \"أحمد\",\n    \"work_info\": {},\n    \"transport_info\": {},\n    \"service_areas\": {},\n    \"documents\": []\n  }\n}"
@@ -1810,7 +1810,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"status\": \"pending_approval\",\n  \"message\": \"حسابك قيد المراجعة.\"\n}"
@@ -1825,7 +1825,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1834,7 +1834,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1847,11 +1847,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1863,7 +1863,7 @@
                             "raw": "{\n  \"first_name\": \"أحمد\",\n  \"father_name\": \"محمد\",\n  \"last_name\": \"محمود\",\n  \"phone\": \"{{phone}}\",\n  \"secondary_phone\": \"012xxxxxxxx\",\n  \"email\": \"captain@metwgo.com\",\n  \"birth_date\": \"1995-01-01\",\n  \"gender\": \"male\",\n  \"address_details\": \"العنوان بالتفصيل\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/profile",
+                            "raw": "{{base_url}}/api/metwgo/profile",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1882,7 +1882,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم تحديث الملف الشخصي\"\n}"
@@ -1897,7 +1897,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1906,7 +1906,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1919,11 +1919,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -1935,7 +1935,7 @@
                             "raw": "{\n  \"courier_type\": \"freelance\",\n  \"warehouse_id\": null,\n  \"work_types\": [\"delivery_inside_governorate\"]\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/profile\/work-info",
+                            "raw": "{{base_url}}/api/metwgo/profile/work-info",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1955,7 +1955,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم تحديث معلومات العمل\"\n}"
@@ -1970,7 +1970,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -1979,7 +1979,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -1992,7 +1992,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -2020,7 +2020,7 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/profile\/transport",
+                            "raw": "{{base_url}}/api/metwgo/profile/transport",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -2040,7 +2040,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم تحديث معلومات المركبة\"\n}"
@@ -2055,7 +2055,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -2064,7 +2064,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -2077,11 +2077,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -2093,7 +2093,7 @@
                             "raw": "{\n  \"governorate_ids\": [{{governorate_id}}],\n  \"city_ids\": [{{city_id}}],\n  \"villages_service_enabled\": true\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/profile\/service-areas",
+                            "raw": "{{base_url}}/api/metwgo/profile/service-areas",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -2113,7 +2113,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم تحديث مناطق الخدمة\"\n}"
@@ -2128,7 +2128,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -2137,7 +2137,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -2150,7 +2150,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -2198,7 +2198,7 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/profile\/documents",
+                            "raw": "{{base_url}}/api/metwgo/profile/documents",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -2218,7 +2218,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم رفع المستندات\"\n}"
@@ -2233,7 +2233,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -2242,7 +2242,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -2255,7 +2255,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -2308,7 +2308,7 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/profile\/complete",
+                            "raw": "{{base_url}}/api/metwgo/profile/complete",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -2328,7 +2328,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم إكمال الملف الشخصي بنجاح\",\n  \"data\": {\n    \"profile\": {},\n    \"approval_status\": \"pending_approval\"\n  }\n}"
@@ -2343,7 +2343,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -2352,7 +2352,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -2361,7 +2361,7 @@
             ]
         },
         {
-            "name": "Home \/ Dashboard",
+            "name": "Home / Dashboard",
             "item": [
                 {
                     "name": "Get courier home dashboard",
@@ -2370,7 +2370,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -2378,7 +2378,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/home",
+                            "raw": "{{base_url}}/api/metwgo/home",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -2398,10 +2398,10 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": true,\n  \"data\": {\n    \"courier\": {\n      \"id\": 1,\n      \"account_number\": \"CRR-00000001\",\n      \"name\": \"محمد\",\n      \"avatar\": \"https:\/\/...\",\n      \"rating\": 4.9,\n      \"availability_status\": \"offline\",\n      \"online_duration_seconds\": 0\n    },\n    \"stats\": {\n      \"today_earnings\": 0,\n      \"completed_orders_today\": 0,\n      \"planned_orders_today\": 0,\n      \"wallet_balance\": 1240\n    },\n    \"notifications\": {\n      \"unread_count\": 1\n    },\n    \"incoming_orders\": [],\n    \"active_order\": null\n  }\n}"
+                            "body": "{\n  \"success\": true,\n  \"data\": {\n    \"courier\": {\n      \"id\": 1,\n      \"account_number\": \"CRR-00000001\",\n      \"name\": \"محمد\",\n      \"avatar\": \"https://...\",\n      \"rating\": 4.9,\n      \"availability_status\": \"offline\",\n      \"online_duration_seconds\": 0\n    },\n    \"stats\": {\n      \"today_earnings\": 0,\n      \"completed_orders_today\": 0,\n      \"planned_orders_today\": 0,\n      \"wallet_balance\": 1240\n    },\n    \"notifications\": {\n      \"unread_count\": 1\n    },\n    \"incoming_orders\": [],\n    \"active_order\": null\n  }\n}"
                         },
                         {
                             "name": "Success - online courier",
@@ -2410,7 +2410,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": {\n    \"courier\": {\n      \"availability_status\": \"online\",\n      \"online_duration_seconds\": 9914\n    },\n    \"stats\": {\n      \"today_earnings\": 245.5,\n      \"completed_orders_today\": 14,\n      \"planned_orders_today\": 18,\n      \"wallet_balance\": 1240\n    },\n    \"incoming_orders\": [\n      {\n        \"id\": 8842,\n        \"order_number\": \"MET-8842\",\n        \"status\": \"pending\",\n        \"priority\": \"urgent\",\n        \"distance_km\": 4.2,\n        \"pickup_address\": \"مطعم شواية الخليج - طريق التخصصي\",\n        \"dropoff_address\": \"حي النخيل - شارع الأمير سعود\",\n        \"estimated_fee\": 0,\n        \"can_start\": true\n      }\n    ],\n    \"active_order\": null\n  }\n}"
@@ -2422,10 +2422,10 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": true,\n  \"data\": {\n    \"active_order\": {\n      \"id\": 8842,\n      \"order_number\": \"MET-8842\",\n      \"status\": \"in_progress\",\n      \"label\": \"طلب جاري\"\n    }\n  }\n}"
+                            "body": "{\n  \"success\": true,\n  \"data\": {\n    \"courier\": {\n      \"availability_status\": \"online\",\n      \"online_duration_seconds\": 9914\n    },\n    \"stats\": {\n      \"today_earnings\": 245.5,\n      \"completed_orders_today\": 14,\n      \"planned_orders_today\": 18,\n      \"wallet_balance\": 1240\n    },\n    \"notifications\": {\n      \"unread_count\": 1\n    },\n    \"incoming_orders\": [],\n    \"active_order\": {\n      \"id\": 8842,\n      \"order_number\": \"MET-8842\",\n      \"status\": \"accepted\",\n      \"priority\": \"urgent\",\n      \"distance_km\": 4.2,\n      \"pickup_address\": \"???? ????? ?????? - ???? ???????\",\n      \"dropoff_address\": \"?? ?????? - ???? ?????? ????\",\n      \"estimated_fee\": 45,\n      \"created_at\": \"2026-01-01T10:00:00Z\",\n      \"can_start\": false\n    }\n  }\n}"
                         },
                         {
                             "name": "Unauthorized",
@@ -2434,7 +2434,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"Unauthenticated.\"\n}"
@@ -2446,7 +2446,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"status\": \"pending_approval\",\n  \"message\": \"حسابك قيد المراجعة.\"\n}"
@@ -2461,7 +2461,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -2470,7 +2470,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -2483,11 +2483,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -2499,7 +2499,7 @@
                             "raw": "{\n  \"status\": \"online\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/courier\/availability",
+                            "raw": "{{base_url}}/api/metwgo/courier/availability",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -2520,7 +2520,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم تحديث حالة الاستقبال\",\n  \"data\": {\n    \"availability_status\": \"online\",\n    \"online_started_at\": \"2026-01-01T10:00:00Z\",\n    \"online_duration_seconds\": 0\n  }\n}"
@@ -2532,7 +2532,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"status\": \"pending_approval\",\n  \"message\": \"لا يمكن تفعيل الحساب قبل الموافقة عليه.\"\n}"
@@ -2544,7 +2544,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"status\": \"offline\",\n  \"message\": \"لا يمكن استقبال الطلبات في وضع عدم الاتصال.\"\n}"
@@ -2556,7 +2556,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"status\": [\"The selected status is invalid.\"]\n  }\n}"
@@ -2571,7 +2571,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -2580,7 +2580,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -2593,7 +2593,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -2601,7 +2601,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/orders\/incoming?page=1&status=pending&limit=10",
+                            "raw": "{{base_url}}/api/metwgo/orders/incoming?page=1&limit=10",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -2615,10 +2615,6 @@
                                 {
                                     "key": "page",
                                     "value": "1"
-                                },
-                                {
-                                    "key": "status",
-                                    "value": "pending"
                                 },
                                 {
                                     "key": "limit",
@@ -2636,10 +2632,10 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 8842,\n      \"order_number\": \"MET-8842\",\n      \"priority\": \"urgent\",\n      \"distance_km\": 4.2,\n      \"pickup_address\": \"مطعم شواية الخليج - طريق التخصصي\",\n      \"dropoff_address\": \"حي النخيل - شارع الأمير سعود\",\n      \"estimated_fee\": 0,\n      \"status\": \"pending\",\n      \"created_at\": \"2026-01-01T10:00:00Z\"\n    }\n  ],\n  \"meta\": {\n    \"current_page\": 1,\n    \"has_more\": false\n  }\n}"
+                            "body": "{\n  \"success\": true,\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": 8842,\n        \"order_number\": \"MET-8842\",\n        \"status\": \"pending\",\n        \"priority\": \"urgent\",\n        \"distance_km\": 4.2,\n        \"pickup_address\": \"???? ????? ?????? - ???? ???????\",\n        \"dropoff_address\": \"?? ?????? - ???? ?????? ????\",\n        \"estimated_fee\": 45,\n        \"created_at\": \"2026-01-01T10:00:00Z\",\n        \"can_start\": true\n      }\n    ],\n    \"meta\": {\n      \"current_page\": 1,\n      \"has_more\": false,\n      \"total\": 1\n    }\n  }\n}"
                         },
                         {
                             "name": "Forbidden - courier not approved",
@@ -2648,7 +2644,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"status\": \"pending_approval\",\n  \"message\": \"لا يمكن عرض الطلبات قبل الموافقة على الحساب.\"\n}"
@@ -2660,7 +2656,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"status\": \"offline\",\n  \"message\": \"الرجاء التفعيل على الإنترنت لعرض الطلبات.\"\n}"
@@ -2675,7 +2671,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -2684,7 +2680,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -2697,7 +2693,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -2705,7 +2701,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/orders\/{{order_id}}",
+                            "raw": "{{base_url}}/api/metwgo/orders/{{order_id}}",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -2716,7 +2712,7 @@
                                 "{{order_id}}"
                             ]
                         },
-                        "description": "Open order details from the incoming orders screen."
+                        "description": "Open order details from the incoming orders screen or the active order card."
                     },
                     "response": [
                         {
@@ -2726,7 +2722,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 8842,\n    \"order_number\": \"MET-8842\",\n    \"priority\": \"urgent\",\n    \"distance_km\": 4.2,\n    \"pickup_address\": \"مطعم شواية الخليج - طريق التخصصي\",\n    \"dropoff_address\": \"حي النخيل - شارع الأمير سعود\",\n    \"sender\": {\n      \"name\": \"اسم المرسل\",\n      \"phone\": \"010xxxxxxxx\"\n    },\n    \"receiver\": {\n      \"name\": \"اسم المستلم\",\n      \"phone\": \"010xxxxxxxx\"\n    },\n    \"parcels\": [\n      {\n        \"description\": \"طرد\",\n        \"weight\": 2,\n        \"volume\": 0.01\n      }\n    ],\n    \"fee\": 0,\n    \"status\": \"pending\"\n  }\n}"
@@ -2738,10 +2734,10 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": false,\n  \"message\": \"Order not found.\"\n}"
+                            "body": "{\n  \"success\": false,\n  \"message\": \"????? ??? ???? ???? ???????.\"\n}"
                         }
                     ],
                     "event": [
@@ -2753,7 +2749,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -2762,24 +2758,24 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
                     ]
                 },
                 {
-                    "name": "Start \/ accept incoming order",
+                    "name": "Start / accept incoming order",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -2791,7 +2787,7 @@
                             "raw": "{\n  \"accepted_fee\": null\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/orders\/{{order_id}}\/start",
+                            "raw": "{{base_url}}/api/metwgo/orders/{{order_id}}/start",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -2813,10 +2809,10 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"تم بدء الطلب\",\n  \"data\": {\n    \"active_order\": {\n      \"id\": 8842,\n      \"order_number\": \"MET-8842\",\n      \"status\": \"in_progress\",\n      \"label\": \"طلب جاري\"\n    }\n  }\n}"
+                            "body": "{\n  \"success\": true,\n  \"message\": \"?? ??? ?????\",\n  \"data\": {\n    \"active_order\": {\n      \"id\": 8842,\n      \"order_number\": \"MET-8842\",\n      \"status\": \"accepted\",\n      \"label\": \"??? ????\"\n    }\n  }\n}"
                         },
                         {
                             "name": "Validation error",
@@ -2825,7 +2821,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"accepted_fee\": [\"The accepted fee field is required.\"]\n  }\n}"
@@ -2837,7 +2833,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"status\": \"pending_approval\",\n  \"message\": \"لا يمكن بدء الطلب قبل الموافقة على الحساب.\"\n}"
@@ -2849,7 +2845,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"status\": \"offline\",\n  \"message\": \"لا يمكن بدء الطلب وأنت غير متصل.\"\n}"
@@ -2861,7 +2857,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"You already have an active order.\"\n}"
@@ -2873,10 +2869,10 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": false,\n  \"message\": \"This order has already been taken by another courier.\"\n}"
+                            "body": "{\n  \"success\": false,\n  \"message\": \"????? ??? ???? ???? ???????.\"\n}"
                         },
                         {
                             "name": "Not found",
@@ -2885,7 +2881,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"Order not found.\"\n}"
@@ -2900,7 +2896,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -2909,7 +2905,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -2922,11 +2918,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -2938,7 +2934,7 @@
                             "raw": "{\n  \"reason_id\": 1,\n  \"custom_reason\": \"العميل طلب إلغاء\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/orders\/{{orderId}}\/reject",
+                            "raw": "{{base_url}}/api/metwgo/orders/{{order_id}}/reject",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -2946,7 +2942,7 @@
                                 "api",
                                 "metwgo",
                                 "orders",
-                                "{{orderId}}",
+                                "{{order_id}}",
                                 "reject"
                             ]
                         }
@@ -2959,22 +2955,22 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم رفض الطلب\",\n  \"data\": {\n    \"order_id\": 1,\n    \"status\": \"rejected\",\n    \"reason\": \"Other reason\",\n    \"custom_reason\": \"العميل طلب إلغاء\"\n  }\n}"
                         },
                         {
-                            "name": "Conflict - already taken",
-                            "status": "Conflict",
-                            "code": 409,
+                            "name": "Not found",
+                            "status": "Not Found",
+                            "code": 404,
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": false,\n  \"message\": \"لم يتم العثور على الطلب أو تم أخذه بواسطة مندوب آخر.\"\n}"
+                            "body": "{\n  \"success\": false,\n  \"message\": \"????? ??? ???? ???? ???????.\"\n}"
                         }
                     ],
                     "event": [
@@ -2986,7 +2982,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -2995,7 +2991,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3008,7 +3004,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3016,7 +3012,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/orders\/active",
+                            "raw": "{{base_url}}/api/metwgo/orders/active",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3036,10 +3032,10 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 8842,\n    \"order_number\": \"MET-8842\",\n    \"status\": \"in_progress\"\n  }\n}"
+                            "body": "{\n  \"success\": true,\n  \"data\": {\n    \"active_order\": {\n      \"id\": 8842,\n      \"order_number\": \"MET-8842\",\n      \"status\": \"accepted\",\n      \"priority\": \"urgent\",\n      \"distance_km\": 4.2,\n      \"pickup_address\": \"???? ????? ?????? - ???? ???????\",\n      \"dropoff_address\": \"?? ?????? - ???? ?????? ????\",\n      \"estimated_fee\": 45,\n      \"created_at\": \"2026-01-01T10:00:00Z\",\n      \"can_start\": false\n    }\n  }\n}"
                         }
                     ],
                     "event": [
@@ -3051,7 +3047,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3060,7 +3056,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3073,7 +3069,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3081,7 +3077,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/notifications\/count",
+                            "raw": "{{base_url}}/api/metwgo/notifications/count",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3101,7 +3097,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": {\n    \"unread_count\": 1\n  }\n}"
@@ -3116,7 +3112,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3125,7 +3121,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3138,7 +3134,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3146,7 +3142,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/wallet\/summary",
+                            "raw": "{{base_url}}/api/metwgo/wallet/summary",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3166,7 +3162,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": {\n    \"balance\": 1240,\n    \"currency\": \"EGP\"\n  }\n}"
@@ -3181,7 +3177,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3190,7 +3186,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3203,11 +3199,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3219,7 +3215,7 @@
                             "raw": "{\n  \"amount\": 500,\n  \"method\": \"bank_wallet\",\n  \"account_reference\": \"010xxxxxxxx\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/wallet\/withdrawals",
+                            "raw": "{{base_url}}/api/metwgo/wallet/withdrawals",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3239,7 +3235,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم إرسال طلب سحب الرصيد\",\n  \"data\": {\n    \"withdrawal_id\": 10,\n    \"status\": \"pending\"\n  }\n}"
@@ -3251,7 +3247,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": false,\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"amount\": [\"The amount must not exceed wallet balance.\"],\n    \"method\": [\"The selected method is invalid.\"]\n  }\n}"
@@ -3266,7 +3262,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3275,7 +3271,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3288,7 +3284,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3296,7 +3292,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/shipping-requests\/incoming",
+                            "raw": "{{base_url}}/api/metwgo/shipping-requests/incoming",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3316,7 +3312,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": []\n}"
@@ -3331,7 +3327,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3340,7 +3336,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3353,7 +3349,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3361,7 +3357,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/shipping-requests\/{{orderId}}",
+                            "raw": "{{base_url}}/api/metwgo/shipping-requests/{{orderId}}",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3381,7 +3377,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"request_number\": \"SHR-00000001\"\n  }\n}"
@@ -3396,7 +3392,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3405,24 +3401,24 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
                     ]
                 },
                 {
-                    "name": "Start \/ accept shipping request",
+                    "name": "Start / accept shipping request",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3434,7 +3430,7 @@
                             "raw": "{}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/shipping-requests\/{{orderId}}\/start",
+                            "raw": "{{base_url}}/api/metwgo/shipping-requests/{{orderId}}/start",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3455,7 +3451,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم بدء طلب الشحن\",\n  \"data\": {\n    \"active_shipping_request\": {\n      \"id\": 1,\n      \"request_number\": \"SHR-00000001\",\n      \"status\": \"assigned\"\n    }\n  }\n}"
@@ -3470,7 +3466,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3479,7 +3475,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3492,11 +3488,11 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3508,7 +3504,7 @@
                             "raw": "{\n  \"reason_id\": 1,\n  \"custom_reason\": \"مشغول حالياً\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/shipping-requests\/{{orderId}}\/reject",
+                            "raw": "{{base_url}}/api/metwgo/shipping-requests/{{orderId}}/reject",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3529,7 +3525,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم رفض طلب الشحن\",\n  \"data\": {\n    \"request_id\": 1,\n    \"status\": \"rejected\",\n    \"reason\": \"Other\"\n  }\n}"
@@ -3544,7 +3540,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3553,7 +3549,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3566,7 +3562,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3574,7 +3570,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/shipping-requests\/active",
+                            "raw": "{{base_url}}/api/metwgo/shipping-requests/active",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3594,7 +3590,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": {\n    \"active_shipping_request\": null\n  }\n}"
@@ -3609,7 +3605,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3618,7 +3614,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3636,7 +3632,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3644,7 +3640,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/admin\/metwgo\/couriers\/pending",
+                            "raw": "{{base_url}}/api/metwgo/admin/metwgo/couriers/pending",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3666,7 +3662,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"data\": {\n    \"couriers\": [{\n      \"id\": 1,\n      \"name\": \"أحمد محمد\",\n      \"phone\": \"01099999999\",\n      \"email\": \"ahmed@example.com\",\n      \"status\": \"pending_approval\",\n      \"is_profile_complete\": false\n    }],\n    \"total\": 1\n  }\n}"
@@ -3681,7 +3677,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3690,7 +3686,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3703,7 +3699,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3711,11 +3707,11 @@
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/admin\/metwgo\/couriers\/1\/approve",
+                            "raw": "{{base_url}}/api/metwgo/admin/metwgo/couriers/1/approve",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3738,7 +3734,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم اعتماد المندوب بنجاح\"\n}"
@@ -3753,7 +3749,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3762,7 +3758,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }
@@ -3775,7 +3771,7 @@
                         "header": [
                             {
                                 "key": "Accept",
-                                "value": "application\/json"
+                                "value": "application/json"
                             },
                             {
                                 "key": "Authorization",
@@ -3783,7 +3779,7 @@
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json"
+                                "value": "application/json"
                             }
                         ],
                         "body": {
@@ -3791,7 +3787,7 @@
                             "raw": "{\n  \"rejection_reason\": \"مستندات ناقصة\"\n}"
                         },
                         "url": {
-                            "raw": "{{base_url}}\/api\/metwgo\/admin\/metwgo\/couriers\/1\/reject",
+                            "raw": "{{base_url}}/api/metwgo/admin/metwgo/couriers/1/reject",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -3814,7 +3810,7 @@
                             "header": [
                                 {
                                     "key": "Content-Type",
-                                    "value": "application\/json"
+                                    "value": "application/json"
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"تم رفض المندوب بنجاح\"\n}"
@@ -3829,7 +3825,7 @@
                                     "});",
                                     "pm.test(\"Response is JSON\", function () {",
                                     "    pm.response.to.have.header(\"Content-Type\");",
-                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application\/json\");",
+                                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                                     "});",
                                     "if (pm.response.code !== 401 && pm.response.code !== 500) {",
                                     "    pm.test(\"Response has success field\", function () {",
@@ -3838,7 +3834,7 @@
                                     "    });",
                                     "}"
                                 ],
-                                "type": "text\/javascript"
+                                "type": "text/javascript"
                             },
                             "listen": "test"
                         }

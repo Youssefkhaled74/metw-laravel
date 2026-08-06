@@ -52,6 +52,7 @@ class OrderController extends Controller
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $status = $e->validator->errors()->first('approval_status');
+
             return responseJson(false, 'لا يمكن عرض الطلبات قبل الموافقة على الحساب.', [
                 'status' => $status,
             ], 403);
@@ -67,20 +68,19 @@ class OrderController extends Controller
         try {
             $user = $request->user();
             $representative = $this->metwGoCourierService->assertRepresentativeExists($user);
+            $this->metwGoCourierService->assertApproved($representative);
 
-            $orderItem = OrderItem::with([
-                'order',
-                'package.packageDetails',
-                'package.pickupAddress',
-                'package.dropoffAddress',
-                'route',
-            ])->findOrFail($orderId);
+            $orderItem = $this->metwGoCourierService->findOrderForRepresentative($representative, (int) $orderId);
 
-            $details = $this->metwGoCourierService->formatOrderDetails($orderItem);
+            return responseJson(true, '', $this->metwGoCourierService->formatOrderDetails($orderItem), 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $status = $e->validator->errors()->first('approval_status');
 
-            return responseJson(true, '', $details, 200);
+            return responseJson(false, 'لا يمكن عرض تفاصيل الطلب قبل الموافقة على الحساب.', [
+                'status' => $status,
+            ], 403);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return responseJson(false, 'Order not found.', null, 404);
+            return responseJson(false, 'الطلب غير متاح لهذا المندوب.', null, 404);
         } catch (\Throwable $th) {
             return responseJson(false, $th->getMessage(), null, 500);
         }
@@ -105,27 +105,37 @@ class OrderController extends Controller
                 ], 403);
             }
 
-            $hasActive = $this->metwGoCourierService->activeOrderQuery($representative)->exists();
-
-            if ($hasActive) {
+            if ($this->metwGoCourierService->activeOrderQuery($representative)->exists()) {
                 return responseJson(false, 'You already have an active order.', null, 409);
             }
 
-            $orderItem = OrderItem::where('id', $orderId)
-                ->whereNull('representative_id')
-                ->where('status', 'pending')
-                ->firstOrFail();
+            $orderItem = DB::transaction(function () use ($representative, $orderId, $validated) {
+                $eligibleOrder = $this->metwGoCourierService->incomingOrdersQuery($representative)
+                    ->whereKey((int) $orderId)
+                    ->firstOrFail();
 
-            $orderItem->update([
-                'representative_id' => $representative->id,
-                'accepted_fee' => $validated['accepted_fee'] ?? $orderItem->est_price,
-                'accepted_at' => now(),
-                'status' => 'accepted',
-            ]);
+                $orderItem = OrderItem::query()
+                    ->whereKey($eligibleOrder->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            $metadata = $orderItem->order?->metadata ?? [];
-            $metadata['active_courier_id'] = $representative->id;
-            $orderItem->order?->update(['metadata' => $metadata]);
+                if ($orderItem->representative_id !== null || $orderItem->status !== 'pending') {
+                    throw new \RuntimeException('order_unavailable');
+                }
+
+                $orderItem->update([
+                    'representative_id' => $representative->id,
+                    'accepted_fee' => $validated['accepted_fee'] ?? $orderItem->est_price,
+                    'accepted_at' => now(),
+                    'status' => 'accepted',
+                ]);
+
+                $metadata = $orderItem->order?->metadata ?? [];
+                $metadata['active_courier_id'] = $representative->id;
+                $orderItem->order?->update(['metadata' => $metadata]);
+
+                return $orderItem->fresh(['order']);
+            });
 
             return responseJson(true, 'تم بدء الطلب', [
                 'active_order' => [
@@ -135,13 +145,17 @@ class OrderController extends Controller
                     'label' => 'طلب جاري',
                 ],
             ], 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            if (str_contains($e->getMessage(), 'OrderItem')) {
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() === 'order_unavailable') {
                 return responseJson(false, 'This order has already been taken by another courier.', null, 409);
             }
-            return responseJson(false, 'Order not found.', null, 404);
+
+            throw $e;
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return responseJson(false, 'الطلب غير متاح لهذا المندوب.', null, 404);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $status = $e->validator->errors()->first('approval_status');
+
             return responseJson(false, 'لا يمكن بدء الطلب قبل الموافقة على الحساب.', [
                 'status' => $status,
             ], 403);
@@ -164,17 +178,29 @@ class OrderController extends Controller
 
             $reason = RejectionReason::findOrFail($validated['reason_id']);
 
-            $orderItem = OrderItem::where('id', $orderId)
-                ->whereNull('representative_id')
-                ->where('status', 'pending')
-                ->firstOrFail();
+            $orderItem = DB::transaction(function () use ($representative, $orderId, $validated) {
+                $eligibleOrder = $this->metwGoCourierService->incomingOrdersQuery($representative)
+                    ->whereKey((int) $orderId)
+                    ->firstOrFail();
 
-            $orderItem->update([
-                'status' => OrderStatus::REJECTED->value,
-                'rejection_reason_id' => $validated['reason_id'],
-                'rejection_note' => $validated['custom_reason'] ?? null,
-                'rejected_at' => now(),
-            ]);
+                $orderItem = OrderItem::query()
+                    ->whereKey($eligibleOrder->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if ($orderItem->representative_id !== null || $orderItem->status !== 'pending') {
+                    throw new \RuntimeException('order_unavailable');
+                }
+
+                $orderItem->update([
+                    'status' => OrderStatus::REJECTED->value,
+                    'rejection_reason_id' => $validated['reason_id'],
+                    'rejection_note' => $validated['custom_reason'] ?? null,
+                    'rejected_at' => now(),
+                ]);
+
+                return $orderItem;
+            });
 
             return responseJson(true, 'تم رفض الطلب', [
                 'order_id' => (int) $orderItem->id,
@@ -182,18 +208,27 @@ class OrderController extends Controller
                 'reason' => $reason->reason_text,
                 'custom_reason' => $validated['custom_reason'] ?? null,
             ], 200);
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() === 'order_unavailable') {
+                return responseJson(false, 'لم يتم العثور على الطلب أو تم أخذه بواسطة مندوب آخر.', null, 409);
+            }
+
+            throw $e;
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             if (str_contains($e->getMessage(), 'RejectionReason')) {
                 return responseJson(false, 'سبب الرفض غير موجود.', null, 404);
             }
-            return responseJson(false, 'لم يتم العثور على الطلب أو تم أخذه بواسطة مندوب آخر.', null, 409);
+
+            return responseJson(false, 'الطلب غير متاح لهذا المندوب.', null, 404);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $status = $e->validator->errors()->first('approval_status');
+
             if ($status) {
                 return responseJson(false, 'لا يمكن رفض الطلب قبل الموافقة على الحساب.', [
                     'status' => $status,
                 ], 403);
             }
+
             throw $e;
         } catch (\Throwable $th) {
             return responseJson(false, $th->getMessage(), null, 500);
@@ -206,10 +241,9 @@ class OrderController extends Controller
             $user = $request->user();
             $representative = $this->metwGoCourierService->assertRepresentativeExists($user);
 
-            $activeOrder = $this->metwGoCourierService->activeOrderQuery($representative)
-                ->first();
+            $activeOrder = $this->metwGoCourierService->activeOrderQuery($representative)->first();
 
-            if (!$activeOrder) {
+            if (! $activeOrder) {
                 return responseJson(true, '', ['active_order' => null], 200);
             }
 

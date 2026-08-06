@@ -10,21 +10,13 @@ use App\Models\State;
 use App\Models\Warehouse;
 use App\Models\WarehouseBusinessProfile;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class WarehouseSeeder extends Seeder
 {
     public function run(): void
     {
-        $country = $this->findCountry(['Egypt', 'مصر']);
-
-        if (! $country) {
-            $country = Country::withoutGlobalScopes()->create([
-                'name_en' => 'Egypt',
-                'name_ar' => 'مصر',
-                'phone_code' => '+20',
-                'is_active' => true,
-            ]);
-        }
+        $country = $this->firstOrCreateCountry();
 
         $warehouses = [
             [
@@ -121,26 +113,17 @@ class WarehouseSeeder extends Seeder
         ];
 
         foreach ($warehouses as $warehouseData) {
-            $governorate = $this->findGovernorate($warehouseData['governorate']);
-
-            if (! $governorate) {
-                continue;
-            }
-
-            $state = $this->findStateByGovernorate($governorate);
-            $city = $this->findCity($warehouseData['city'], $governorate->id, $state?->id);
-
-            if (! $city) {
-                continue;
-            }
+            $governorate = $this->firstOrCreateGovernorate($warehouseData['governorate']);
+            $state = $this->firstOrCreateState($country->id, $warehouseData['governorate']);
+            $city = $this->firstOrCreateCity($warehouseData['city'], $governorate->id, $state->id);
 
             $warehouse = Warehouse::withTrashed()->updateOrCreate(
                 ['name' => $warehouseData['name']],
-                [
+                $this->filterExistingColumns('warehouses', [
                     'phone' => $warehouseData['phone'],
                     'country_id' => $country->id,
                     'governorate_id' => $governorate->id,
-                    'state_id' => $state?->id,
+                    'state_id' => $state->id,
                     'city_id' => $city->id,
                     'district_or_village_name' => $warehouseData['district_or_village_name'],
                     'district_or_village_type' => $warehouseData['district_or_village_type'],
@@ -158,7 +141,7 @@ class WarehouseSeeder extends Seeder
                     'latitude' => $warehouseData['latitude'],
                     'longitude' => $warehouseData['longitude'],
                     'is_main' => $warehouseData['is_main'],
-                ]
+                ])
             );
 
             if ($warehouse->trashed()) {
@@ -197,40 +180,72 @@ class WarehouseSeeder extends Seeder
         }
     }
 
-    private function findCountry(array $names): ?Country
+    private function firstOrCreateCountry(): Country
     {
-        return Country::withoutGlobalScopes()
-            ->where(function ($query) use ($names) {
-                foreach ($names as $name) {
-                    $query->orWhere('name_en', $name)
-                        ->orWhere('name_ar', $name);
-                }
+        $country = Country::withoutGlobalScopes()
+            ->where(function ($query) {
+                $query->where('name_en', 'Egypt')
+                    ->orWhere('name_ar', 'مصر');
             })
             ->first();
+
+        if ($country) {
+            return $country;
+        }
+
+        return Country::withoutGlobalScopes()->create([
+            'name_en' => 'Egypt',
+            'name_ar' => 'مصر',
+            'phone_code' => '+20',
+            'is_active' => true,
+        ]);
     }
 
-    private function findGovernorate(array $names): ?Governorate
+    private function firstOrCreateGovernorate(array $names): Governorate
     {
-        return Governorate::withoutGlobalScopes()
+        $governorate = Governorate::withoutGlobalScopes()
             ->where(function ($query) use ($names) {
                 foreach ($names as $name) {
                     $query->orWhere('name_ar', $name);
                 }
             })
             ->first();
+
+        if ($governorate) {
+            return $governorate;
+        }
+
+        return Governorate::withoutGlobalScopes()->create([
+            'governorate_number' => ((int) (Governorate::withoutGlobalScopes()->max('governorate_number') ?? 0)) + 1,
+            'name_ar' => $names[1] ?? $names[0],
+            'is_active' => true,
+        ]);
     }
 
-    private function findStateByGovernorate(Governorate $governorate): ?State
+    private function firstOrCreateState(int $countryId, array $names): State
     {
-        return State::withoutGlobalScopes()
-            ->where(function ($query) use ($governorate) {
-                $query->where('name_ar', $governorate->name_ar)
-                    ->orWhere('name_en', $governorate->name_ar);
+        $state = State::withoutGlobalScopes()
+            ->where(function ($query) use ($names) {
+                foreach ($names as $name) {
+                    $query->orWhere('name_ar', $name)
+                        ->orWhere('name_en', $name);
+                }
             })
             ->first();
+
+        if ($state) {
+            return $state;
+        }
+
+        return State::withoutGlobalScopes()->create([
+            'name_en' => $names[0],
+            'name_ar' => $names[1] ?? $names[0],
+            'country_id' => $countryId,
+            'is_active' => true,
+        ]);
     }
 
-    private function findCity(array $names, int $governorateId, ?int $stateId): ?City
+    private function firstOrCreateCity(array $names, int $governorateId, int $stateId): City
     {
         $city = City::withoutGlobalScopes()
             ->where('governorate_id', $governorateId)
@@ -246,18 +261,21 @@ class WarehouseSeeder extends Seeder
             return $city;
         }
 
-        if (! $stateId) {
-            return null;
-        }
+        return City::withoutGlobalScopes()->create([
+            'name_en' => $names[0],
+            'name_ar' => $names[1] ?? $names[0],
+            'state_id' => $stateId,
+            'governorate_id' => $governorateId,
+            'excel_sort' => ((int) (City::withoutGlobalScopes()->where('governorate_id', $governorateId)->max('excel_sort') ?? 0)) + 1,
+            'is_capital' => false,
+            'is_active' => true,
+        ]);
+    }
 
-        return City::withoutGlobalScopes()
-            ->where('state_id', $stateId)
-            ->where(function ($query) use ($names) {
-                foreach ($names as $name) {
-                    $query->orWhere('name_ar', $name)
-                        ->orWhere('name_en', $name);
-                }
-            })
-            ->first();
+    private function filterExistingColumns(string $table, array $attributes): array
+    {
+        return collect($attributes)
+            ->filter(fn ($value, $column) => Schema::hasColumn($table, $column))
+            ->all();
     }
 }

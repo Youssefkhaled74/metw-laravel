@@ -14,10 +14,13 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    private const OTP_EXPIRES_IN_SECONDS = 300;
+
+    private const OTP_RESEND_AFTER_SECONDS = 20;
+
     public function __construct(
         protected MetwGoCourierService $metwGoCourierService
     ) {}
@@ -29,41 +32,72 @@ class AuthController extends Controller
 
             $user = User::where('phone', $validated['phone'])->first();
 
-            if (!$user || !Hash::check($validated['password'], $user->password)) {
-                return responseJson(false, 'بيانات الدخول غير صحيحة.', null, 401);
+            if (! $user || ! Hash::check($validated['password'], $user->password)) {
+                return $this->authError(
+                    'بيانات تسجيل الدخول غير صحيحة.',
+                    401,
+                    'login',
+                    'invalid_credentials'
+                );
             }
 
             $representative = $user->representative;
 
-            if (!$representative) {
-                return responseJson(false, 'لم يتم العثور على حساب مندوب.', null, 404);
+            if (! $representative) {
+                return $this->authError(
+                    'لم يتم العثور على حساب مندوب.',
+                    404,
+                    'login',
+                    'courier_not_found'
+                );
             }
 
             $approvalStatus = $this->metwGoCourierService->approvalStatus($representative);
 
             if ($approvalStatus === 'pending_approval') {
-                return responseJson(false, 'حسابك قيد المراجعة، وسيتم تفعيل الدخول بعد الموافقة عليه.', [
-                    'status' => 'pending_approval',
-                ], 403);
+                return $this->authError(
+                    'حسابك قيد المراجعة، وسيتم تفعيل الدخول بعد الموافقة عليه.',
+                    403,
+                    'waiting_approval',
+                    'pending_approval',
+                    [
+                        'status' => 'pending_approval',
+                        'next_action' => 'wait_for_approval',
+                    ]
+                );
             }
 
-            if (in_array($approvalStatus, ['rejected', 'suspended'])) {
+            if (in_array($approvalStatus, ['rejected', 'suspended'], true)) {
                 $message = $approvalStatus === 'suspended'
                     ? 'تم إيقاف الحساب. الرجاء التواصل مع الدعم.'
                     : 'تم رفض الحساب. الرجاء التواصل مع الدعم.';
 
-                return responseJson(false, $message, [
-                    'status' => $approvalStatus,
-                ], 403);
+                return $this->authError(
+                    $message,
+                    403,
+                    'login',
+                    $approvalStatus,
+                    [
+                        'status' => $approvalStatus,
+                        'next_action' => 'contact_support',
+                    ]
+                );
             }
 
             if ($approvalStatus !== 'approved') {
-                return responseJson(false, 'حسابك غير مكتمل. يرجى إكمال التسجيل أولاً.', [
-                    'status' => $approvalStatus,
-                ], 403);
+                return $this->authError(
+                    'حسابك غير مكتمل. يرجى إكمال التسجيل أولاً.',
+                    403,
+                    'login',
+                    'registration_incomplete',
+                    [
+                        'status' => $approvalStatus,
+                        'next_action' => 'complete_registration',
+                    ]
+                );
             }
 
-            if (!empty($validated['device_token'])) {
+            if (! empty($validated['device_token'])) {
                 $user->update(['fcm_token' => $validated['device_token']]);
             }
 
@@ -74,9 +108,15 @@ class AuthController extends Controller
                 'access_token' => $accessToken,
                 'token_type' => 'Bearer',
                 'courier' => $courier,
+                'next_screen' => 'home',
             ], 200);
         } catch (\Throwable $th) {
-            return responseJson(false, $th->getMessage(), null, 500);
+            return $this->authError(
+                'حدث خطأ غير متوقع أثناء تسجيل الدخول.',
+                500,
+                'login',
+                'login_failed'
+            );
         }
     }
 
@@ -85,9 +125,16 @@ class AuthController extends Controller
         try {
             $request->user()->currentAccessToken()->delete();
 
-            return responseJson(true, 'تم تسجيل الخروج بنجاح');
+            return responseJson(true, 'تم تسجيل الخروج بنجاح', [
+                'next_screen' => 'login',
+            ]);
         } catch (\Throwable $th) {
-            return responseJson(false, $th->getMessage(), null, 500);
+            return $this->authError(
+                'حدث خطأ غير متوقع أثناء تسجيل الخروج.',
+                500,
+                'logout',
+                'logout_failed'
+            );
         }
     }
 
@@ -98,16 +145,27 @@ class AuthController extends Controller
 
             $user = User::where('phone', $request->phone)->first();
 
-            if (!$user) {
-                return responseJson(false, 'رقم الهاتف غير مسجل.', null, 404);
+            if (! $user) {
+                return $this->authError(
+                    'رقم الهاتف غير مسجل.',
+                    404,
+                    'forgot_password',
+                    'phone_not_found'
+                );
             }
 
             $cooldown = $this->metwGoCourierService->otpCooldownSeconds($user, 'forgot_password');
 
             if ($cooldown > 0) {
-                return responseJson(false, 'يرجى الانتظار قبل طلب رمز جديد.', [
-                    'retry_after_seconds' => $cooldown,
-                ], 429);
+                return $this->authError(
+                    'يرجى الانتظار قبل طلب رمز جديد.',
+                    429,
+                    'forgot_password',
+                    'otp_cooldown',
+                    [
+                        'retry_after_seconds' => $cooldown,
+                    ]
+                );
             }
 
             $this->createOtp($user, OtpPurpose::PASSWORD_RESET);
@@ -115,11 +173,17 @@ class AuthController extends Controller
 
             return responseJson(true, 'تم إرسال رمز التحقق', [
                 'masked_phone' => $maskedPhone,
-                'expires_in_seconds' => 300,
-                'resend_after_seconds' => 20,
+                'expires_in_seconds' => self::OTP_EXPIRES_IN_SECONDS,
+                'resend_after_seconds' => self::OTP_RESEND_AFTER_SECONDS,
+                'next_screen' => 'otp',
             ], 200);
         } catch (\Throwable $th) {
-            return responseJson(false, $th->getMessage(), null, 500);
+            return $this->authError(
+                'حدث خطأ غير متوقع أثناء إرسال رمز التحقق.',
+                500,
+                'forgot_password',
+                'otp_send_failed'
+            );
         }
     }
 
@@ -130,8 +194,13 @@ class AuthController extends Controller
 
             $user = User::where('phone', $validated['phone'])->first();
 
-            if (!$user) {
-                return responseJson(false, 'رقم الهاتف غير مسجل.', null, 404);
+            if (! $user) {
+                return $this->authError(
+                    'رقم الهاتف غير مسجل.',
+                    404,
+                    'otp',
+                    'phone_not_found'
+                );
             }
 
             $purpose = match ($validated['purpose'] ?? 'forgot_password') {
@@ -143,22 +212,34 @@ class AuthController extends Controller
 
             $isValid = $this->validateOtp($user, $validated['otp'], $purpose);
 
-            if (!$isValid) {
-                return responseJson(false, 'رمز التحقق غير صالح أو منتهي الصلاحية.', null, 422);
+            if (! $isValid) {
+                return $this->authError(
+                    'رمز التحقق غير صالح أو منتهي الصلاحية.',
+                    422,
+                    'otp',
+                    'otp_invalid'
+                );
             }
 
-            $data = [];
+            $data = [
+                'purpose' => $validated['purpose'] ?? 'forgot_password',
+                'next_screen' => $purpose === OtpPurpose::PASSWORD_RESET ? 'reset_password' : null,
+            ];
 
             if ($purpose === OtpPurpose::PASSWORD_RESET) {
-                $resetToken = $this->metwGoCourierService->createResetToken($user);
-                $data['reset_token'] = $resetToken;
+                $data['reset_token'] = $this->metwGoCourierService->createResetToken($user);
             }
 
             $this->markOtpUsed($user, $purpose);
 
-            return responseJson(true, 'تم التحقق بنجاح', $data, 200);
+            return responseJson(true, 'تم التحقق من الرمز بنجاح', $data, 200);
         } catch (\Throwable $th) {
-            return responseJson(false, $th->getMessage(), null, 500);
+            return $this->authError(
+                'حدث خطأ غير متوقع أثناء التحقق من الرمز.',
+                500,
+                'otp',
+                'otp_verify_failed'
+            );
         }
     }
 
@@ -172,8 +253,13 @@ class AuthController extends Controller
 
             $user = User::where('phone', $request->phone)->first();
 
-            if (!$user) {
-                return responseJson(false, 'رقم الهاتف غير مسجل.', null, 404);
+            if (! $user) {
+                return $this->authError(
+                    'رقم الهاتف غير مسجل.',
+                    404,
+                    'otp',
+                    'phone_not_found'
+                );
             }
 
             $purpose = match ($request->input('purpose', 'forgot_password')) {
@@ -186,19 +272,30 @@ class AuthController extends Controller
             $cooldown = $this->metwGoCourierService->otpCooldownSeconds($user, $purpose->value);
 
             if ($cooldown > 0) {
-                return responseJson(false, 'يرجى الانتظار قبل إعادة إرسال الرمز.', [
-                    'retry_after_seconds' => $cooldown,
-                ], 429);
+                return $this->authError(
+                    'يرجى الانتظار قبل إعادة إرسال الرمز.',
+                    429,
+                    'otp',
+                    'otp_cooldown',
+                    [
+                        'retry_after_seconds' => $cooldown,
+                    ]
+                );
             }
 
             $this->createOtp($user, $purpose);
 
-            return responseJson(true, 'تم إعادة إرسال الرمز', [
-                'expires_in_seconds' => 300,
-                'resend_after_seconds' => 20,
+            return responseJson(true, 'تم إعادة إرسال الرمز بنجاح', [
+                'expires_in_seconds' => self::OTP_EXPIRES_IN_SECONDS,
+                'resend_after_seconds' => self::OTP_RESEND_AFTER_SECONDS,
             ], 200);
         } catch (\Throwable $th) {
-            return responseJson(false, $th->getMessage(), null, 500);
+            return $this->authError(
+                'حدث خطأ غير متوقع أثناء إعادة إرسال الرمز.',
+                500,
+                'otp',
+                'otp_resend_failed'
+            );
         }
     }
 
@@ -209,22 +306,39 @@ class AuthController extends Controller
 
             $user = User::where('phone', $validated['phone'])->first();
 
-            if (!$user) {
-                return responseJson(false, 'رقم الهاتف غير مسجل.', null, 404);
+            if (! $user) {
+                return $this->authError(
+                    'رقم الهاتف غير مسجل.',
+                    404,
+                    'reset_password',
+                    'phone_not_found'
+                );
             }
 
             $isValid = $this->metwGoCourierService->validateResetToken($user, $validated['reset_token']);
 
-            if (!$isValid) {
-                return responseJson(false, 'رمز إعادة التعيين غير صالح أو منتهي الصلاحية.', null, 422);
+            if (! $isValid) {
+                return $this->authError(
+                    'رمز إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية.',
+                    422,
+                    'reset_password',
+                    'reset_token_invalid'
+                );
             }
 
             $user->update(['password' => $validated['password']]);
             $this->metwGoCourierService->clearResetToken($user);
 
-            return responseJson(true, 'تم تحديث كلمة المرور بنجاح', null, 200);
+            return responseJson(true, 'تم تغيير كلمة المرور بنجاح', [
+                'next_screen' => 'login',
+            ], 200);
         } catch (\Throwable $th) {
-            return responseJson(false, $th->getMessage(), null, 500);
+            return $this->authError(
+                'حدث خطأ غير متوقع أثناء تغيير كلمة المرور.',
+                500,
+                'reset_password',
+                'password_reset_failed'
+            );
         }
     }
 
@@ -238,9 +352,14 @@ class AuthController extends Controller
             $user = $request->user();
             $user->update(['password' => $request->password]);
 
-            return responseJson(true, 'تم تغيير كلمة المرور', null, 200);
+            return responseJson(true, 'تم تغيير كلمة المرور بنجاح', null, 200);
         } catch (\Throwable $th) {
-            return responseJson(false, $th->getMessage(), null, 500);
+            return $this->authError(
+                'حدث خطأ غير متوقع أثناء تغيير كلمة المرور.',
+                500,
+                'change_password',
+                'password_change_failed'
+            );
         }
     }
 
@@ -276,5 +395,18 @@ class AuthController extends Controller
         OtpCode::where('user_id', $user->id)
             ->where('purpose', $purpose)
             ->update(['is_used' => true]);
+    }
+
+    private function authError(
+        string $message,
+        int $status,
+        string $screen,
+        string $code,
+        array $data = []
+    ): JsonResponse {
+        return responseJson(false, $message, array_merge([
+            'screen' => $screen,
+            'code' => $code,
+        ], $data), $status);
     }
 }
