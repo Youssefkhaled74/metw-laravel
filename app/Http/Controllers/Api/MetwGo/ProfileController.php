@@ -196,9 +196,16 @@ class ProfileController extends Controller
 
                 foreach ($documentMapping as $field => $docType) {
                     if ($request->hasFile($field)) {
+                        $uploadedFile = $request->file($field);
+                        $mimeType = $uploadedFile?->getMimeType();
+                        $size = $uploadedFile?->getSize();
                         $path = uploadImage($request, $field, 'storage/metwgo/documents');
 
                         if ($path) {
+                            $directory = str_contains($path, '/')
+                                ? dirname($path)
+                                : null;
+
                             $existing = $representative->mediaFiles()
                                 ->where('collection_name', 'representative_documents')
                                 ->where('document_type', $docType->value)
@@ -206,16 +213,30 @@ class ProfileController extends Controller
 
                             if ($existing) {
                                 deleteImage($existing->url);
-                                $existing->update(['url' => $path]);
+                                $existing->update([
+                                    'disk' => 'public',
+                                    'directory' => $directory,
+                                    'filename' => basename($path),
+                                    'original_name' => $uploadedFile?->getClientOriginalName(),
+                                    'extension' => $uploadedFile?->getClientOriginalExtension(),
+                                    'url' => $path,
+                                    'mime_type' => $mimeType,
+                                    'size' => $size,
+                                ]);
                             } else {
                                 MediaFile::create([
                                     'mediable_type' => Representative::class,
                                     'mediable_id' => $representative->id,
                                     'collection_name' => 'representative_documents',
                                     'document_type' => $docType->value,
+                                    'disk' => 'public',
+                                    'directory' => $directory,
+                                    'filename' => basename($path),
+                                    'original_name' => $uploadedFile?->getClientOriginalName(),
+                                    'extension' => $uploadedFile?->getClientOriginalExtension(),
                                     'url' => $path,
-                                    'mime_type' => $request->file($field)->getMimeType(),
-                                    'size' => $request->file($field)->getSize(),
+                                    'mime_type' => $mimeType,
+                                    'size' => $size,
                                 ]);
                             }
                         }

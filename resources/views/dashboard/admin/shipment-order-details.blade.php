@@ -230,6 +230,64 @@
                                         {{ $item->est_date ? \Carbon\Carbon::parse($item->est_date)->format('M d, Y') : '-' }}
                                     </p>
 
+                                    <hr>
+
+                                    <p class="mb-2"><strong>سجل استجابات المناديب:</strong></p>
+
+                                    @php
+                                        $assignmentResponses = $item->assignments->sortByDesc('updated_at');
+                                    @endphp
+
+                                    @if($assignmentResponses->isNotEmpty())
+                                        @foreach($assignmentResponses as $assignment)
+                                            @php
+                                                $representativeName = trim(collect([
+                                                    $assignment->representative->first_name ?? null,
+                                                    $assignment->representative->father_name ?? null,
+                                                    $assignment->representative->last_name ?? null,
+                                                ])->filter()->implode(' '));
+                                            @endphp
+
+                                            <div class="border rounded p-2 mb-2 bg-light">
+                                                <p class="mb-1">
+                                                    <strong>المندوب:</strong>
+                                                    {{ $representativeName ?: ($assignment->representative->user->username ?? '-') }}
+                                                </p>
+                                                <p class="mb-1"><strong>الحالة:</strong> {{ $assignment->status ?? '-' }}</p>
+
+                                                @if($assignment->rejectionReason)
+                                                    <p class="mb-1"><strong>سبب الرفض:</strong> {{ $assignment->rejectionReason->reason_text }}</p>
+                                                @endif
+
+                                                @if($assignment->rejection_note)
+                                                    <p class="mb-1"><strong>ملاحظة:</strong> {{ $assignment->rejection_note }}</p>
+                                                @endif
+
+                                                @if($assignment->responded_at)
+                                                    <p class="mb-0"><strong>وقت الرد:</strong> {{ \Carbon\Carbon::parse($assignment->responded_at)->format('M d, Y H:i') }}</p>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    @elseif($item->rejectionReason || $item->rejection_note || $item->rejected_at)
+                                        <div class="border rounded p-2 mb-2 bg-light">
+                                            <p class="mb-1"><strong>الحالة:</strong> {{ $item->status ?? '-' }}</p>
+
+                                            @if($item->rejectionReason)
+                                                <p class="mb-1"><strong>سبب الرفض:</strong> {{ $item->rejectionReason->reason_text }}</p>
+                                            @endif
+
+                                            @if($item->rejection_note)
+                                                <p class="mb-1"><strong>ملاحظة:</strong> {{ $item->rejection_note }}</p>
+                                            @endif
+
+                                            @if($item->rejected_at)
+                                                <p class="mb-0"><strong>وقت الرفض:</strong> {{ \Carbon\Carbon::parse($item->rejected_at)->format('M d, Y H:i') }}</p>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <p class="text-muted mb-0">لا توجد استجابات مسجلة حتى الآن.</p>
+                                    @endif
+
                                 </div>
 
                             </div>

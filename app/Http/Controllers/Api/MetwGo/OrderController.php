@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api\MetwGo;
 
+use App\Enum\CourierAssignmentStatus;
 use App\Enum\OrderStatus;
+use App\Enum\RequestLegType;
 use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
 use App\Models\RejectionReason;
@@ -130,6 +132,18 @@ class OrderController extends Controller
                     'status' => 'accepted',
                 ]);
 
+                $orderItem->assignments()->updateOrCreate(
+                    ['representative_id' => $representative->id],
+                    [
+                        'leg_type' => RequestLegType::DIRECT_DELIVERY->value,
+                        'status' => CourierAssignmentStatus::ACCEPTED->value,
+                        'offered_at' => now(),
+                        'responded_at' => now(),
+                        'rejection_reason_id' => null,
+                        'rejection_note' => null,
+                    ]
+                );
+
                 $metadata = $orderItem->order?->metadata ?? [];
                 $metadata['active_courier_id'] = $representative->id;
                 $orderItem->order?->update(['metadata' => $metadata]);
@@ -192,12 +206,17 @@ class OrderController extends Controller
                     throw new \RuntimeException('order_unavailable');
                 }
 
-                $orderItem->update([
-                    'status' => OrderStatus::REJECTED->value,
-                    'rejection_reason_id' => $validated['reason_id'],
-                    'rejection_note' => $validated['custom_reason'] ?? null,
-                    'rejected_at' => now(),
-                ]);
+                $orderItem->assignments()->updateOrCreate(
+                    ['representative_id' => $representative->id],
+                    [
+                        'leg_type' => RequestLegType::DIRECT_DELIVERY->value,
+                        'status' => CourierAssignmentStatus::REJECTED->value,
+                        'offered_at' => now(),
+                        'responded_at' => now(),
+                        'rejection_reason_id' => $validated['reason_id'],
+                        'rejection_note' => $validated['custom_reason'] ?? null,
+                    ]
+                );
 
                 return $orderItem;
             });
@@ -205,8 +224,10 @@ class OrderController extends Controller
             return responseJson(true, 'تم رفض الطلب', [
                 'order_id' => (int) $orderItem->id,
                 'status' => OrderStatus::REJECTED->value,
+                'order_status' => $orderItem->status,
                 'reason' => $reason->reason_text,
                 'custom_reason' => $validated['custom_reason'] ?? null,
+                'removed_from_queue' => true,
             ], 200);
         } catch (\RuntimeException $e) {
             if ($e->getMessage() === 'order_unavailable') {

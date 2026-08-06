@@ -2958,7 +2958,7 @@
                                     "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"تم رفض الطلب\",\n  \"data\": {\n    \"order_id\": 1,\n    \"status\": \"rejected\",\n    \"reason\": \"Other reason\",\n    \"custom_reason\": \"العميل طلب إلغاء\"\n  }\n}"
+                            "body": "{\n  \"success\": true,\n  \"message\": \"تم رفض الطلب\",\n  \"data\": {\n    \"order_id\": 1,\n    \"status\": \"rejected\",\n    \"order_status\": \"pending\",\n    \"reason\": \"الطرد ثقيل جداً\",\n    \"custom_reason\": \"العميل طلب إلغاء\",\n    \"removed_from_queue\": true\n  }\n}"
                         },
                         {
                             "name": "Not found",
@@ -2970,7 +2970,7 @@
                                     "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": false,\n  \"message\": \"????? ??? ???? ???? ???????.\"\n}"
+                            "body": "{\n  \"success\": false,\n  \"message\": \"الطلب غير متاح لهذا المندوب.\"\n}"
                         }
                     ],
                     "event": [

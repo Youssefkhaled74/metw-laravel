@@ -2,6 +2,7 @@
 
 namespace App\Services\MetwGo;
 
+use App\Enum\CourierAssignmentStatus;
 use App\Enum\RepresentativeAccountType;
 use App\Enum\RepresentativeStatus;
 use App\Enum\ShipmentRequestStatus;
@@ -240,7 +241,11 @@ class MetwGoCourierService
                 'route',
             ])
             ->whereNull('representative_id')
-            ->where('status', 'pending');
+            ->where('status', 'pending')
+            ->whereDoesntHave('assignments', function (Builder $builder) use ($representative) {
+                $builder->where('representative_id', $representative->id)
+                    ->where('status', CourierAssignmentStatus::REJECTED->value);
+            });
 
         $workTypes = $representative->workTypes->pluck('work_type')->values();
 

@@ -111,6 +111,9 @@ class ShipmentController extends Controller
             'orderItems.package.dropoffAddress.state',
             'orderItems.package.dropoffAddress.zone',
             'orderItems.route',
+            'orderItems.rejectionReason',
+            'orderItems.assignments.representative.user',
+            'orderItems.assignments.rejectionReason',
         ])->findOrFail($id);
 
         return view('dashboard.admin.shipment-order-details', compact('order'));

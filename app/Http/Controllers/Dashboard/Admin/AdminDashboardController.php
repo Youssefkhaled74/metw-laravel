@@ -290,7 +290,21 @@ class AdminDashboardController extends Controller
 
     public function shipmentOrderDetails($id)
     {
-        $order = Order::with(['user', 'shipmentCompany', 'orderItems.package.packageDetails'])
+        $order = Order::with([
+            'user',
+            'shipmentCompany',
+            'orderItems.package.packageDetails',
+            'orderItems.package.pickupAddress.city',
+            'orderItems.package.pickupAddress.state',
+            'orderItems.package.pickupAddress.zone',
+            'orderItems.package.dropoffAddress.city',
+            'orderItems.package.dropoffAddress.state',
+            'orderItems.package.dropoffAddress.zone',
+            'orderItems.route',
+            'orderItems.rejectionReason',
+            'orderItems.assignments.representative.user',
+            'orderItems.assignments.rejectionReason',
+        ])
             ->findOrFail($id);
 
         return view('dashboard.admin.shipment-order-details', compact('order'));
